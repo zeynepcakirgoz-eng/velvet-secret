@@ -93,7 +93,7 @@
     }
   };
 
-  // 3 Luxury Merge Item Chains (6 levels each) with High-Res Painted Artwork
+  // 3 Luxury Merge Item Chains (6 levels each) with 18 Unique High-Res Painted Illustrations
   const itemChains = [
     // 0: Kraliyet Gülleri & Parfümeri
     [
@@ -102,7 +102,7 @@
       { name: 'Kraliyet Gül Buketi', icon: '💐', img: 'assets/items/item_0_3.jpg' },
       { name: 'Safir Kristal Parfüm', icon: '💎', img: 'assets/items/item_0_4.jpg' },
       { name: 'Yakut İksir Şişesi', icon: '✨', img: 'assets/items/item_0_5.jpg' },
-      { name: 'İmparatorluk Elmas Tacı', icon: '👑', img: 'assets/items/item_0_6.jpg' }
+      { name: 'Aurelia Altın Gül Şamdanı', icon: '🕯️', img: 'assets/items/item_0_6.jpg' }
     ],
     // 1: Couture & Mücevherat
     [
@@ -110,7 +110,7 @@
       { name: 'Elmas Stiletto Topuklu', icon: '👠', img: 'assets/items/item_1_2.jpg' },
       { name: 'Zümrüt & İnci Gerdanlık', icon: '📿', img: 'assets/items/item_1_3.jpg' },
       { name: 'Kraliyet Deri Valiz', icon: '🧳', img: 'assets/items/item_1_4.jpg' },
-      { name: 'Altın Zafer Kupası', icon: '🏆', img: 'assets/items/item_1_5.jpg' },
+      { name: 'Elmaslı Venedik Balo Maskesi', icon: '🎭', img: 'assets/items/item_1_5.jpg' },
       { name: 'Monako Kraliyet Tacı', icon: '👑', img: 'assets/items/item_1_6.jpg' }
     ],
     // 2: Riviera Gala & Gurme
@@ -135,38 +135,107 @@
     return { ...item, img: imgUrl };
   }
 
-  // 4 Main Characters from Concept Art with Real Photo Avatars
+  // 4 Main Characters with Real Photo Avatars & Topic-Matched Scene Banners
   const customerPool = [
     {
       name: 'Adrian Vale',
       role: 'Gizemli Milyarder',
       avatarImg: 'assets/avatar_adrian.jpg',
-      quotes: ['Bu akşamki gizli davet için bunu arıyordum.', 'Isabella, bu otelin sırları düşündüğünden derin...']
+      sceneBg: 'assets/scene_romance_gala.jpg',
+      quotes: [
+        'Terastaki gizli gala daveti için bu lüks eseri hazırlayabilir misin?',
+        'Isabella, bu otelin her köşesi senin dokunuşunla yeniden parlıyor.'
+      ]
     },
     {
       name: 'Isabella Laurent',
       role: 'Otel Varisi',
       avatarImg: 'assets/avatar_isabella.jpg',
-      quotes: ['Aurelia Oteli eski görkemine kavuşacak!', 'Babamın mirasını kimseye bırakmam.']
+      sceneBg: 'assets/scene_lobby_reception.jpg',
+      quotes: [
+        'Büyük Lobi ve kraliyet süitlerimiz için en seçkin objeleri birleştirelim!',
+        'Babamın mirası Aurelia Palace yeniden Monako’nun incisi olacak.'
+      ]
     },
     {
       name: 'Leon Marchand',
-      role: 'Otelin Sahibi',
+      role: 'Yönetim Kurulu Üyesi',
       avatarImg: 'assets/avatar_leon.jpg',
-      quotes: ['Her şeyin kontrolü benim elimde Isabella.', 'Bu otelde hiçbir şey göründüğü gibi değildir.']
+      sceneBg: 'assets/scene_penthouse_piano.jpg',
+      quotes: [
+        'Penthouse salonundaki özel koleksiyon için bu parçayı bekliyorum.',
+        'Kaliteden ödün vermem Isabella, bana en iyisini getir.'
+      ]
     },
     {
       name: 'Serena Black',
       role: 'Sosyetenin Gözdesi',
       avatarImg: 'assets/avatar_serena.jpg',
-      quotes: ['Sosyete bu geceyi konuşacak!', 'Bana yardım et, senin tarafında olayım tatlım.']
+      sceneBg: 'assets/scene_spa_wellness.jpg',
+      quotes: [
+        'Termal Spa ve Sonsuzluk Havuzu partisinde herkes bunu konuşacak!',
+        'Tatlım, bu siparişi tamamlarsan sosyete senin yanında yer alır.'
+      ]
     }
   ];
 
+  // 5 Topic-Matched Photorealistic Quests with Multi-Currency Visual Rewards
   const tasks = [
-    { id: 'merge', name: 'Kusursuz Birleşim', desc: 'Masanızdaki objeleri birleştirin', goal: 4, reward: 50, metric: 'merges' },
-    { id: 'orders', name: 'Sipariş Teslimatı', desc: 'Müşteri siparişlerini teslim edin', goal: 2, reward: 80, metric: 'ordersCompleted' },
-    { id: 'hotel', name: 'Otel Restorasyonu', desc: 'Otelde bir bölümü yenileyin', goal: 1, reward: 100, metric: 'hotelUpgrades' }
+    {
+      id: 'quest_garden_roses',
+      name: 'Akdeniz Gül Bahçesi & Parfüm Atölyesi',
+      areaTag: '🌹 Botanik Bahçe & Atölye',
+      desc: 'Bahçe terasındaki gülleri, parfüm şişelerini ve lüks objeleri masada birleştirerek yeni eserler üretin.',
+      bgImg: 'assets/scene_garden_terrace.jpg',
+      subjectImg: 'assets/items/item_0_3.jpg',
+      baseGoal: 4,
+      metric: 'merges',
+      rewards: { energy: 60, coins: 250, gems: 2, stars: 0 }
+    },
+    {
+      id: 'quest_vip_orders',
+      name: 'Riviera Gala & VIP Konuk Servisi',
+      areaTag: '🥂 Riviera Restoran & Bar',
+      desc: 'Adrian Vale, Serena Black ve VIP konukların siparişlerini hazırlayıp zamanında teslim edin.',
+      bgImg: 'assets/scene_restaurant_bar.jpg',
+      subjectImg: 'assets/items/item_2_5.jpg',
+      baseGoal: 2,
+      metric: 'ordersCompleted',
+      rewards: { energy: 45, coins: 400, gems: 0, stars: 1 }
+    },
+    {
+      id: 'quest_hotel_reno',
+      name: 'Aurelia Palace 3D Mimari Restorasyonu',
+      areaTag: '🏛️ 3D Otel Restorasyonu',
+      desc: '3D Otelde herhangi bir alanı (Lobi, Suit 101, Restoran, Havuz, Spa veya Bahçe) bir üst seviyeye yükseltin.',
+      bgImg: 'assets/scene_lobby_reception.jpg',
+      subjectImg: 'assets/rewards/reward_chest.jpg',
+      baseGoal: 1,
+      metric: 'hotelUpgrades',
+      rewards: { energy: 100, coins: 600, gems: 5, stars: 1 }
+    },
+    {
+      id: 'quest_couture_craft',
+      name: 'Penthouse Kraliyet Koleksiyonu Sentezi',
+      areaTag: '👑 2. Kat Başkanlık Suiti',
+      desc: 'Masada Seviye 3 veya üzeri nadir bir mücevher, buket ya da gurme eseri sentezleyin.',
+      bgImg: 'assets/scene_penthouse_piano.jpg',
+      subjectImg: 'assets/items/item_1_6.jpg',
+      baseGoal: 2,
+      metric: 'highLevelMerges',
+      rewards: { energy: 75, coins: 450, gems: 6, stars: 1 }
+    },
+    {
+      id: 'quest_spa_serenity',
+      name: 'Termal Spa & Kraliyet Sandığı Üretimi',
+      areaTag: '♨️ Zen Termal Spa & Havuz',
+      desc: 'Kraliyet Üretim Sandığından masaya yeni lüks objeler çıkararak koleksiyonu genişletin.',
+      bgImg: 'assets/scene_spa_wellness.jpg',
+      subjectImg: 'assets/rewards/reward_spawner.jpg',
+      baseGoal: 6,
+      metric: 'itemsSpawned',
+      rewards: { energy: 80, coins: 300, gems: 3, stars: 0 }
+    }
   ];
 
   // Storage helper
@@ -196,7 +265,7 @@
     }
 
     const totalLvl = reqItems.reduce((acc, item) => acc + item.level, 0);
-    const rewardCoins = 80 + totalLvl * 60;
+    const rewardCoins = 120 + totalLvl * 75;
     const rewardStars = totalLvl >= 3 ? 2 : 1;
 
     return {
@@ -204,6 +273,7 @@
       customer: cust.name,
       role: cust.role,
       avatarImg: cust.avatarImg,
+      sceneBg: cust.sceneBg,
       quote: quote,
       items: reqItems,
       rewardCoins,
@@ -236,14 +306,20 @@
       board,
       selected: null,
       merges: 0,
+      highLevelMerges: 1,
+      itemsSpawned: 2,
       ordersCompleted: 0,
       hotelUpgrades: 0,
       area1Progress: 35,
       area2Progress: 20,
       claimedTasks: [],
+      questStages: {},
+      totalQuestsClaimed: 0,
+      chestClaims: 0,
       storyChoiceMade: null,
+      storyCh3Claimed: false,
       orders: initialOrders,
-      notice: 'Hoş geldin! Üstteki karakter siparişlerini tamamla, Yıldızları (⭐) topla ve oteli yenile!'
+      notice: 'Hoş geldin! Üstteki karakter siparişlerini ve aşağıdaki foto-gerçekçi görevleri tamamlayarak 3D Oteli yenile!'
     };
   }
 
@@ -254,6 +330,11 @@
         const s = JSON.parse(raw);
         if (s && Array.isArray(s.board) && s.board.length === 25) {
           state = { ...initialState(), ...s };
+          if (!state.questStages) state.questStages = {};
+          if (typeof state.highLevelMerges !== 'number') state.highLevelMerges = 1;
+          if (typeof state.itemsSpawned !== 'number') state.itemsSpawned = 2;
+          if (typeof state.totalQuestsClaimed !== 'number') state.totalQuestsClaimed = 0;
+          if (typeof state.chestClaims !== 'number') state.chestClaims = 0;
           if (window.GameEconomy) {
             state.prestige = window.GameEconomy.getBalance();
             state.stars = window.GameEconomy.getStars();
@@ -286,11 +367,63 @@
     } catch (e) {}
   }
 
+  function getActualHotelUpgradesCount() {
+    let count = state.hotelUpgrades || 0;
+    if (window.GameEconomy && window.GameEconomy.state && window.GameEconomy.state.renovations) {
+      const renos = window.GameEconomy.state.renovations;
+      let econUpgrades = 0;
+      Object.keys(renos).forEach((k) => {
+        const entry = renos[k];
+        if (entry && typeof entry === 'object' && entry.level > 1) {
+          econUpgrades += (entry.level - 1);
+        } else if (typeof entry === 'string') {
+          econUpgrades += 1;
+        }
+      });
+      count = Math.max(count, econUpgrades);
+    }
+    return count;
+  }
+
+  function addCurrencyRewards({ energy = 0, coins = 0, gems = 0, stars = 0 }, sourceLabel = 'Görev Ödülü') {
+    if (energy > 0) {
+      state.energy = Math.min(MAX_ENERGY + 300, state.energy + energy);
+    }
+    if (gems > 0) {
+      state.gems += gems;
+    }
+    if (coins > 0 || stars > 0) {
+      if (window.GameEconomy) {
+        if (coins > 0) {
+          window.GameEconomy.addHotelIncome(coins, sourceLabel);
+        }
+        if (stars > 0) {
+          window.GameEconomy.state.stars = (window.GameEconomy.state.stars || 0) + stars;
+          window.GameEconomy.save();
+          window.GameEconomy.notifyListeners();
+        }
+        state.prestige = window.GameEconomy.getBalance();
+        state.stars = window.GameEconomy.getStars();
+      } else {
+        state.prestige += coins;
+        state.stars += stars;
+      }
+    }
+    if (window.hotel3D) {
+      window.hotel3D.state.coins = state.prestige;
+      window.hotel3D.state.stars = state.stars;
+      window.hotel3D.saveState();
+      window.hotel3D.checkAffordableNotifications();
+      if (window.hotel3D.updateProximityPanel) window.hotel3D.updateProximityPanel();
+      if (window.hotel3D.renderHotelAreaCards) window.hotel3D.renderHotelAreaCards();
+    }
+  }
+
   function tick() {
     const now = Date.now();
     const elapsed = Math.max(0, now - (state.energyUpdated || now));
     const gained = Math.floor(elapsed / ENERGY_INTERVAL);
-    if (gained > 0) {
+    if (gained > 0 && state.energy < MAX_ENERGY) {
       state.energy = Math.min(MAX_ENERGY, state.energy + gained);
       state.energyUpdated = state.energy >= MAX_ENERGY ? now : state.energyUpdated + gained * ENERGY_INTERVAL;
     }
@@ -329,9 +462,7 @@
     if (state.xp >= needed) {
       state.xp -= needed;
       state.playerLevel++;
-      state.energy = Math.min(MAX_ENERGY, state.energy + 100);
-      state.gems += 5;
-      state.stars += 1;
+      addCurrencyRewards({ energy: 100, coins: 0, gems: 5, stars: 1 }, `Seviye ${state.playerLevel} Ödülü`);
       sfx.fanfare();
       triggerLevelUpModal();
     }
@@ -349,7 +480,7 @@
   function spend(n) {
     tick();
     if (state.energy < n) {
-      notify('Enerjin bitti! "+" butonuna basarak reklam izleyebilir veya çarkı çevirebilirsin.');
+      notify('Enerjin bitti! "+" butonuna basarak bonus enerji alabilir veya görev ödüllerini toplayabilirsin.');
       return false;
     }
     state.energy -= n;
@@ -359,7 +490,7 @@
     return true;
   }
 
-  /* ================= GOSSIP HARBOR ORDER TRAY ================= */
+  /* ================= CUSTOMER ORDER TRAY (WITH PHOTOREALISTIC BANNERS & REWARD ICONS) ================= */
   function checkOrderFulfillment(order) {
     const boardCopy = state.board.map((x) => (x ? { ...x } : null));
     const itemsStatus = [];
@@ -391,8 +522,16 @@
     if (!tray) return;
     tray.innerHTML = '';
 
+    const customerBgMap = {
+      'Adrian Vale': 'assets/scene_romance_gala.jpg',
+      'Isabella Laurent': 'assets/scene_lobby_reception.jpg',
+      'Leon Marchand': 'assets/scene_penthouse_piano.jpg',
+      'Serena Black': 'assets/scene_spa_wellness.jpg'
+    };
+
     state.orders.forEach((ord, index) => {
       const { allReady, itemsStatus } = checkOrderFulfillment(ord);
+      const bgImg = ord.sceneBg || customerBgMap[ord.customer] || 'assets/scene_lobby_reception.jpg';
 
       const card = document.createElement('div');
       card.className = 'order-card' + (allReady ? ' ready-to-serve' : '');
@@ -410,21 +549,27 @@
       });
 
       card.innerHTML = `
-        <div class="order-customer-head">
+        <div class="order-customer-head" style="background-image: linear-gradient(90deg, rgba(14,17,27,0.88) 25%, rgba(14,17,27,0.45) 100%), url('${bgImg}');">
           <img src="${ord.avatarImg}" alt="${ord.customer}" class="order-photo-avatar">
           <div class="order-customer-meta">
             <span class="order-name-text">${ord.customer}</span>
-            <small class="order-role-text">${ord.role || ''}</small>
+            <small class="order-role-text">${ord.role || 'VIP Konuk'}</small>
           </div>
         </div>
         <div class="order-speech-bubble">"${ord.quote}"</div>
         <div class="order-req-items">${itemsHtml}</div>
         <div class="order-rewards-bar">
-          <span>💰 +$${ord.rewardCoins}</span>
-          <span class="stars-num">⭐ +${ord.rewardStars}</span>
+          <span class="reward-badge-card compact">
+            <img src="assets/rewards/reward_prestige.jpg" alt="Prestij">
+            <b>+$${ord.rewardCoins}</b>
+          </span>
+          <span class="reward-badge-card compact star">
+            <img src="assets/rewards/reward_star.jpg" alt="Yıldız">
+            <b>+${ord.rewardStars} Yıldız</b>
+          </span>
         </div>
         <button class="serve-action-btn ${allReady ? 'can-serve' : ''}" ${!allReady ? 'disabled' : ''}>
-          ${allReady ? 'TESLİM ET' : 'HAZIRLA'}
+          ${allReady ? '✦ SİPARİŞİ TESLİM ET' : 'MASADA HAZIRLA'}
         </button>
       `;
 
@@ -478,7 +623,7 @@
     addXP(35);
     state.orders[orderIdx] = generateRandomOrder();
 
-    notify(`Sipariş teslim edildi! ${order.customer} çok memnun kaldı. +$${order.rewardCoins} ve +⭐${order.rewardStars} Yıldız kazandın!`);
+    notify(`Sipariş teslim edildi! ${order.customer} çok memnun kaldı. +$${order.rewardCoins} ve +${order.rewardStars} Yıldız kazandın!`);
     renderAll();
   }
 
@@ -509,66 +654,6 @@
     }
   }
 
-  function upgradeArea1(clientX, clientY) {
-    if (state.area1Progress >= 100) return;
-
-    if (state.stars >= 1) {
-      state.stars -= 1;
-    } else if (state.prestige >= 300) {
-      state.prestige -= 300;
-    } else {
-      notify('Yeterli Yıldız veya Prestij yok! Siparişleri tamamlayarak toplayabilirsin.');
-      return;
-    }
-
-    state.area1Progress = Math.min(100, state.area1Progress + 25);
-    state.hotelUpgrades++;
-    sfx.fanfare();
-
-    if (clientX && clientY) {
-      showFloatingText('✨ ALAN YENİLENDİ!', clientX, clientY);
-    }
-    addXP(50);
-
-    const txt = $('hotelDialogueText');
-    if (txt) {
-      txt.textContent = `"Isabella: Mermer fıskiye ve palmiyeler pırıl pırıl oldu! Otelimizin meydanı körfezin gözdesi haline geldi."`;
-    }
-
-    notify(`Aurelia Meydanı yenilendi! İlerleme: %${state.area1Progress}`);
-    renderAll();
-  }
-
-  function upgradeArea2(clientX, clientY) {
-    if (state.area2Progress >= 100) return;
-
-    if (state.stars >= 2) {
-      state.stars -= 2;
-    } else if (state.prestige >= 600) {
-      state.prestige -= 600;
-    } else {
-      notify('Yeterli Yıldız veya Prestij yok!');
-      return;
-    }
-
-    state.area2Progress = Math.min(100, state.area2Progress + 25);
-    state.hotelUpgrades++;
-    sfx.fanfare();
-
-    if (clientX && clientY) {
-      showFloatingText('🌟 SÜİT YENİLENDİ!', clientX, clientY);
-    }
-    addXP(70);
-
-    const txt = $('hotelDialogueText');
-    if (txt) {
-      txt.textContent = `"Adrian Vale: Başkanlık Süiti'nin manzarası nefes kesici Isabella... Burada konuşacak çok özel şeylerimiz var."`;
-    }
-
-    notify(`Başkanlık Süiti yenilendi! İlerleme: %${state.area2Progress}`);
-    renderAll();
-  }
-
   /* ================= STORY INTERACTIVE DECISIONS (PAGE 3) ================= */
   function initStoryChoices() {
     const choiceBtns = document.querySelectorAll('.story-choice-btn');
@@ -576,36 +661,62 @@
 
     choiceBtns.forEach((btn) => {
       btn.onclick = () => {
+        if (state.storyChoiceMade) return;
         const choice = btn.dataset.choice;
         state.storyChoiceMade = choice;
         sfx.fanfare();
 
         if (choice === 'accept') {
-          state.prestige += 150;
+          addCurrencyRewards({ energy: 30, coins: 250, gems: 0, stars: 0 }, 'Hikâye Bölüm 2: Adrian Daveti');
           if (logBox) {
-            logBox.innerHTML = `<strong>💛 Seçim Yapıldı: Daveti Kabul Ettin!</strong><br>"Adrian gülümsedi: 'Doğru seçimi yaptın Isabella. Bu gece Monako'nun en derin sırlarını öğreneceksin.' (+150 Prestij)"`;
+            logBox.innerHTML = `<strong>💛 Seçim Yapıldı: Daveti Kabul Ettin!</strong><br>"Adrian gülümsedi: 'Doğru seçimi yaptın Isabella. Bu gece Monako'nun en derin sırlarını öğreneceksin.' (+$250 Prestij &amp; +30 Enerji)"`;
           }
         } else if (choice === 'decline') {
-          state.gems += 3;
+          addCurrencyRewards({ energy: 30, coins: 0, gems: 8, stars: 0 }, 'Hikâye Bölüm 2: Mesafeli Duruş');
           if (logBox) {
-            logBox.innerHTML = `<strong>💎 Seçim Yapıldı: Mesafeli Kaldın!</strong><br>"Adrian şaşırdı ama saygı duydu: 'Gizemli ve temkinli duruşun seni daha da çekici kılıyor.' (+3 Elmas)"`;
+            logBox.innerHTML = `<strong>💎 Seçim Yapıldı: Mesafeli Kaldın!</strong><br>"Adrian şaşırdı ama saygı duydu: 'Gizemli ve temkinli duruşun seni daha da güçlü kılıyor.' (+8 Elmas &amp; +30 Enerji)"`;
           }
         } else {
-          state.stars += 1;
+          addCurrencyRewards({ energy: 0, coins: 150, gems: 0, stars: 2 }, 'Hikâye Bölüm 2: Otel Arşivi');
           if (logBox) {
-            logBox.innerHTML = `<strong>🔍 Seçim Yapıldı: Otel Arşivini Araştırdın!</strong><br>"Eski bir kasada gizli bir ortaklık sözleşmesi buldun: Leon Marchand ile Adrian geçmişte ortaktı! (+1 Yıldız ⭐)"`;
+            logBox.innerHTML = `<strong>🔍 Seçim Yapıldı: Otel Arşivini Araştırdın!</strong><br>"Eski bir kasada gizli bir ortaklık sözleşmesi buldun: Leon Marchand ile Adrian geçmişte ortaktı! (+2 Yıldız &amp; +$150 Prestij)"`;
           }
         }
 
         addXP(40);
         choiceBtns.forEach((b) => (b.disabled = true));
-        notify('Kritik kararın hikâyeyi ve ilişkileri değiştirdi!');
+        notify('Kritik kararın hikâyeyi değiştirdi ve ödüllerin kasana eklendi!');
         renderAll();
       };
     });
 
     if (state.storyChoiceMade) {
       choiceBtns.forEach((b) => (b.disabled = true));
+    }
+
+    // Chapter 3 Zen Spa Vault Reward Button
+    const ch3Btn = document.querySelector('.story-choice-btn-ch3');
+    const ch3Log = $('storyCh3Log');
+    if (ch3Btn) {
+      if (state.storyCh3Claimed) {
+        ch3Btn.disabled = true;
+        if (ch3Log) {
+          ch3Log.innerHTML = `<strong>🗝️ Gizli Kasa Anahtarı Alındı!</strong><br>Penthouse piyanosunun içindeki altın mühürlü kasa açıldı (+$300 Prestij, +50 Enerji, +1 Yıldız).`;
+        }
+      }
+      ch3Btn.onclick = () => {
+        if (state.storyCh3Claimed) return;
+        state.storyCh3Claimed = true;
+        sfx.fanfare();
+        addCurrencyRewards({ energy: 50, coins: 300, gems: 0, stars: 1 }, 'Hikâye Bölüm 3: Zen Spa Gizli Anahtarı');
+        addXP(50);
+        ch3Btn.disabled = true;
+        if (ch3Log) {
+          ch3Log.innerHTML = `<strong>🗝️ Gizli Kasa Anahtarı Alındı!</strong><br>Penthouse piyanosunun içindeki altın mühürlü kasa açıldı (+$300 Prestij, +50 Enerji, +1 Yıldız).`;
+        }
+        notify('Bölüm 3 tamamlandı! +$300 Prestij, +50 Enerji ve +1 Yıldız kazandın!');
+        renderAll();
+      };
     }
   }
 
@@ -620,12 +731,12 @@
     let currentDegree = 0;
 
     const segments = [
-      { name: '100 Enerji', reward: () => { state.energy = Math.min(MAX_ENERGY, state.energy + 100); } },
-      { name: '500 Prestij', reward: () => { state.prestige += 500; } },
-      { name: '10 Elmas', reward: () => { state.gems += 10; } },
-      { name: '1 Yenileme Yıldızı', reward: () => { state.stars += 1; } },
-      { name: '50 Enerji', reward: () => { state.energy = Math.min(MAX_ENERGY, state.energy + 50); } },
-      { name: 'VIP Sürpriz Obje', reward: () => { spawnItem(); state.prestige += 200; } }
+      { name: '+100 Enerji', reward: () => addCurrencyRewards({ energy: 100 }, 'Şans Çarkı') },
+      { name: '+$500 Prestij', reward: () => addCurrencyRewards({ coins: 500 }, 'Şans Çarkı') },
+      { name: '+10 Elmas', reward: () => addCurrencyRewards({ gems: 10 }, 'Şans Çarkı') },
+      { name: '+1 Yenileme Yıldızı', reward: () => addCurrencyRewards({ stars: 1 }, 'Şans Çarkı') },
+      { name: '+50 Enerji', reward: () => addCurrencyRewards({ energy: 50 }, 'Şans Çarkı') },
+      { name: 'VIP Kraliyet Sandığı (+$300 & Obje)', reward: () => { spawnItem(); addCurrencyRewards({ coins: 300, gems: 3 }, 'Şans Çarkı VIP Sandığı'); } }
     ];
 
     function runSpin() {
@@ -681,7 +792,7 @@
         clearInterval(timer);
         countdownEl.textContent = 'Tamamlandı!';
         claimBtn.disabled = false;
-        claimBtn.textContent = '🎁 Ödülü Al (+50 Enerji & 200 Prestij)';
+        claimBtn.textContent = '🎁 Ödülü Al (+50 Enerji & +$200 Prestij)';
         sfx.fanfare();
       }
     }, 1000);
@@ -691,10 +802,9 @@
       if (adCallback) {
         adCallback();
       } else {
-        state.energy = Math.min(MAX_ENERGY, state.energy + 50);
-        state.prestige += 200;
+        addCurrencyRewards({ energy: 50, coins: 200 }, 'VIP Sponsor Ödülü');
         sfx.coin();
-        notify('VIP Reklam ödülü hesabına aktarıldı: +50 Enerji ve +200 Prestij!');
+        notify('VIP Sponsor ödülü hesabına aktarıldı: +50 Enerji ve +$200 Prestij!');
         renderAll();
       }
       adCallback = null;
@@ -719,12 +829,13 @@
     const targetIdx = emptySlots[Math.floor(Math.random() * emptySlots.length)];
     const randomType = Math.floor(Math.random() * itemChains.length);
     state.board[targetIdx] = { type: randomType, level: 1 };
+    state.itemsSpawned = (state.itemsSpawned || 0) + 1;
     sfx.pop();
 
     const spawnBtn = $('spawnBtn');
     if (spawnBtn) {
       const rect = spawnBtn.getBoundingClientRect();
-      showFloatingText('🎁 +1 Obje', rect.left + rect.width / 2, rect.top);
+      showFloatingText('🎁 +1 Lüks Obje', rect.left + rect.width / 2, rect.top);
     }
 
     renderAll();
@@ -773,11 +884,14 @@
 
     // Same type & level -> MERGE!
     if (source.type === target.type && source.level === target.level) {
-      const newLevel = target.level + 1;
+      const newLevel = Math.min(6, target.level + 1);
       state.board[toIdx] = { type: target.type, level: newLevel };
       state.board[fromIdx] = null;
       state.selected = null;
       state.merges++;
+      if (newLevel >= 3) {
+        state.highLevelMerges = (state.highLevelMerges || 0) + 1;
+      }
 
       sfx.merge();
       const meta = getItemMeta(target.type, newLevel);
@@ -941,44 +1055,172 @@
     });
   }
 
+  /* ================= PHOTOREALISTIC QUESTS & GRAND CHEST SHOWCASE ================= */
+  function getTaskMetricValue(metric) {
+    if (metric === 'merges') return state.merges || 0;
+    if (metric === 'ordersCompleted') return state.ordersCompleted || 0;
+    if (metric === 'hotelUpgrades') return getActualHotelUpgradesCount();
+    if (metric === 'highLevelMerges') return state.highLevelMerges || 0;
+    if (metric === 'itemsSpawned') return state.itemsSpawned || 0;
+    return 0;
+  }
+
   function renderTasks() {
     const el = $('tasks');
     if (!el) return;
     el.innerHTML = '';
-    tasks.forEach((t) => {
-      const count = t.metric === 'merges' ? state.merges : t.metric === 'ordersCompleted' ? state.ordersCompleted : state.hotelUpgrades;
-      const done = count >= t.goal;
-      const claimed = state.claimedTasks.includes(t.id);
-      const pct = Math.min(100, (count / t.goal) * 100);
 
-      const d = document.createElement('div');
-      d.className = 'task-item';
-      d.innerHTML = `
-        <div class="t-top">
-          <span class="t-name">${t.name}</span>
-          <span class="t-reward">⚡ +${t.reward}</span>
-        </div>
-        <div class="t-desc">${t.desc}</div>
-        <div class="t-bar"><div style="width:${pct}%"></div></div>
-        <div class="t-foot">
-          <span>${Math.min(count, t.goal)} / ${t.goal}${claimed ? ' · Alındı' : ''}</span>
-          <button class="t-claim-btn" ${!done || claimed ? 'disabled' : ''}>${claimed ? 'ALINDI' : done ? 'ÖDÜLÜ AL' : 'DEVAM ET'}</button>
+    // 1. Render Grand Royal Quest Chest Showcase (#questChestHeader)
+    const chestEl = $('questChestHeader');
+    if (chestEl) {
+      const chestGoal = 3;
+      const totalClaimed = state.totalQuestsClaimed || 0;
+      const chestClaims = state.chestClaims || 0;
+      const progressInCycle = Math.min(chestGoal, Math.max(0, totalClaimed - chestClaims * chestGoal));
+      const chestReady = progressInCycle >= chestGoal;
+      const chestPct = Math.round((progressInCycle / chestGoal) * 100);
+
+      chestEl.innerHTML = `
+        <div class="grand-chest-banner" style="background-image: linear-gradient(90deg, rgba(12,15,24,0.92) 25%, rgba(12,15,24,0.68) 100%), url('assets/scene_hotel_exterior.jpg');">
+          <div class="grand-chest-left">
+            <div class="grand-chest-img-wrap ${chestReady ? 'pulse-glow' : ''}">
+              <img src="assets/rewards/reward_chest.jpg" alt="Kraliyet Sandığı" class="grand-chest-img">
+              <span class="chest-lv-tag">SEVİYE ${chestClaims + 1}</span>
+            </div>
+            <div class="grand-chest-info">
+              <span class="chest-eyebrow">✦ BÜYÜK KRALİYET HAZİNE SANDIĞI</span>
+              <h5>3 Görev Tamamla, Büyük Sandığı Aç! (${progressInCycle}/${chestGoal})</h5>
+              <div class="chest-progress-bar"><div style="width:${chestPct}%"></div></div>
+              <div class="reward-pill-list">
+                <span class="reward-badge-card"><img src="assets/rewards/reward_prestige.jpg" alt="Prestij"> +$750</span>
+                <span class="reward-badge-card"><img src="assets/rewards/reward_energy.jpg" alt="Enerji"> +120 Enerji</span>
+                <span class="reward-badge-card"><img src="assets/rewards/reward_gems.jpg" alt="Elmas"> +10 Elmas</span>
+                <span class="reward-badge-card"><img src="assets/rewards/reward_star.jpg" alt="Yıldız"> +2 Yıldız</span>
+              </div>
+            </div>
+          </div>
+          <button id="claimGrandChestBtn" class="grand-chest-btn ${chestReady ? 'ready' : ''}" ${!chestReady ? 'disabled' : ''}>
+            ${chestReady ? '🎁 SANDIĞI AÇ' : `${progressInCycle}/${chestGoal} GÖREV`}
+          </button>
         </div>
       `;
 
-      const claimBtn = d.querySelector('button');
-      if (claimBtn) {
-        claimBtn.onclick = (e) => {
+      const chestBtn = $('claimGrandChestBtn');
+      if (chestBtn && chestReady) {
+        chestBtn.onclick = (e) => {
           e.preventDefault();
-          if (!done || claimed) return;
-          state.claimedTasks.push(t.id);
-          state.energy = Math.min(MAX_ENERGY, state.energy + t.reward);
-          sfx.coin();
-          notify(`Görev ödülü alındı! +${t.reward} Enerji kazandın.`);
-          addXP(25);
+          state.chestClaims = (state.chestClaims || 0) + 1;
+          sfx.fanfare();
+          addCurrencyRewards({ energy: 120, coins: 750, gems: 10, stars: 2 }, 'Büyük Kraliyet Görev Sandığı');
+          addXP(80, e.clientX, e.clientY);
+          notify('🎉 BÜYÜK KRALİYET SANDIĞI AÇILDI! +$750 Prestij, +120 Enerji, +10 Elmas ve +2 Yıldız kazandın!');
           renderAll();
         };
       }
+    }
+
+    // 2. Render 5 Topic-Matched Photorealistic Quest Cards
+    tasks.forEach((t) => {
+      const stage = (state.questStages && state.questStages[t.id]) ? state.questStages[t.id] : 1;
+      const cumulativeGoal = t.baseGoal * stage;
+      const rawCount = getTaskMetricValue(t.metric);
+      const done = rawCount >= cumulativeGoal;
+      const pct = Math.min(100, Math.round((rawCount / cumulativeGoal) * 100));
+
+      // Scale rewards with stage
+      const scale = 1 + (stage - 1) * 0.35;
+      const rEnergy = Math.round((t.rewards.energy || 0) * scale);
+      const rCoins = Math.round((t.rewards.coins || 0) * scale);
+      const rGems = Math.round((t.rewards.gems || 0) * scale);
+      const rStars = t.rewards.stars || 0;
+
+      let rewardBadgesHtml = '';
+      if (rCoins > 0) {
+        rewardBadgesHtml += `
+          <span class="reward-badge-card">
+            <img src="assets/rewards/reward_prestige.jpg" alt="Prestij">
+            <b>+$${rCoins}</b>
+          </span>`;
+      }
+      if (rEnergy > 0) {
+        rewardBadgesHtml += `
+          <span class="reward-badge-card">
+            <img src="assets/rewards/reward_energy.jpg" alt="Enerji">
+            <b>+${rEnergy} Enerji</b>
+          </span>`;
+      }
+      if (rGems > 0) {
+        rewardBadgesHtml += `
+          <span class="reward-badge-card">
+            <img src="assets/rewards/reward_gems.jpg" alt="Elmas">
+            <b>+${rGems} Elmas</b>
+          </span>`;
+      }
+      if (rStars > 0) {
+        rewardBadgesHtml += `
+          <span class="reward-badge-card star">
+            <img src="assets/rewards/reward_star.jpg" alt="Yıldız">
+            <b>+${rStars} Yıldız</b>
+          </span>`;
+      }
+
+      const d = document.createElement('div');
+      d.className = `task-item photoreal-quest-card ${done ? 'quest-ready' : ''}`;
+      d.innerHTML = `
+        <div class="quest-banner-top" style="background-image: linear-gradient(90deg, rgba(11,14,22,0.92) 22%, rgba(11,14,22,0.35) 100%), url('${t.bgImg}');">
+          <img src="${t.subjectImg}" alt="${t.name}" class="quest-subject-thumb">
+          <div class="quest-banner-titles">
+            <div class="quest-tags-row">
+              <span class="quest-area-pill">${t.areaTag}</span>
+              <span class="quest-stage-pill">AŞAMA ${stage}</span>
+            </div>
+            <h5 class="t-name">${t.name}</h5>
+          </div>
+        </div>
+
+        <div class="quest-card-body">
+          <p class="t-desc">${t.desc}</p>
+
+          <div class="quest-rewards-box">
+            <span class="quest-rewards-label">KAZANIMLAR:</span>
+            <div class="reward-pill-list">
+              ${rewardBadgesHtml}
+            </div>
+          </div>
+
+          <div class="t-bar"><div style="width:${pct}%"></div></div>
+
+          <div class="t-foot">
+            <span class="quest-prog-text">İlerleme: <b>${Math.min(rawCount, cumulativeGoal)} / ${cumulativeGoal}</b> (%${pct})</span>
+            <button class="t-claim-btn ${done ? 'ready-pulse' : ''}" ${!done ? 'disabled' : ''}>
+              ${done ? '🎁 KAZANIMLARI TOPLA' : 'DEVAM EDİYOR'}
+            </button>
+          </div>
+        </div>
+      `;
+
+      const claimBtn = d.querySelector('.t-claim-btn');
+      if (claimBtn && done) {
+        claimBtn.onclick = (e) => {
+          e.preventDefault();
+          if (!state.questStages) state.questStages = {};
+          state.questStages[t.id] = stage + 1;
+          state.totalQuestsClaimed = (state.totalQuestsClaimed || 0) + 1;
+
+          addCurrencyRewards(
+            { energy: rEnergy, coins: rCoins, gems: rGems, stars: rStars },
+            `Görev Tamamlandı: ${t.name} (Aşama ${stage})`
+          );
+          sfx.fanfare();
+          if (e.clientX && e.clientY) {
+            showFloatingText(`🎁 +$${rCoins} & +${rEnergy}⚡`, e.clientX, e.clientY);
+          }
+          addXP(40, e.clientX, e.clientY);
+          notify(`🎉 "${t.name}" (Aşama ${stage}) ödülleri toplandı! +$${rCoins}, +${rEnergy} Enerji${rGems ? `, +${rGems} Elmas` : ''}${rStars ? `, +${rStars} Yıldız` : ''}!`);
+          renderAll();
+        };
+      }
+
       el.appendChild(d);
     });
   }
@@ -995,7 +1237,9 @@
     if ($('stars')) $('stars').textContent = state.stars;
 
     const left = state.energy >= MAX_ENERGY ? 60 : 60 - Math.floor((Date.now() - state.energyUpdated) / 1000) % 60;
-    if ($('timer')) $('timer').textContent = '00:' + String(left).padStart(2, '0');
+    if ($('timer')) {
+      $('timer').textContent = state.energy >= MAX_ENERGY ? 'MAKS 500' : ('00:' + String(left).padStart(2, '0'));
+    }
 
     if ($('levelBadge')) $('levelBadge').textContent = `LV.${state.playerLevel}`;
     const xpNeeded = state.playerLevel * 60;
@@ -1012,7 +1256,7 @@
     save();
   }
 
-  /* ================= GOSSIP HARBOR BOTTOM NAVIGATION ================= */
+  /* ================= BOTTOM NAVIGATION ================= */
   function switchMainPage(targetId) {
     const navTabs = document.querySelectorAll('.nav-tab');
     navTabs.forEach((t) => {
@@ -1073,12 +1317,6 @@
         if (window.GameEconomy) window.GameEconomy.openLedgerModal();
       };
     }
-
-    const upgrade1 = $('upgradeArea1Btn');
-    if (upgrade1) upgrade1.onclick = (e) => upgradeArea1(e.clientX, e.clientY);
-
-    const upgrade2 = $('upgradeArea2Btn');
-    if (upgrade2) upgrade2.onclick = (e) => upgradeArea2(e.clientX, e.clientY);
 
     const closeLevelUpBtn = $('closeLevelUpBtn');
     if (closeLevelUpBtn) {

@@ -3104,4 +3104,546 @@ button:active {
   border-radius: 6px;
 }
 
+/* ================= HIGH-RES PAINTED 3D CURRENCY & REWARD ICONS ================= */
+.curr-img-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 215, 0, 0.55);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+  flex-shrink: 0;
+}
+
+.mini-btn-icon,
+.btn-inline-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  object-fit: cover;
+  vertical-align: middle;
+  border: 1px solid rgba(255, 215, 0, 0.5);
+}
+
+.hero-ledger-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.spawner-img-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1.5px solid var(--gold-bright);
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.45);
+}
+
+.spawn-btn-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hint-img-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid rgba(223, 191, 131, 0.5);
+  flex-shrink: 0;
+}
+
+.nav-img-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  object-fit: cover;
+  border: 1px solid rgba(223, 191, 131, 0.4);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-tab.active .nav-img-icon {
+  transform: scale(1.12);
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.55);
+}
+
+/* Visual Reward Pills (Kazanımlar) */
+.reward-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.reward-badge-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(28, 33, 48, 0.95), rgba(17, 20, 31, 0.95));
+  border: 1px solid rgba(223, 191, 131, 0.45);
+  border-radius: 9px;
+  padding: 4px 8px 4px 5px;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #f8f1e5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.reward-badge-card img {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 215, 0, 0.55);
+  flex-shrink: 0;
+}
+
+.reward-badge-card.star {
+  border-color: rgba(255, 215, 0, 0.75);
+  background: linear-gradient(135deg, rgba(55, 42, 14, 0.92), rgba(28, 22, 9, 0.95));
+  color: #ffe89e;
+}
+
+.reward-badge-card.compact {
+  padding: 3px 7px 3px 4px;
+  font-size: 10px;
+}
+
+.reward-badge-card.compact img {
+  width: 19px;
+  height: 19px;
+}
+
+/* Customer Order Header Banner */
+.order-customer-head {
+  background-size: cover;
+  background-position: center;
+  padding: 8px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  border: 1px solid rgba(223, 191, 131, 0.25);
+}
+
+/* ================= GRAND ROYAL QUEST CHEST & PHOTOREALISTIC QUEST CARDS ================= */
+.tasks-sub {
+  margin: 2px 0 0;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.grand-reward-showcase {
+  margin-bottom: 12px;
+}
+
+.grand-chest-banner {
+  background-size: cover;
+  background-position: center;
+  border: 1.5px solid rgba(255, 215, 0, 0.55);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55);
+}
+
+.grand-chest-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.grand-chest-img-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid var(--gold-bright);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+  flex-shrink: 0;
+}
+
+.grand-chest-img-wrap.pulse-glow {
+  animation: pulseGlow 1.4s infinite;
+}
+
+.grand-chest-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.chest-lv-tag {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(12, 14, 22, 0.9);
+  color: var(--gold-bright);
+  font-size: 8px;
+  font-weight: 900;
+  text-align: center;
+  padding: 2px 0;
+}
+
+.grand-chest-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chest-eyebrow {
+  font-size: 9px;
+  font-weight: 900;
+  color: var(--gold-bright);
+  letter-spacing: 0.8px;
+}
+
+.grand-chest-info h5 {
+  margin: 2px 0 6px;
+  font-size: 13px;
+  color: #fff;
+  font-family: Georgia, serif;
+}
+
+.chest-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.chest-progress-bar > div {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #ff9900);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.grand-chest-btn {
+  background: #23283a;
+  color: #8f9bb3;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 10.5px;
+  font-weight: 900;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.grand-chest-btn.ready {
+  background: linear-gradient(135deg, #ffd700, #cc9900);
+  color: #151003;
+  border-color: #fff3b0;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.65);
+  cursor: pointer;
+  animation: pulseGlow 1.5s infinite;
+}
+
+/* Topic-Matched Photorealistic Quest Cards */
+.photoreal-quest-card {
+  padding: 0 !important;
+  overflow: hidden;
+  border: 1px solid rgba(223, 191, 131, 0.32) !important;
+  border-radius: 14px !important;
+  background: #141824 !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.photoreal-quest-card.quest-ready {
+  border-color: #2ecc71 !important;
+  box-shadow: 0 0 18px rgba(46, 204, 113, 0.28);
+}
+
+.quest-banner-top {
+  min-height: 82px;
+  background-size: cover;
+  background-position: center;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(223, 191, 131, 0.25);
+}
+
+.quest-subject-thumb {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid var(--gold-bright);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.75);
+  flex-shrink: 0;
+}
+
+.quest-banner-titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.quest-tags-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.quest-area-pill {
+  background: rgba(12, 15, 24, 0.85);
+  border: 1px solid rgba(223, 191, 131, 0.45);
+  color: var(--gold-bright);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.quest-stage-pill {
+  background: rgba(0, 240, 255, 0.16);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  color: #72f5ff;
+  font-size: 8.5px;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.quest-banner-titles .t-name {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 14px;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.quest-card-body {
+  padding: 10px 12px 12px;
+}
+
+.quest-card-body .t-desc {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: #d2d8e6;
+  line-height: 1.38;
+}
+
+.quest-rewards-box {
+  background: rgba(10, 12, 19, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 7px 9px;
+  margin-bottom: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quest-rewards-label {
+  font-size: 9px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 0.7px;
+}
+
+.quest-prog-text {
+  font-size: 10.5px;
+  color: #cbd5e1;
+}
+
+.quest-prog-text b {
+  color: var(--gold-bright);
+}
+
+.t-claim-btn.ready-pulse {
+  background: linear-gradient(135deg, #2ecc71, #199f53) !important;
+  color: #fff !important;
+  box-shadow: 0 0 14px rgba(46, 204, 113, 0.5);
+  cursor: pointer;
+}
+
+/* Story & Wheel & Modal Visual Rewards */
+.episode-reward-strip {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ep-reward-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+.ch-img-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  object-fit: cover;
+  border: 1.5px solid var(--gold);
+  flex-shrink: 0;
+}
+
+.story-choice-btn-ch3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #23283b, #171a28);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--cream);
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+
+.story-choice-btn-ch3:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.wheel-prizes-showcase {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.ad-reward-hero-img,
+.levelup-hero-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 2px solid var(--gold-bright);
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.45);
+  margin: 0 auto 8px;
+  display: block;
+}
+
+/* ================= NON-OVERLAPPING 3D PROXIMITY DOCK & ACTION PROMPT ================= */
+.hotel-3d-viewport .action-prompt {
+  top: 56px !important;
+  bottom: auto !important;
+  padding: 7px 14px !important;
+  border-radius: 24px !important;
+  max-width: 88%;
+}
+
+/* Docked cleanly right below #hotel3DContainer so it NEVER blocks the 3D view on phones */
+#renovationProximityPanel.renovation-proximity-panel {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 10px 0 14px !important;
+  z-index: 20;
+}
+
+/* ================= ANDROID PHONE & TABLET RESPONSIVE DESIGN ================= */
+@media (max-width: 420px) {
+  .currency-strip {
+    gap: 5px;
+    padding: 7px 8px;
+  }
+  .curr-img-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .c-text b {
+    font-size: 11px;
+  }
+  .grand-chest-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .grand-chest-btn {
+    width: 100%;
+    text-align: center;
+  }
+  .hotel-3d-viewport {
+    height: 390px;
+  }
+}
+
+/* Tablet & Wide Foldables (768px - 1200px+) */
+@media (min-width: 680px) {
+  .app {
+    max-width: 920px;
+  }
+  .bottom-nav-bar {
+    max-width: 920px;
+    height: 68px;
+  }
+  .hero-cover {
+    height: 165px;
+  }
+  .merge-grid {
+    max-width: 460px;
+    margin: 0 auto 12px;
+  }
+  .tasks-list-wrap {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .hotel-3d-viewport {
+    height: 520px;
+  }
+  .hotel-areas-visual-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .story-page-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .episode-img-wrap {
+    height: 195px;
+  }
+  .reno-modal-card,
+  .proj-modal-card {
+    max-width: 620px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app {
+    max-width: 1060px;
+  }
+  .bottom-nav-bar {
+    max-width: 1060px;
+  }
+  .hotel-3d-viewport {
+    height: 580px;
+  }
+}
+
+
 

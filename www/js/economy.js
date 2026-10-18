@@ -37,7 +37,7 @@ class GameEconomyManager {
                 levelCosts: { 2: 600, 3: 1100, 4: 1800 },
                 stars: 2,
                 jumpRoom: 'lobby',
-                sceneImg: 'assets/scene_lobby_reception.jpg',
+                sceneImg: 'assets/scene_lobby_carpet.jpg',
                 defaultDesc: 'Seviye 1: Yıpranmış Ham Mermer Zemin'
             },
             lobby_chandelier: {
@@ -48,7 +48,7 @@ class GameEconomyManager {
                 levelCosts: { 2: 1000, 3: 1700, 4: 2600 },
                 stars: 3,
                 jumpRoom: 'lobby',
-                sceneImg: 'assets/scene_lobby_reception.jpg',
+                sceneImg: 'assets/scene_lobby_chandelier.jpg',
                 defaultDesc: 'Seviye 1: Çıplak Sarkıt Ampul'
             },
             room101_bed: {
@@ -70,7 +70,7 @@ class GameEconomyManager {
                 levelCosts: { 2: 900, 3: 1500, 4: 2300 },
                 stars: 3,
                 jumpRoom: 'room101',
-                sceneImg: 'assets/scene_presidential_suite.jpg',
+                sceneImg: 'assets/scene_suite_terrace.jpg',
                 defaultDesc: 'Seviye 1: Boş ve Bakımsız Teras Köşesi'
             },
             restaurant_tables: {
@@ -81,7 +81,7 @@ class GameEconomyManager {
                 levelCosts: { 2: 1200, 3: 1950, 4: 2900 },
                 stars: 3,
                 jumpRoom: 'restaurant',
-                sceneImg: 'assets/scene_romance_gala.jpg',
+                sceneImg: 'assets/scene_restaurant_pool.jpg',
                 defaultDesc: 'Seviye 1: Eski ve Çizik Ahşap Masalar'
             },
             restaurant_bar: {
@@ -92,7 +92,7 @@ class GameEconomyManager {
                 levelCosts: { 2: 1400, 3: 2200, 4: 3300 },
                 stars: 4,
                 jumpRoom: 'restaurant',
-                sceneImg: 'assets/scene_romance_gala.jpg',
+                sceneImg: 'assets/scene_restaurant_bar.jpg',
                 defaultDesc: 'Seviye 1: Terk Edilmiş Eski Bar Tezgahı'
             },
             swimming_pool: {
@@ -103,7 +103,7 @@ class GameEconomyManager {
                 levelCosts: { 2: 5000, 3: 7500, 4: 10500 },
                 stars: 5,
                 jumpRoom: 'pool',
-                sceneImg: 'assets/scene_restaurant_pool.jpg',
+                sceneImg: 'assets/scene_infinity_pool.jpg',
                 defaultDesc: 'Seviye 1: Kuru ve Bakımsız Havuz Çukuru'
             },
             spa_jacuzzi: {
@@ -136,7 +136,7 @@ class GameEconomyManager {
                 levelCosts: { 2: 6500, 3: 9800, 4: 14000 },
                 stars: 6,
                 jumpRoom: 'penthouse',
-                sceneImg: 'assets/scene_hotel_exterior.jpg',
+                sceneImg: 'assets/scene_penthouse_piano.jpg',
                 defaultDesc: 'Seviye 1: Terk Edilmiş Tozlu Çatı Katı'
             }
         };

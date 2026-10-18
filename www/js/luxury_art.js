@@ -8,6 +8,57 @@ class LuxuryArtEngine {
     constructor() {
         this.itemCache = {};
         this.designPreviewCache = {};
+        this.loadedPhotos = {};
+
+        this.areaSceneMap = {
+            reception_desk: 'assets/scene_lobby_reception.jpg',
+            lobby_carpet: 'assets/scene_lobby_carpet.jpg',
+            lobby_chandelier: 'assets/scene_lobby_chandelier.jpg',
+            room101_bed: 'assets/scene_presidential_suite.jpg',
+            room101_decor: 'assets/scene_suite_terrace.jpg',
+            restaurant_tables: 'assets/scene_restaurant_pool.jpg',
+            restaurant_bar: 'assets/scene_restaurant_bar.jpg',
+            swimming_pool: 'assets/scene_infinity_pool.jpg',
+            spa_jacuzzi: 'assets/scene_spa_wellness.jpg',
+            garden_courtyard: 'assets/scene_garden_terrace.jpg',
+            penthouse_suite: 'assets/scene_penthouse_piano.jpg'
+        };
+
+        this.rewardIconMap = {
+            energy: 'assets/rewards/reward_energy.jpg',
+            prestige: 'assets/rewards/reward_prestige.jpg',
+            coins: 'assets/rewards/reward_prestige.jpg',
+            cash: 'assets/rewards/reward_prestige.jpg',
+            gems: 'assets/rewards/reward_gems.jpg',
+            stars: 'assets/rewards/reward_star.jpg',
+            star: 'assets/rewards/reward_star.jpg',
+            chest: 'assets/rewards/reward_chest.jpg',
+            spawner: 'assets/rewards/reward_spawner.jpg',
+            key: 'assets/rewards/reward_key.jpg',
+            mask: 'assets/rewards/reward_mask.jpg'
+        };
+
+        this.preloadScenes();
+    }
+
+    preloadScenes() {
+        const urls = new Set(Object.values(this.areaSceneMap));
+        urls.forEach((url) => {
+            const img = new Image();
+            img.onload = () => {
+                this.loadedPhotos[url] = img;
+                this.designPreviewCache = {};
+            };
+            img.src = url;
+        });
+    }
+
+    getAreaScene(areaId) {
+        return this.areaSceneMap[areaId] || 'assets/scene_lobby_reception.jpg';
+    }
+
+    getRewardIcon(type) {
+        return this.rewardIconMap[type] || 'assets/rewards/reward_prestige.jpg';
     }
 
     // Returns the high-resolution painted luxury illustration path for any (type, level) merge item
@@ -733,156 +784,140 @@ class LuxuryArtEngine {
     }
 
     // --------------------------------------------------------
-    // ARCHITECTURAL 3-DESIGN PREVIEW GENERATOR (FOR MODAL)
-    // Generates distinct visual previews for:
+    // PHOTOREALISTIC 3-DESIGN PREVIEW GENERATOR (FOR MODAL)
+    // Uses the area's HD photorealistic scene with distinct
+    // architectural color grading, lighting & material swatches:
     // - opt_a: Option 1 — Modern Elegance
     // - opt_b: Option 2 — Velvet Luxury
     // - opt_c: Option 3 — Mediterranean Suite
     // --------------------------------------------------------
     getDesignPreview(areaId, optionId, targetLevel = 2) {
-        const key = `${areaId}_${optionId}_lv${targetLevel}`;
+        const sceneUrl = this.getAreaScene(areaId);
+        const photo = this.loadedPhotos[sceneUrl];
+        const key = `${areaId}_${optionId}_lv${targetLevel}_${photo ? 'hd' : 'init'}`;
         if (this.designPreviewCache[key]) return this.designPreviewCache[key];
 
         const canvas = document.createElement('canvas');
-        canvas.width = 480;
-        canvas.height = 240;
+        canvas.width = 640;
+        canvas.height = 320;
         const ctx = canvas.getContext('2d');
 
-        if (optionId === 'opt_a') {
-            // OPTION 1 — MODERN ELEGANCE (Warm minimalist oak, cream stone, architectural halo lighting)
-            const wall = ctx.createLinearGradient(0, 0, 0, 170);
-            wall.addColorStop(0, '#3a352f');
-            wall.addColorStop(1, '#dfd5c6');
-            ctx.fillStyle = wall;
-            ctx.fillRect(0, 0, 480, 170);
-
-            // Nordic oak floor
-            const floor = ctx.createLinearGradient(0, 170, 0, 240);
-            floor.addColorStop(0, '#c8a97e');
-            floor.addColorStop(1, '#8c6d46');
-            ctx.fillStyle = floor;
-            ctx.fillRect(0, 170, 480, 70);
-
-            // Warm architectural LED halo rings
-            ctx.strokeStyle = '#fff3d1';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.ellipse(240, 36, 75, 14, 0, 0, Math.PI * 2);
-            ctx.stroke();
-            if (targetLevel >= 3) {
-                ctx.beginPath();
-                ctx.ellipse(240, 48, 50, 9, 0, 0, Math.PI * 2);
-                ctx.stroke();
+        if (photo) {
+            ctx.save();
+            // Apply distinct crop/zoom and photorealistic color grading per design option
+            if (optionId === 'opt_a') {
+                ctx.filter = 'brightness(1.08) contrast(1.06) saturate(0.95)';
+                ctx.drawImage(photo, 0, 0, photo.width, photo.height, 0, 0, 640, 320);
+                // Warm Scandinavian daylight architectural sheen
+                const sheen = ctx.createLinearGradient(0, 0, 640, 320);
+                sheen.addColorStop(0, 'rgba(255, 248, 231, 0.22)');
+                sheen.addColorStop(0.5, 'rgba(216, 185, 139, 0.08)');
+                sheen.addColorStop(1, 'rgba(18, 22, 32, 0.55)');
+                ctx.fillStyle = sheen;
+                ctx.fillRect(0, 0, 640, 320);
+            } else if (optionId === 'opt_b') {
+                ctx.filter = 'contrast(1.16) saturate(1.25) brightness(0.98)';
+                ctx.drawImage(photo, photo.width * 0.04, photo.height * 0.04, photo.width * 0.92, photo.height * 0.92, 0, 0, 640, 320);
+                // Royal Monaco Gold & Crimson Velvet vignette
+                const royalGlow = ctx.createRadialGradient(320, 120, 30, 320, 160, 360);
+                royalGlow.addColorStop(0, 'rgba(255, 215, 0, 0.22)');
+                royalGlow.addColorStop(0.65, 'rgba(128, 15, 47, 0.16)');
+                royalGlow.addColorStop(1, 'rgba(10, 12, 20, 0.68)');
+                ctx.fillStyle = royalGlow;
+                ctx.fillRect(0, 0, 640, 320);
+            } else {
+                ctx.filter = 'sepia(0.16) saturate(1.28) contrast(1.08) brightness(1.03)';
+                ctx.drawImage(photo, photo.width * 0.06, 0, photo.width * 0.94, photo.height * 0.94, 0, 0, 640, 320);
+                // Warm Riviera sunset golden hour rays
+                const rivieraGrad = ctx.createLinearGradient(0, 0, 0, 320);
+                rivieraGrad.addColorStop(0, 'rgba(244, 162, 97, 0.20)');
+                rivieraGrad.addColorStop(0.6, 'rgba(233, 196, 106, 0.08)');
+                rivieraGrad.addColorStop(1, 'rgba(20, 16, 14, 0.62)');
+                ctx.fillStyle = rivieraGrad;
+                ctx.fillRect(0, 0, 640, 320);
             }
-
-            // Contemporary designer furniture piece
-            ctx.fillStyle = '#f5efe6';
-            this.roundRect(ctx, 130, 105, 220, 72, 14);
-            ctx.fill();
-            ctx.strokeStyle = '#c8a97e';
-            ctx.lineWidth = 4;
-            ctx.stroke();
-
-            // Warm side lamps
-            [95, 385].forEach(lx => {
-                const glow = ctx.createRadialGradient(lx, 110, 4, lx, 110, 48);
-                glow.addColorStop(0, 'rgba(255, 240, 200, 0.85)');
-                glow.addColorStop(1, 'rgba(255, 240, 200, 0)');
-                ctx.fillStyle = glow;
-                ctx.beginPath();
-                ctx.arc(lx, 110, 48, 0, Math.PI * 2);
-                ctx.fill();
-            });
-        } else if (optionId === 'opt_b') {
-            // OPTION 2 — VELVET LUXURY (Black Nero marble, 24K gold trim, crimson/emerald velvet, crystal chandelier)
-            const wall = ctx.createLinearGradient(0, 0, 0, 170);
-            wall.addColorStop(0, '#0d0f17');
-            wall.addColorStop(1, '#221824');
-            ctx.fillStyle = wall;
-            ctx.fillRect(0, 0, 480, 170);
-
-            // Gold wall paneling lines
-            ctx.strokeStyle = 'rgba(255, 215, 0, 0.45)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(24, 16, 110, 135);
-            ctx.strokeRect(346, 16, 110, 135);
-
-            // Black marble & gold floor
-            const floor = ctx.createLinearGradient(0, 170, 0, 240);
-            floor.addColorStop(0, '#1a1c26');
-            floor.addColorStop(1, '#090a0f');
-            ctx.fillStyle = floor;
-            ctx.fillRect(0, 170, 480, 70);
-
-            // Crimson velvet royal rug
-            ctx.fillStyle = '#6e0d25';
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = 3;
-            this.roundRect(ctx, 90, 182, 300, 44, 8);
-            ctx.fill();
-            ctx.stroke();
-
-            // Statement Velvet & Gold centerpiece furniture
-            const vel = ctx.createLinearGradient(130, 95, 350, 180);
-            vel.addColorStop(0, '#800f2f');
-            vel.addColorStop(0.5, '#4a081b');
-            vel.addColorStop(1, '#1f030b');
-            ctx.fillStyle = vel;
-            this.roundRect(ctx, 130, 98, 220, 80, 18);
-            ctx.fill();
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = 4;
-            ctx.stroke();
-
-            // Crystal & Gold Chandelier
-            this.drawSparkle(ctx, 240, 38, 22, '#ffd700');
-            this.drawSparkle(ctx, 205, 46, 14, '#ffffff');
-            this.drawSparkle(ctx, 275, 46, 14, '#ffffff');
+            ctx.restore();
         } else {
-            // OPTION 3 — MEDITERRANEAN SUITE (Natural carved wood, coastal sunset view, warm terracotta/linen)
-            const sky = ctx.createLinearGradient(0, 0, 0, 165);
-            sky.addColorStop(0, '#3d2c4e');
-            sky.addColorStop(0.5, '#c96d53');
-            sky.addColorStop(1, '#f4b87a');
-            ctx.fillStyle = sky;
-            ctx.fillRect(0, 0, 480, 165);
-
-            // Mediterranean arch columns
-            ctx.fillStyle = '#e6ccb2';
-            ctx.fillRect(0, 0, 68, 170);
-            ctx.fillRect(412, 0, 68, 170);
-
-            // Natural teak & travertine floor
-            ctx.fillStyle = '#9c6644';
-            ctx.fillRect(0, 165, 480, 75);
-
-            // Carved natural wood & soft linen furniture
-            ctx.fillStyle = '#7f4f24';
-            this.roundRect(ctx, 125, 108, 230, 72, 12);
-            ctx.fill();
-            ctx.fillStyle = '#faf0ca';
-            this.roundRect(ctx, 135, 116, 210, 48, 8);
-            ctx.fill();
-
-            // Mediterranean palms & roses
-            this.drawLeaf(ctx, 90, 95, 0.4, 34);
-            this.drawLeaf(ctx, 390, 95, -0.4, 34);
-            this.drawDetailedRose(ctx, 240, 122, 16, '#d62828', '#ff6b6b', '#780000');
+            // Fallback luxury gradient while image preloads
+            const bg = ctx.createLinearGradient(0, 0, 640, 320);
+            bg.addColorStop(0, optionId === 'opt_a' ? '#3a352f' : (optionId === 'opt_b' ? '#241422' : '#4a2c20'));
+            bg.addColorStop(1, '#0e111a');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, 640, 320);
         }
 
-        // Level upgrade badge overlay in top-right of preview
-        ctx.fillStyle = 'rgba(12, 14, 22, 0.85)';
-        this.roundRect(ctx, 340, 12, 126, 30, 8);
+        // Architectural level lighting sparkles for Lv.3 & Lv.4
+        if (targetLevel >= 3) {
+            this.drawSparkle(ctx, 120, 58, 16, '#fff6d6');
+            this.drawSparkle(ctx, 510, 64, 18, '#ffd700');
+            if (targetLevel >= 4) {
+                this.drawSparkle(ctx, 320, 44, 22, '#ffd700');
+                this.drawSparkle(ctx, 210, 82, 14, '#ffffff');
+                this.drawSparkle(ctx, 430, 82, 14, '#ffffff');
+            }
+        }
+
+        // Bottom architectural material palette bar
+        const matBarGrad = ctx.createLinearGradient(0, 236, 0, 320);
+        matBarGrad.addColorStop(0, 'rgba(10, 12, 20, 0)');
+        matBarGrad.addColorStop(0.35, 'rgba(10, 12, 20, 0.86)');
+        matBarGrad.addColorStop(1, 'rgba(10, 12, 20, 0.96)');
+        ctx.fillStyle = matBarGrad;
+        ctx.fillRect(0, 236, 640, 84);
+
+        const swatches = optionId === 'opt_a'
+            ? [
+                { color: '#d8b98b', ring: '#fff3d1', label: 'İskandinav Meşe' },
+                { color: '#e2e8f0', ring: '#94a3b8', label: 'Kristal Cam' },
+                { color: '#fef3c7', ring: '#f59e0b', label: 'Halo LED' }
+            ]
+            : (optionId === 'opt_b'
+                ? [
+                    { color: '#14161f', ring: '#ffd700', label: 'Nero Mermer' },
+                    { color: '#7a0c1a', ring: '#ffd700', label: 'Kraliyet Kadife' },
+                    { color: '#d4af37', ring: '#fff3b0', label: '24K Altın Varak' }
+                ]
+                : [
+                    { color: '#f4f1ea', ring: '#d4af37', label: 'Carrara Mermer' },
+                    { color: '#5c3317', ring: '#d97706', label: 'Oyma Maun' },
+                    { color: '#0f5132', ring: '#ffd700', label: 'Riviera Dokuma' }
+                ]);
+
+        swatches.forEach((sw, i) => {
+            const sx = 24 + i * 148;
+            const sy = 288;
+            ctx.fillStyle = sw.color;
+            ctx.beginPath();
+            ctx.arc(sx, sy, 13, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = sw.ring;
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#f8f1e5';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(sw.label, sx + 20, sy + 4);
+        });
+
+        // Level upgrade badge in bottom-right
+        ctx.fillStyle = 'rgba(20, 24, 38, 0.92)';
+        this.roundRect(ctx, 468, 268, 154, 36, 10);
         ctx.fill();
         ctx.strokeStyle = '#ffd700';
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 2;
         ctx.stroke();
         ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 12px sans-serif';
+        ctx.font = 'bold 13px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`★ SEVİYE ${targetLevel} TASARIM`, 403, 31);
+        ctx.fillText(`★ SEVİYE ${targetLevel} MİMARİ`, 545, 291);
 
-        const url = canvas.toDataURL('image/png');
+        // Gold outer frame
+        ctx.strokeStyle = 'rgba(223, 191, 131, 0.55)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(1.5, 1.5, 637, 317);
+
+        const url = canvas.toDataURL('image/jpeg', 0.92);
         this.designPreviewCache[key] = url;
         return url;
     }

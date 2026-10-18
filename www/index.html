@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0d0f17">
-<title>Velvet Secrets - Luxury Story & Merge</title>
+<title>Velvet Secrets - Luxury Story &amp; 3D Hotel Simulator</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -24,32 +24,34 @@
         </div>
         <span id="levelBadge" class="level-badge">LV.1</span>
       </div>
-      <div class="vip-crest">✦ VIP SOSYETE</div>
-      <button class="hero-ledger-pill" onclick="window.GameEconomy && window.GameEconomy.openLedgerModal()">💼 Kasa Defteri</button>
+      <div class="vip-crest">✦ AURELIA PALACE</div>
+      <button class="hero-ledger-pill" onclick="window.GameEconomy && window.GameEconomy.openLedgerModal()">
+        <img src="assets/rewards/reward_prestige.jpg" alt="Kasa" class="mini-btn-icon"> Kasa Defteri
+      </button>
     </div>
   </header>
 
-  <!-- ================= 4 CURRENCY BAR ================= -->
+  <!-- ================= 4 CURRENCY BAR (HIGH-RES 3D PAINTED ICONS) ================= -->
   <section class="currency-strip">
     <div class="curr-box energy-box">
-      <span class="c-icon">⚡</span>
+      <img src="assets/rewards/reward_energy.jpg" alt="Enerji" class="curr-img-icon">
       <div class="c-text">
-        <b id="energy">500<small>/500</small></b>
-        <label id="timer">01:00</label>
+        <b id="energy">500</b>
+        <label id="timer">MAKS 500</label>
       </div>
       <button id="addEnergyBtn" class="c-add" title="Enerji Al">+</button>
     </div>
 
-    <div class="curr-box">
-      <span class="c-icon">◆</span>
+    <div class="curr-box" title="Kasa Defterini Aç">
+      <img src="assets/rewards/reward_prestige.jpg" alt="Prestij" class="curr-img-icon">
       <div class="c-text">
-        <b id="coins">1200</b>
+        <b id="coins">$1200</b>
         <label>PRESTİJ</label>
       </div>
     </div>
 
     <div class="curr-box">
-      <span class="c-icon">💎</span>
+      <img src="assets/rewards/reward_gems.jpg" alt="Elmas" class="curr-img-icon">
       <div class="c-text">
         <b id="gems">25</b>
         <label>ELMAS</label>
@@ -57,7 +59,7 @@
     </div>
 
     <div class="curr-box star-box">
-      <span class="c-icon">⭐</span>
+      <img src="assets/rewards/reward_star.jpg" alt="Yıldız" class="curr-img-icon">
       <div class="c-text">
         <b id="stars">2</b>
         <label>YILDIZ</label>
@@ -65,35 +67,40 @@
     </div>
   </section>
 
-  <!-- ================= GOSSIP HARBOR GÖVDE (SAYFALAR) ================= -->
+  <!-- ================= ANA OYUN SAYFALARI ================= -->
   <main class="page-container">
 
-    <!-- ========== SAYFA 1: BİRLEŞTİRME MASASI & SİPARİŞLER ========== -->
+    <!-- ========== SAYFA 1: BİRLEŞTİRME MASASI, SİPARİŞLER & FOTO-GERÇEKÇİ GÖREVLER ========== -->
     <section id="pageBoard" class="game-page active-page">
       
-      <!-- Gossip Harbor Müşteri Sipariş Kuyruğu -->
+      <!-- Müşteri Sipariş Kuyruğu -->
       <div class="tray-header">
         <div class="tray-title-row">
-          <h3>✦ SOSYETE SİPARİŞLERİ</h3>
-          <span class="tray-sub">Siparişleri teslim et, Prestij (◆) ve Yıldız (⭐) kazan!</span>
+          <h3>✦ SOSYETE &amp; OTEL SİPARİŞLERİ</h3>
+          <span class="tray-sub">Siparişleri tamamla, Otel Restorasyonu için Prestij ($) ve Yıldız kazan!</span>
         </div>
       </div>
 
       <div id="orderTray" class="orders-scroll-tray">
-        <!-- JavaScript ile Adrian Vale, Serena Black, Leon Marchand kartları basılacak -->
+        <!-- JavaScript ile Adrian Vale, Serena Black, Leon Marchand, Isabella kartları basılacak -->
       </div>
 
       <!-- Üretici Sandık ve Düzenle Çubuğu -->
       <div class="board-top-controls">
         <div class="spawner-widget">
-          <div class="spawner-icon-pulse">🎁</div>
+          <div class="spawner-icon-pulse">
+            <img src="assets/rewards/reward_spawner.jpg" alt="Lüks Sandık" class="spawner-img-icon">
+          </div>
           <div class="spawner-meta">
-            <strong>Lüks Sandık</strong>
-            <small>Yeni sürpriz obje üret</small>
+            <strong>Kraliyet Üretim Sandığı</strong>
+            <small>Masaya yeni lüks obje çıkarır</small>
           </div>
           <button id="spawnBtn" class="spawner-tap-btn">
-            <span>⚡ ÜRET</span>
-            <small>1 Enerji</small>
+            <div class="spawn-btn-top">
+              <img src="assets/rewards/reward_energy.jpg" alt="Enerji" class="btn-inline-icon">
+              <span>ÜRET</span>
+            </div>
+            <small>-1 Enerji</small>
           </button>
         </div>
 
@@ -106,16 +113,24 @@
       <div id="board" class="merge-grid" aria-label="Birleştirme Masası"></div>
 
       <div class="board-hint-strip">
-        <span class="hint-icon">💡</span>
-        <p id="notice" role="status">İki aynı objeyi sürükleyip birleştirerek siparişleri hazırla!</p>
+        <img src="assets/rewards/reward_key.jpg" alt="İpucu" class="hint-img-icon">
+        <p id="notice" role="status">İki aynı objeyi sürükleyip birleştirerek üst seviye lüks eserler üretin!</p>
       </div>
 
-      <!-- Günün Görevleri Kartı -->
+      <!-- Foto-Gerçekçi Otel Görevleri ve Zengin Kazanım Vitrini -->
       <div class="daily-tasks-card">
         <div class="tasks-card-top">
-          <h4>GÜNÜN GÖREVLERİ</h4>
-          <span class="tasks-card-pill">Cömert Ödüller</span>
+          <div>
+            <h4>✦ AURELIA KRALİYET GÖREVLERİ &amp; KAZANIMLAR</h4>
+            <p class="tasks-sub">Her görevi tamamlayarak yüksek enerjili sandık, altın prestij, elmas ve yıldız ödüllerini toplayın!</p>
+          </div>
+          <span class="tasks-card-pill">Foto-Gerçekçi Ödüller</span>
         </div>
+
+        <!-- Büyük Kraliyet Görev Sandığı İlerleme Vitrini -->
+        <div id="questChestHeader" class="grand-reward-showcase"></div>
+
+        <!-- Konuyla Uyumlu Foto-Gerçekçi Görev Kartları Listesi -->
         <div id="tasks" class="tasks-list-wrap"></div>
       </div>
     </section>
@@ -125,8 +140,8 @@
       <div class="hotel-page-header">
         <div class="hotel-title-flex">
           <div>
-            <h2>🏨 AURELIA PALACE — 3D OTEL KEŞFİ</h2>
-            <p>Otel içinde serbestçe yürüyün, odaları gezin ve her alanı adım adım yenileyin!</p>
+            <h2>🏨 AURELIA PALACE — 3D OTEL &amp; RESTORASYON</h2>
+            <p>Otel içinde serbestçe yürüyün, odaları gezin ve 11 alanı 3 farklı tasarımla Seviye 4'e yükseltin!</p>
           </div>
           <div class="hotel-rating-badge" id="hudHotelStars">⭐⭐⭐</div>
         </div>
@@ -147,7 +162,7 @@
         <!-- Canlı Ekonomi ve Kasa Çubuğu -->
         <div class="hotel-economy-strip">
           <div class="econ-item">
-            <span class="econ-label">Otel Geliri</span>
+            <span class="econ-label">Pasif Gelir Hızı</span>
             <b id="hudRate" class="econ-val">+$45/dk</b>
           </div>
           <div class="econ-item">
@@ -155,7 +170,8 @@
             <b id="hudUncollected" class="econ-val cash">$0</b>
           </div>
           <button id="collectIncomeBtn" class="collect-cash-btn" onclick="hotel3D.collectIncome()">
-            <span>💰 GELİRİ TOPLA</span>
+            <img src="assets/rewards/reward_prestige.jpg" alt="Topla" class="btn-inline-icon">
+            <span>GELİRİ TOPLA</span>
           </button>
         </div>
       </div>
@@ -169,10 +185,7 @@
         <!-- Canlı Gelir Toast Bildirimi -->
         <div id="incomeToast" class="income-toast" style="display: none;"></div>
 
-        <!-- İnteraktif Yakınlık Kartı (Proximity Information Panel) -->
-        <div id="renovationProximityPanel" class="renovation-proximity-panel" style="display: none;"></div>
-
-        <!-- Üst Bilgi Rozeti (Mevcut Konum) -->
+        <!-- Üst Bilgi Rozeti (Mevcut Konum & Radar) -->
         <div class="viewport-hud-top">
           <div id="hudLocationTag" class="location-pill">📍 Aurelia Palace Büyük Lobi &amp; Resepsiyon</div>
           <!-- Sağ Üst: Radar / Minimap -->
@@ -194,19 +207,19 @@
 
           <div id="mobileLookZone" class="mobile-look-zone">
             <div class="look-crosshair">✦</div>
-            <span class="look-guide-text">Bakış için dokunup kaydırın 👁️</span>
+            <span class="look-guide-text">Bakmak için ekranda parmağınızı kaydırın 👁️</span>
           </div>
 
           <button id="mobileActionBtn" class="mobile-action-btn" onclick="hotel3D.triggerActiveBeacon()">
             <span>🛠️</span>
-            <small>YENİLE</small>
+            <small>İNCELE</small>
           </button>
         </div>
 
         <!-- Masaüstü Kontrol Rehberi -->
         <div class="desktop-hint-bar">
           <span>⌨️ <b>WASD / Oklar:</b> Yürü</span>
-          <span>🖱️ <b>Fare:</b> Çevreye Bak</span>
+          <span>🖱️ <b>Fare / Dokun:</b> Bak</span>
           <span>🛠️ <b>[E]:</b> Restorasyon</span>
           <span>⚡ <b>Shift:</b> Koş</span>
         </div>
@@ -216,12 +229,15 @@
 
       </div>
 
+      <!-- İnteraktif Yakınlık Kartı (3D Ekranı Kapatmayan Alt Konsol) -->
+      <div id="renovationProximityPanel" class="renovation-proximity-panel" style="display: none;"></div>
+
       <!-- GERÇEKÇİ OTEL ALANLARI VE 4-SEVİYELİ RESTORASYON GALERİSİ -->
       <div class="hotel-areas-gallery-section">
         <div class="gallery-sec-head">
           <div>
-            <h3>✦ AURELIA PALACE — OTEL ALANLARI &amp; 4-SEVİYELİ RESTORASYON</h3>
-            <p>Her alana tıklayarak gerçekçi görünümünü inceleyin, 3D odasına yürüyün veya 3 farklı lüks tasarımla Seviye 1'den Seviye 4'e yükseltin!</p>
+            <h3>✦ AURELIA PALACE — 11 OTEL ALANI &amp; 4-SEVİYELİ RESTORASYON</h3>
+            <p>Her alanın kendine özel foto-gerçekçi mimarisini inceleyin, 3D odasına yürüyün veya 3 farklı tasarımla Seviye 1'den Seviye 4'e yükseltin!</p>
           </div>
           <button class="project-plan-btn" onclick="hotel3D.openProjectPlanModal()">📋 Tüm Maliyet Tablosu</button>
         </div>
@@ -232,13 +248,13 @@
       <div class="story-character-callout">
         <img src="assets/avatar_isabella.jpg" alt="Isabella" class="callout-avatar">
         <div class="callout-content">
-          <strong>Isabella Laurent (Otel Sahibi)</strong>
-          <p id="hotelDialogueText">"Otelimizin her köşesini bizzat gezerek inceleyebilirsin! Masadan siparişleri tamamlayıp kazandığın altın ve yıldızlarla resepsiyonu, suitleri, havuzu, spa ve bahçeyi Seviye 1'den Seviye 4'e yükselt!"</p>
+          <strong>Isabella Laurent (Otel Varisi)</strong>
+          <p id="hotelDialogueText">"Otelimizin her köşesini bizzat gezerek inceleyebilirsin! Masadan siparişleri ve görevleri tamamlayıp kazandığın altın ve yıldızlarla resepsiyonu, suitleri, havuzu, spa ve bahçeyi Seviye 1'den Seviye 4'e yükselt!"</p>
         </div>
       </div>
     </section>
 
-    <!-- ========== SAYFA 3: GİZEMLİ HİKÂYE & SEÇİMLER ========== -->
+    <!-- ========== SAYFA 3: GİZEMLİ HİKÂYE & İNTERAKTİF BÖLÜMLER ========== -->
     <section id="pageStory" class="game-page">
       <div class="story-page-container">
         
@@ -249,9 +265,16 @@
             <span class="episode-badge">BÖLÜM 1 · AÇILIŞ GECESİ</span>
           </div>
           <div class="episode-body">
-            <h3>Masada Unutulan Mektup</h3>
-            <p>"Açılış gecesinde masada kırmızı mühürlü bir mektup buldum. Üzerinde sadece 'A' harfi var. Bu gece herkesin sakladığı bir şey var..."</p>
-            <div class="letter-quote">"Bu mektup... kime ait? Ve neden burada?" — Isabella</div>
+            <h3>Lobi Masasında Unutulan Kırmızı Mühürlü Mektup</h3>
+            <p>"Aurelia Palace'ın açılış gecesinde mum ışığıyla aydınlanan mermer masada kırmızı balmumu mühürlü bir zarf buldum. Üzerinde altın yaldızlı bir 'A' harfi var..."</p>
+            <div class="letter-quote">"Babamın vefat ettiği gece otelde kim vardı? Bu mektup gerçeğin ilk anahtarı." — Isabella Laurent</div>
+            <div class="episode-reward-strip">
+              <span class="ep-reward-label">Bölüm Kazanımı:</span>
+              <div class="reward-pill-list">
+                <span class="reward-badge-card"><img src="assets/rewards/reward_key.jpg" alt="Anahtar"> Arşiv İpucu Açıldı</span>
+                <span class="reward-badge-card"><img src="assets/rewards/reward_prestige.jpg" alt="Prestij"> +$100 Prestij</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -262,26 +285,79 @@
             <span class="episode-badge">BÖLÜM 2 · KRİTİK SEÇİM</span>
           </div>
           <div class="episode-body">
-            <h3>Adrian'ın Gece Yarısı Teklifi</h3>
-            <p>Adrian Vale yanına yaklaştı ve seni körfez manzaralı terasa davet etti. Bakışlarında gizemli bir merak var.</p>
+            <h3>Adrian Vale'in Monako Terasındaki Teklifi</h3>
+            <p>Gizemli milyarder Adrian Vale, yat limanına bakan terasta elinde kristal şampanya kadehiyle yanına yaklaştı. Bakışlarında hem tehlike hem de karşı konulmaz bir çekim var.</p>
             
             <div class="interactive-choices">
               <button class="story-choice-btn" data-choice="accept">
-                <span class="ch-icon">💛</span>
-                <div class="ch-text"><strong>Daveti kabul et</strong><small>Adrian ile yakınlaş (+150 Prestij)</small></div>
+                <img src="assets/rewards/reward_prestige.jpg" alt="Prestij" class="ch-img-icon">
+                <div class="ch-text">
+                  <strong>Daveti kabul et ve terasta kal</strong>
+                  <small>Adrian ile yakınlaş · Kazanım: +$250 Prestij &amp; +30 Enerji</small>
+                </div>
               </button>
               <button class="story-choice-btn" data-choice="decline">
-                <span class="ch-icon">💎</span>
-                <div class="ch-text"><strong>Daveti reddet ve mesafeli kal</strong><small>Temkinli hareket et (+3 Elmas)</small></div>
+                <img src="assets/rewards/reward_gems.jpg" alt="Elmas" class="ch-img-icon">
+                <div class="ch-text">
+                  <strong>Daveti reddet ve mesafeli dur</strong>
+                  <small>Kendi kurallarınla oyna · Kazanım: +8 Elmas &amp; +30 Enerji</small>
+                </div>
               </button>
               <button class="story-choice-btn" data-choice="investigate">
-                <span class="ch-icon">🔍</span>
-                <div class="ch-text"><strong>Önce otel arşivinde araştır</strong><small>Leon'un geçmişini incele (+1 Yıldız)</small></div>
+                <img src="assets/rewards/reward_star.jpg" alt="Yıldız" class="ch-img-icon">
+                <div class="ch-text">
+                  <strong>Gizlice otel arşivine inip araştır</strong>
+                  <small>Leon'un geçmişini incele · Kazanım: +2 Yıldız &amp; +$150 Prestij</small>
+                </div>
               </button>
             </div>
 
             <div id="storyDecisionLog" class="decision-feedback-box">
-              Henüz seçim yapmadın. Her karar otelin kaderini ve ilişkileri değiştirecek!
+              Henüz seçim yapmadın. Seçimin otelin kaderini ve kazanacağın ödülleri belirleyecek!
+            </div>
+          </div>
+        </div>
+
+        <!-- Bölüm 3: Zen Spa'daki Gizli Buluşma -->
+        <div class="story-episode-card">
+          <div class="episode-img-wrap">
+            <img src="assets/scene_story_spa_secret.jpg" alt="Zen Spa Gizemi">
+            <span class="episode-badge">BÖLÜM 3 · MERMER SPA SIRRI</span>
+          </div>
+          <div class="episode-body">
+            <h3>Termal Spa'da Gece Yarısı Fısıltıları</h3>
+            <p>Altın mozaikli termal spa pavyonunda Serena Black'in düşürdüğü ikinci mektubu buldun. Mektupta otelin çatı katındaki piyanonun içinde gizli bir kasa anahtarı olduğu yazıyor!</p>
+            <div class="interactive-choices">
+              <button class="story-choice-btn-ch3" data-ch3="vault">
+                <img src="assets/rewards/reward_chest.jpg" alt="Sandık" class="ch-img-icon">
+                <div class="ch-text">
+                  <strong>Gizli Kasa Anahtarını Al &amp; Ödülü Topla</strong>
+                  <small>Kazanım: +$300 Prestij · +50 Enerji · +1 Yıldız</small>
+                </div>
+              </button>
+            </div>
+            <div id="storyCh3Log" class="decision-feedback-box">
+              Bölüm 3 ödülünü toplamak için yukarıdaki seçeneğe dokun!
+            </div>
+          </div>
+        </div>
+
+        <!-- Bölüm 4: Penthouse Piyano & Maskeli Balo -->
+        <div class="story-episode-card">
+          <div class="episode-img-wrap">
+            <img src="assets/scene_penthouse_piano.jpg" alt="Penthouse Suit">
+            <span class="episode-badge">BÖLÜM 4 · KRALİYET PENTHOUSE</span>
+          </div>
+          <div class="episode-body">
+            <h3>2. Kat Başkanlık Suitinde Büyük Yüzleşme</h3>
+            <p>Şömine ateşinin aydınlattığı Penthouse salonda kuyruklu piyanonun kapağını açtığında Aurelia ailesinin gerçek tapu mührü ortaya çıkıyor.</p>
+            <div class="episode-reward-strip">
+              <span class="ep-reward-label">Final Bölümü Kazanımları:</span>
+              <div class="reward-pill-list">
+                <span class="reward-badge-card"><img src="assets/rewards/reward_mask.jpg" alt="Maske"> Kraliyet Maskesi</span>
+                <span class="reward-badge-card"><img src="assets/rewards/reward_star.jpg" alt="Yıldız"> Penthouse Yetkisi</span>
+                <span class="reward-badge-card"><img src="assets/rewards/reward_gems.jpg" alt="Elmas"> VIP Koleksiyon</span>
+              </div>
             </div>
           </div>
         </div>
@@ -293,15 +369,24 @@
     <section id="pageWheel" class="game-page">
       <div class="wheel-panel-card">
         <div class="wheel-headline">
-          <h2>AURELIA ŞANS ÇARKI</h2>
-          <p>Her gün çevir, büyük ödülleri ve gizemli VIP sandıkları kazan!</p>
+          <h2>AURELIA KRALİYET ŞANS ÇARKI</h2>
+          <p>Her gün çevir, foto-gerçekçi VIP hazine sandıklarını, altınları ve elmasları kazan!</p>
+        </div>
+
+        <!-- Çark Ödül Vitrini -->
+        <div class="wheel-prizes-showcase">
+          <span class="reward-badge-card"><img src="assets/rewards/reward_energy.jpg" alt="Enerji"> +100 Enerji</span>
+          <span class="reward-badge-card"><img src="assets/rewards/reward_prestige.jpg" alt="Prestij"> +$500 Prestij</span>
+          <span class="reward-badge-card"><img src="assets/rewards/reward_gems.jpg" alt="Elmas"> +10 Elmas</span>
+          <span class="reward-badge-card"><img src="assets/rewards/reward_star.jpg" alt="Yıldız"> +1 Yıldız</span>
+          <span class="reward-badge-card"><img src="assets/rewards/reward_chest.jpg" alt="VIP"> VIP Sandık</span>
         </div>
 
         <div class="wheel-visual-holder">
           <div class="wheel-needle">▼</div>
           <div id="luckyWheel" class="wheel-disc">
             <div class="w-slice" style="--i:0;"><span>⚡ 100</span></div>
-            <div class="w-slice" style="--i:1;"><span>◆ 500</span></div>
+            <div class="w-slice" style="--i:1;"><span>◆ $500</span></div>
             <div class="w-slice" style="--i:2;"><span>💎 10</span></div>
             <div class="w-slice" style="--i:3;"><span>⭐ 1</span></div>
             <div class="w-slice" style="--i:4;"><span>⚡ 50</span></div>
@@ -316,34 +401,34 @@
             <small>ÜCRETSİZ ÇEVİR</small>
           </button>
           <button id="spinAdBtn" class="spin-outline-btn">
-            <span>📺 REKLAM İZLE &amp; ÇEVİR</span>
+            <span>📺 BONUS ÇEVİRME HAKKI AL</span>
           </button>
         </div>
 
-        <div id="wheelResultNotice" class="wheel-announcement">Her gün 1 ücretsiz çevirme hakkın var!</div>
+        <div id="wheelResultNotice" class="wheel-announcement">Her gün ücretsiz çevirme hakkın hazır!</div>
       </div>
     </section>
 
   </main>
 
-  <!-- ================= GOSSIP HARBOR ALT GEZİNME ÇUBUĞU ================= -->
+  <!-- ================= ALT GEZİNME ÇUBUĞU (MOBİL & TABLET UYUMLU) ================= -->
   <nav class="bottom-nav-bar">
     <button class="nav-tab active" data-target="pageBoard">
-      <span class="nav-icon">🧩</span>
-      <span class="nav-label">MASA</span>
+      <img src="assets/rewards/reward_spawner.jpg" alt="Masa" class="nav-img-icon">
+      <span class="nav-label">MASA &amp; GÖREV</span>
     </button>
     <button class="nav-tab" data-target="pageHotel">
-      <span class="nav-icon">🏨</span>
+      <img src="assets/rewards/reward_star.jpg" alt="3D Otel" class="nav-img-icon">
       <span class="nav-label">3D OTEL</span>
       <span id="hotelBadgeCount" class="nav-badge">1</span>
     </button>
     <button class="nav-tab" data-target="pageStory">
-      <span class="nav-icon">📖</span>
+      <img src="assets/rewards/reward_key.jpg" alt="Hikâye" class="nav-img-icon">
       <span class="nav-label">HİKÂYE</span>
     </button>
     <button class="nav-tab" data-target="pageWheel">
-      <span class="nav-icon">🎡</span>
-      <span class="nav-label">ÇARK</span>
+      <img src="assets/rewards/reward_chest.jpg" alt="Çark" class="nav-img-icon">
+      <span class="nav-label">ŞANS ÇARKI</span>
     </button>
   </nav>
 
@@ -363,11 +448,14 @@
       <span id="adCountdown" class="ad-timer">5 sn</span>
     </div>
     <div class="ad-card-body">
-      <div class="ad-video-mock">
-        <div class="ad-big-gem">💎</div>
+      <div class="ad-video-mock" style="background-image: linear-gradient(180deg, rgba(10,12,20,0.45), rgba(10,12,20,0.92)), url('assets/scene_hotel_exterior.jpg'); background-size: cover; background-position: center;">
+        <img src="assets/rewards/reward_chest.jpg" alt="VIP Hazine" class="ad-reward-hero-img">
         <h3>AURELIA ROYALE RESORT &amp; CASINO</h3>
         <p>Monako körfezinin en seçkin konukları burada buluşuyor. Özel VIP süitlerde yerinizi ayırtın.</p>
-        <div class="ad-stars-rating">★★★★★</div>
+        <div class="reward-pill-list" style="justify-content:center; margin-top:8px;">
+          <span class="reward-badge-card"><img src="assets/rewards/reward_energy.jpg" alt="Enerji"> +50 Enerji</span>
+          <span class="reward-badge-card"><img src="assets/rewards/reward_prestige.jpg" alt="Prestij"> +$200 Prestij</span>
+        </div>
       </div>
     </div>
     <button id="adClaimBtn" class="ad-claim-action" disabled>Ödül İçin Bekleyin (5)</button>
@@ -377,13 +465,13 @@
 <!-- Seviye Atlama Modalı -->
 <div id="levelUpModal" class="modal-overlay" style="display: none;">
   <div class="levelup-card">
-    <div class="levelup-star">🌟</div>
+    <img src="assets/rewards/reward_chest.jpg" alt="Tebrikler" class="levelup-hero-img">
     <h2>TEBRİKLER!</h2>
     <p id="levelUpSubtitle">Seviye 2'ye Ulaştın!</p>
     <div class="levelup-rewards-box">
-      <div><span>⚡</span> +100 Enerji</div>
-      <div><span>💎</span> +5 Elmas</div>
-      <div><span>⭐</span> +1 Yıldız</div>
+      <div class="reward-badge-card"><img src="assets/rewards/reward_energy.jpg" alt="Enerji"> +100 Enerji</div>
+      <div class="reward-badge-card"><img src="assets/rewards/reward_gems.jpg" alt="Elmas"> +5 Elmas</div>
+      <div class="reward-badge-card"><img src="assets/rewards/reward_star.jpg" alt="Yıldız"> +1 Yıldız</div>
     </div>
     <button id="closeLevelUpBtn" class="gold-action-btn pulse">ÖDÜLLERİ TOPLA</button>
   </div>

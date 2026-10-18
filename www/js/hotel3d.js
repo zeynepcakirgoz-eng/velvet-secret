@@ -1054,119 +1054,304 @@ class Hotel3DSimulator {
     }
 
     // ----------------------------------------------------
-    // BUILD CONNECTED HOTEL ARCHITECTURE
+    // BUILD CONNECTED HOTEL ARCHITECTURE & SUNSET SKY DOME
     // ----------------------------------------------------
+    buildSunsetSkyAndOcean() {
+        // 360-degree Mediterranean Golden Hour Sunset Sky Dome
+        const skyCanvas = document.createElement('canvas');
+        skyCanvas.width = 512;
+        skyCanvas.height = 256;
+        const sctx = skyCanvas.getContext('2d');
+        const skyGrad = sctx.createLinearGradient(0, 0, 0, 256);
+        skyGrad.addColorStop(0.0, '#0d1326');
+        skyGrad.addColorStop(0.28, '#231f42');
+        skyGrad.addColorStop(0.52, '#6b3054');
+        skyGrad.addColorStop(0.72, '#c85a46');
+        skyGrad.addColorStop(0.88, '#f4a261');
+        skyGrad.addColorStop(1.0, '#ffe599');
+        sctx.fillStyle = skyGrad;
+        sctx.fillRect(0, 0, 512, 256);
+
+        // Soft glowing sun disc on the northern horizon
+        const sunGlow = sctx.createRadialGradient(256, 205, 6, 256, 205, 85);
+        sunGlow.addColorStop(0, 'rgba(255, 250, 220, 0.95)');
+        sunGlow.addColorStop(0.4, 'rgba(255, 195, 100, 0.45)');
+        sunGlow.addColorStop(1, 'rgba(255, 140, 60, 0)');
+        sctx.fillStyle = sunGlow;
+        sctx.beginPath();
+        sctx.arc(256, 205, 85, 0, Math.PI * 2);
+        sctx.fill();
+
+        const skyTex = new THREE.CanvasTexture(skyCanvas);
+        const skyDome = new THREE.Mesh(
+            new THREE.SphereGeometry(115, 32, 24),
+            new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false })
+        );
+        this.scene.add(skyDome);
+
+        // Shimmering Mediterranean Sea surrounding the hotel terrace
+        const waterTex = this.getTexture('pool_water');
+        waterTex.repeat.set(18, 12);
+        const seaPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(180, 95),
+            new THREE.MeshStandardMaterial({
+                map: waterTex,
+                color: 0x0e6ba8,
+                roughness: 0.15,
+                metalness: 0.35
+            })
+        );
+        seaPlane.rotation.x = -Math.PI / 2;
+        seaPlane.position.set(0, -1.35, -68);
+        this.scene.add(seaPlane);
+    }
+
+    createWallSconce(x, y, z) {
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
+        const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffe8b0 });
+        const sconce = new THREE.Group();
+        const plate = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.36, 0.08), goldMat);
+        const globe = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 10), bulbMat);
+        globe.position.y = 0.12;
+        sconce.add(plate);
+        sconce.add(globe);
+        sconce.position.set(x, y, z);
+        this.scene.add(sconce);
+    }
+
+    createPalmTree3D(x, y, z, scale = 1.0) {
+        const tree = new THREE.Group();
+        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
+        const leafMat = new THREE.MeshStandardMaterial({ color: 0x1e6b34, roughness: 0.6, side: THREE.DoubleSide });
+        const potMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.75, roughness: 0.25 });
+
+        const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.42 * scale, 0.32 * scale, 0.65 * scale, 14), potMat);
+        pot.position.y = 0.32 * scale;
+        tree.add(pot);
+
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12 * scale, 0.18 * scale, 2.8 * scale, 10), trunkMat);
+        trunk.position.y = 1.7 * scale;
+        tree.add(trunk);
+
+        for (let i = 0; i < 7; i++) {
+            const angle = (i / 7) * Math.PI * 2;
+            const frond = new THREE.Mesh(new THREE.ConeGeometry(0.35 * scale, 1.45 * scale, 5), leafMat);
+            frond.position.set(Math.cos(angle) * 0.55 * scale, 3.05 * scale, Math.sin(angle) * 0.55 * scale);
+            frond.rotation.z = -Math.cos(angle) * 1.1;
+            frond.rotation.x = Math.sin(angle) * 1.1;
+            tree.add(frond);
+        }
+        tree.position.set(x, y, z);
+        this.scene.add(tree);
+    }
+
     buildHotelEnvironment() {
+        this.buildSunsetSkyAndOcean();
+
         const marbleTex = this.getTexture('carrara_marble');
         marbleTex.repeat.set(8, 8);
-        const wallMat = new THREE.MeshStandardMaterial({ color: 0xf5f3ee, roughness: 0.6 });
         const parquetTex = this.getTexture('light_nordic_oak');
         parquetTex.repeat.set(6, 6);
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.88, roughness: 0.2 });
 
-        // 1. GRAND LOBBY FLOOR
-        const lobbyFloorGeo = new THREE.PlaneGeometry(24, 20);
-        const lobbyFloorMat = new THREE.MeshStandardMaterial({ map: marbleTex, roughness: 0.15, metalness: 0.1 });
-        const lobbyFloor = new THREE.Mesh(lobbyFloorGeo, lobbyFloorMat);
+        // 1. GRAND LOBBY FLOOR & COFFERED CEILING
+        const lobbyFloor = new THREE.Mesh(
+            new THREE.PlaneGeometry(24, 20),
+            new THREE.MeshStandardMaterial({ map: marbleTex, roughness: 0.14, metalness: 0.12 })
+        );
         lobbyFloor.rotation.x = -Math.PI / 2;
         lobbyFloor.position.set(0, 0, 0);
         lobbyFloor.receiveShadow = true;
         this.scene.add(lobbyFloor);
 
-        // CEILING
-        const ceilingGeo = new THREE.PlaneGeometry(24, 20);
-        const ceilingMat = new THREE.MeshStandardMaterial({ color: 0x222530, roughness: 0.9 });
-        const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
+        const ceiling = new THREE.Mesh(
+            new THREE.PlaneGeometry(24, 20),
+            new THREE.MeshStandardMaterial({ color: 0x262220, roughness: 0.85 })
+        );
         ceiling.rotation.x = Math.PI / 2;
         ceiling.position.set(0, 5, 0);
         this.scene.add(ceiling);
 
-        // LOBBY WALLS with doorways
-        this.createWall(0, 2.5, 10, 24, 5, 0.4, null, true, [-3, 3]); // South main door
-        this.createWall(0, 2.5, -10, 24, 5, 0.4, null, true, [-2, 2]); // North door to pool
-        this.createWall(-12, 2.5, 0, 0.4, 5, 20, null, true, null, [-2, 2]); // West door to rooms
-        this.createWall(12, 2.5, 0, 0.4, 5, 20, null, true, null, [-3, 3]); // East arch to restaurant
+        // Golden ceiling cornice around Grand Lobby
+        const corniceN = new THREE.Mesh(new THREE.BoxGeometry(24, 0.22, 0.22), goldMat);
+        corniceN.position.set(0, 4.88, -9.85);
+        const corniceS = new THREE.Mesh(new THREE.BoxGeometry(24, 0.22, 0.22), goldMat);
+        corniceS.position.set(0, 4.88, 9.85);
+        this.scene.add(corniceN);
+        this.scene.add(corniceS);
 
-        // LOBBY COLUMNS
+        // Backlit AURELIA PALACE Royal Crest wall behind reception desk
+        const lobbyBackdropTex = this.loadPhotoTexture('assets/scene_lobby_reception.jpg');
+        const lobbyMural = new THREE.Mesh(
+            new THREE.PlaneGeometry(8.5, 3.8),
+            new THREE.MeshBasicMaterial({ map: lobbyBackdropTex })
+        );
+        lobbyMural.position.set(0, 2.5, -9.72);
+        this.scene.add(lobbyMural);
+        const muralFrame = new THREE.Mesh(new THREE.BoxGeometry(8.8, 4.05, 0.08), goldMat);
+        muralFrame.position.set(0, 2.5, -9.76);
+        this.scene.add(muralFrame);
+
+        // LOBBY WALLS with doorways
+        this.createWall(0, 2.5, 10, 24, 5, 0.4, null, true, [-3, 3]); // South main entrance
+        this.createWall(0, 2.5, -10, 24, 5, 0.4, null, true, [-6.5, -3.5]); // North-West promenade door to Pool & Garden
+        this.createWall(-12, 2.5, 0, 0.4, 5, 20, null, true, null, [-2, 2]); // West door to Suite 101
+        this.createWall(12, 2.5, 0, 0.4, 5, 20, null, true, null, [-3, 3]); // East arch to Restaurant
+
+        // LOBBY COLUMNS & PALMS
         [[-6, -4], [6, -4], [-6, 4], [6, 4]].forEach(pos => {
             this.createColumn(pos[0], pos[1]);
         });
+        this.createPalmTree3D(-9.5, 0, 7.5, 0.95);
+        this.createPalmTree3D(9.5, 0, 7.5, 0.95);
+        this.createWallSconce(-5.8, 2.8, -9.7);
+        this.createWallSconce(5.8, 2.8, -9.7);
 
         // 2. WEST WING: CORRIDOR & GUEST SUITE 101
-        const corridorFloorGeo = new THREE.PlaneGeometry(16, 6);
-        const corridorFloor = new THREE.Mesh(corridorFloorGeo, new THREE.MeshStandardMaterial({ map: parquetTex, roughness: 0.3 }));
+        const corridorFloor = new THREE.Mesh(
+            new THREE.PlaneGeometry(16, 6),
+            new THREE.MeshStandardMaterial({ map: parquetTex, roughness: 0.28 })
+        );
         corridorFloor.rotation.x = -Math.PI / 2;
         corridorFloor.position.set(-20, 0, 0);
         corridorFloor.receiveShadow = true;
         this.scene.add(corridorFloor);
 
         this.createWall(-20, 2.25, 3, 16, 4.5, 0.3, null);
-        this.createWall(-20, 2.25, -3, 16, 4.5, 0.3, null, true, [-20, -18]); // Door to 101
+        this.createWall(-20, 2.25, -3, 16, 4.5, 0.3, null, true, [-20.5, -17.5]); // Door to Suite 101
 
         // ROOM 101 (Deluxe Ocean Suite)
-        const suiteFloorGeo = new THREE.PlaneGeometry(14, 15);
-        const suiteFloor = new THREE.Mesh(suiteFloorGeo, new THREE.MeshStandardMaterial({ map: parquetTex, roughness: 0.25 }));
+        const suiteFloor = new THREE.Mesh(
+            new THREE.PlaneGeometry(14, 15),
+            new THREE.MeshStandardMaterial({ map: parquetTex, roughness: 0.22 })
+        );
         suiteFloor.rotation.x = -Math.PI / 2;
         suiteFloor.position.set(-21, 0, -10.5);
         suiteFloor.receiveShadow = true;
         this.scene.add(suiteFloor);
 
+        const suiteCeiling = new THREE.Mesh(
+            new THREE.PlaneGeometry(14, 21),
+            new THREE.MeshStandardMaterial({ color: 0x262220, roughness: 0.85 })
+        );
+        suiteCeiling.rotation.x = Math.PI / 2;
+        suiteCeiling.position.set(-21, 4.5, -7.5);
+        this.scene.add(suiteCeiling);
+
         this.createWall(-28, 2.25, -10.5, 0.3, 4.5, 15, null);
         this.createWall(-14, 2.25, -10.5, 0.3, 4.5, 15, null);
-        this.createWall(-21, 2.25, -18, 14, 4.5, 0.3, null, true, [-24, -18]); // Balcony doors
+        this.createWall(-21, 2.25, -18, 14, 4.5, 0.3, null, true, [-24.5, -17.5]); // Panoramic balcony opening
 
-        const oceanTex = this.loadPhotoTexture('assets/scene_presidential_suite.jpg');
-        const oceanBackdrop = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), new THREE.MeshBasicMaterial({ map: oceanTex }));
-        oceanBackdrop.position.set(-21, 2.5, -18.2);
+        const suiteViewTex = this.loadPhotoTexture('assets/scene_suite_terrace.jpg');
+        const oceanBackdrop = new THREE.Mesh(
+            new THREE.PlaneGeometry(11, 4.3),
+            new THREE.MeshBasicMaterial({ map: suiteViewTex })
+        );
+        oceanBackdrop.position.set(-21, 2.25, -18.25);
         this.scene.add(oceanBackdrop);
 
-        // 3. EAST WING: RIVIERA RESTAURANT & BAR
-        const restFloorGeo = new THREE.PlaneGeometry(18, 20);
-        const restFloorMat = new THREE.MeshStandardMaterial({ map: marbleTex, roughness: 0.2 });
-        const restFloor = new THREE.Mesh(restFloorGeo, restFloorMat);
+        // 3. EAST WING: RIVIERA RESTAURANT & CHAMPAGNE BAR
+        const restFloor = new THREE.Mesh(
+            new THREE.PlaneGeometry(18, 20),
+            new THREE.MeshStandardMaterial({ map: marbleTex, roughness: 0.18 })
+        );
         restFloor.rotation.x = -Math.PI / 2;
         restFloor.position.set(21, 0, 0);
         restFloor.receiveShadow = true;
         this.scene.add(restFloor);
 
+        const restCeiling = new THREE.Mesh(
+            new THREE.PlaneGeometry(18, 20),
+            new THREE.MeshStandardMaterial({ color: 0x241e1c, roughness: 0.85 })
+        );
+        restCeiling.rotation.x = Math.PI / 2;
+        restCeiling.position.set(21, 5, 0);
+        this.scene.add(restCeiling);
+
         this.createWall(30, 2.5, 0, 0.4, 5, 20, null);
         this.createWall(21, 2.5, 10, 18, 5, 0.4, null);
-        this.createWall(21, 2.5, -10, 18, 5, 0.4, null);
+        this.createWall(21, 2.5, -10, 18, 5, 0.4, null, true, [14.5, 18.5]); // Door from Restaurant to Spa & Pool Terrace
 
-        const galaTex = this.loadPhotoTexture('assets/scene_romance_gala.jpg');
-        const galaMural = new THREE.Mesh(new THREE.PlaneGeometry(7, 3.5), new THREE.MeshStandardMaterial({ map: galaTex }));
+        const galaTex = this.loadPhotoTexture('assets/scene_restaurant_pool.jpg');
+        const galaMural = new THREE.Mesh(
+            new THREE.PlaneGeometry(10, 4.2),
+            new THREE.MeshBasicMaterial({ map: galaTex })
+        );
         galaMural.position.set(29.7, 2.5, 0);
         galaMural.rotation.y = -Math.PI / 2;
         this.scene.add(galaMural);
+        const galaFrame = new THREE.Mesh(new THREE.BoxGeometry(0.08, 4.4, 10.3), goldMat);
+        galaFrame.position.set(29.75, 2.5, 0);
+        this.scene.add(galaFrame);
 
-        // 4. OUTDOOR PROMENADE & SWIMMING POOL
-        const poolTerraceGeo = new THREE.PlaneGeometry(42, 22);
-        const stoneMat = new THREE.MeshStandardMaterial({ color: 0xe8e4dc, roughness: 0.6 });
-        const poolTerrace = new THREE.Mesh(poolTerraceGeo, stoneMat);
+        // 4. OUTDOOR PROMENADE: INFINITY POOL, BOTANICAL GARDEN & ZEN SPA PAVILION
+        const poolTerrace = new THREE.Mesh(
+            new THREE.PlaneGeometry(48, 24),
+            new THREE.MeshStandardMaterial({ color: 0xe8e2d5, roughness: 0.45 })
+        );
         poolTerrace.rotation.x = -Math.PI / 2;
-        poolTerrace.position.set(5, 0, -21);
+        poolTerrace.position.set(4, 0, -22);
         poolTerrace.receiveShadow = true;
         this.scene.add(poolTerrace);
 
-        const poolBasinGeo = new THREE.BoxGeometry(16, 2, 8);
-        const poolBasinMat = new THREE.MeshStandardMaterial({ color: 0x003344, roughness: 0.1 });
-        const poolBasin = new THREE.Mesh(poolBasinGeo, poolBasinMat);
+        const poolBasin = new THREE.Mesh(
+            new THREE.BoxGeometry(16, 2, 8),
+            new THREE.MeshStandardMaterial({ color: 0x003344, roughness: 0.1 })
+        );
         poolBasin.position.set(0, -0.8, -22);
         this.scene.add(poolBasin);
 
-        this.createWall(5, 0.6, -32, 42, 1.2, 0.4, null, false);
-        this.createWall(-16, 0.6, -21, 0.4, 1.2, 22, null, false);
-        this.createWall(26, 0.6, -21, 0.4, 1.2, 22, null, false);
+        // Glass & Gold Infinity Terrace Balustrade
+        this.createWall(4, 0.55, -33.5, 48, 1.1, 0.35, null, false);
+        this.createWall(-19.5, 0.55, -22, 0.35, 1.1, 24, null, false);
+        this.createWall(27.5, 0.55, -22, 0.35, 1.1, 24, null, false);
 
-        const exteriorTex = this.loadPhotoTexture('assets/scene_hotel_exterior.jpg');
-        const extMural = new THREE.Mesh(new THREE.PlaneGeometry(35, 14), new THREE.MeshBasicMaterial({ map: exteriorTex }));
-        extMural.position.set(5, 7, -35);
+        // Zen Spa Marble Pavilion pillars around (18, 0, -22)
+        [[14.5, -18.5], [21.5, -18.5], [14.5, -25.5], [21.5, -25.5]].forEach(pos => {
+            this.createColumn(pos[0], pos[1]);
+        });
+        const spaRoof = new THREE.Mesh(
+            new THREE.BoxGeometry(8.2, 0.3, 8.2),
+            new THREE.MeshStandardMaterial({ color: 0xf4efe6, roughness: 0.4 })
+        );
+        spaRoof.position.set(18, 5.05, -22);
+        this.scene.add(spaRoof);
+
+        const spaMuralTex = this.loadPhotoTexture('assets/scene_spa_wellness.jpg');
+        const spaMural = new THREE.Mesh(
+            new THREE.PlaneGeometry(7.2, 3.8),
+            new THREE.MeshBasicMaterial({ map: spaMuralTex })
+        );
+        spaMural.position.set(27.2, 2.4, -22);
+        spaMural.rotation.y = -Math.PI / 2;
+        this.scene.add(spaMural);
+
+        // Botanical Garden Pergola & Cypress/Palm trees around (-12, 0, -22)
+        this.createPalmTree3D(-16.5, 0, -18.5, 1.1);
+        this.createPalmTree3D(-16.5, 0, -25.5, 1.1);
+        const gardenMuralTex = this.loadPhotoTexture('assets/scene_garden_terrace.jpg');
+        const gardenMural = new THREE.Mesh(
+            new THREE.PlaneGeometry(7.2, 3.8),
+            new THREE.MeshBasicMaterial({ map: gardenMuralTex })
+        );
+        gardenMural.position.set(-19.2, 2.4, -22);
+        gardenMural.rotation.y = Math.PI / 2;
+        this.scene.add(gardenMural);
+
+        // Panoramic Monaco Harbor Sunset Backdrop
+        const harborTex = this.loadPhotoTexture('assets/scene_infinity_pool.jpg');
+        const extMural = new THREE.Mesh(
+            new THREE.PlaneGeometry(44, 15),
+            new THREE.MeshBasicMaterial({ map: harborTex })
+        );
+        extMural.position.set(4, 6.8, -36);
         this.scene.add(extMural);
 
         // 5. PENTHOUSE & ELEVATOR
         this.buildPenthouseFloor();
         this.buildStairsAndElevator();
 
-        // 6. ARTWORKS
+        // 6. ARTWORKS & 3D CHARACTER PRESENCES
         this.buildArtGalleries();
 
         // 7. INITIAL RENOVATION MESHES
@@ -1268,9 +1453,10 @@ class Hotel3DSimulator {
 
         this.colliders.push({
             minX: x - 0.5, maxX: x + 0.5,
-            minZ: z - 0.5, maxZ: z + 0.5,
+            minZ: z - 0.5, maxZ: z + depthOfCol(),
             minY: 0, maxY: 5
         });
+        function depthOfCol() { return 0.5; }
     }
 
     buildStairsAndElevator() {
@@ -1331,18 +1517,49 @@ class Hotel3DSimulator {
 
     buildPenthouseFloor() {
         const parquetTex = this.getTexture('light_nordic_oak');
-        const pentFloorGeo = new THREE.PlaneGeometry(24, 24);
-        const pentFloorMat = new THREE.MeshStandardMaterial({ map: parquetTex, roughness: 0.2 });
-        const pentFloor = new THREE.Mesh(pentFloorGeo, pentFloorMat);
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.88, roughness: 0.2 });
+        const pentFloor = new THREE.Mesh(
+            new THREE.PlaneGeometry(24, 24),
+            new THREE.MeshStandardMaterial({ map: parquetTex, roughness: 0.18 })
+        );
         pentFloor.rotation.x = -Math.PI / 2;
         pentFloor.position.set(0, 6.0, 0);
         pentFloor.receiveShadow = true;
         this.scene.add(pentFloor);
 
+        const pentCeiling = new THREE.Mesh(
+            new THREE.PlaneGeometry(24, 24),
+            new THREE.MeshStandardMaterial({ color: 0x1e1b18, roughness: 0.8 })
+        );
+        pentCeiling.rotation.x = Math.PI / 2;
+        pentCeiling.position.set(0, 10.8, 0);
+        this.scene.add(pentCeiling);
+
+        const pentLight = new THREE.PointLight(0xffe0a3, 1.3, 25);
+        pentLight.position.set(0, 9.8, 0);
+        this.scene.add(pentLight);
+
         this.createWall(0, 6.6, 12, 24, 1.2, 0.2, null);
         this.createWall(-12, 6.6, 0, 0.2, 1.2, 24, null);
         this.createWall(12, 6.6, 0, 0.2, 1.2, 24, null);
         this.createWall(0, 8.5, -12, 24, 5.0, 0.3, null);
+
+        // Panoramic Penthouse Mural on North Wall
+        const pentTex = this.loadPhotoTexture('assets/scene_penthouse_piano.jpg');
+        const pentMural = new THREE.Mesh(
+            new THREE.PlaneGeometry(16, 4.2),
+            new THREE.MeshBasicMaterial({ map: pentTex })
+        );
+        pentMural.position.set(0, 8.4, -11.75);
+        this.scene.add(pentMural);
+        const pentFrame = new THREE.Mesh(new THREE.BoxGeometry(16.4, 4.45, 0.08), goldMat);
+        pentFrame.position.set(0, 8.4, -11.8);
+        this.scene.add(pentFrame);
+
+        // Elevator return button on 2nd Floor Penthouse
+        this.createInteractivePoint('elevator_down', 'Asansör: Lobiye İn', new THREE.Vector3(6, 7.2, -10.2), () => {
+            this.toggleFloor();
+        });
     }
 
     buildArtGalleries() {
@@ -1374,9 +1591,10 @@ class Hotel3DSimulator {
 
     // ----------------------------------------------------
     // DYNAMIC 3D RENOVATION BUILDERS (WITH 3 DISTINCT DESIGNS)
+    // Every area has a complete Level 1 unrenovated 3D model
+    // AND detailed multi-part 3D models for Opt A, B, and C!
     // ----------------------------------------------------
     rebuildAllRenovations() {
-        // Clear all previous dynamic meshes
         Object.keys(this.upgradeMeshes).forEach(key => {
             if (this.upgradeMeshes[key]) {
                 this.scene.remove(this.upgradeMeshes[key]);
@@ -1450,7 +1668,6 @@ class Hotel3DSimulator {
         const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.95, roughness: 0.12 });
         const crystalMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 0.9, opacity: 1, transparent: true, roughness: 0.05 });
 
-        // Level 3: Premium golden border trim & warm ambient spotlight
         if (level >= 3) {
             const haloRing = new THREE.Mesh(new THREE.RingGeometry(1.6, 1.85, 32), new THREE.MeshBasicMaterial({
                 color: 0xd4af37,
@@ -1467,7 +1684,6 @@ class Hotel3DSimulator {
             group.add(warmLight);
         }
 
-        // Level 4: Royal Luxury Suite twin golden pedestals with crystal globes
         if (level >= 4) {
             const baseY = (def.pos.y > 5) ? 6.0 : 0.0;
             [-2.2, 2.2].forEach(offsetX => {
@@ -1482,50 +1698,74 @@ class Hotel3DSimulator {
         }
     }
 
-    // 1. RECEPTION DESK 3D (Old vs Opt A vs Opt B vs Opt C)
+    // 1. RECEPTION DESK 3D
     buildReceptionDesk3D(optionId) {
         const group = new THREE.Group();
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.15 });
+
         if (!optionId) {
-            const oldMat = new THREE.MeshStandardMaterial({ color: 0x4a3728, roughness: 0.9 });
-            const desk = new THREE.Mesh(new THREE.BoxGeometry(4.5, 1.1, 1.2), oldMat);
-            desk.position.set(0, 0.55, -4);
+            // Level 1: Weathered wooden reception desk with old ledger & dusty lamp
+            const oldMat = new THREE.MeshStandardMaterial({ color: 0x4a3728, roughness: 0.92 });
+            const desk = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.05, 1.15), oldMat);
+            desk.position.set(0, 0.52, -4);
             group.add(desk);
-        } else if (optionId === 'opt_a') {
-            const oakTex = this.getTexture('light_nordic_oak');
-            const desk = new THREE.Mesh(new THREE.BoxGeometry(5.0, 1.15, 1.3), new THREE.MeshStandardMaterial({ map: oakTex, roughness: 0.3 }));
+            const top = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.08, 1.25), new THREE.MeshStandardMaterial({ color: 0x36261a, roughness: 0.95 }));
+            top.position.set(0, 1.08, -4);
+            group.add(top);
+            const ledger = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.06, 0.4), new THREE.MeshStandardMaterial({ color: 0x5c1a1a }));
+            ledger.position.set(0.6, 1.15, -3.8);
+            group.add(ledger);
+        } else {
+            let bodyMat, topMat, sofaColor;
+            if (optionId === 'opt_a') {
+                bodyMat = new THREE.MeshStandardMaterial({ map: this.getTexture('light_nordic_oak'), roughness: 0.3 });
+                topMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 0.85, opacity: 1, transparent: true, roughness: 0.08 });
+                sofaColor = 0xe2d9c8;
+            } else if (optionId === 'opt_b') {
+                bodyMat = new THREE.MeshStandardMaterial({ map: this.getTexture('nero_marble'), roughness: 0.12 });
+                topMat = goldMat;
+                sofaColor = 0x7a0c1a;
+            } else {
+                bodyMat = new THREE.MeshStandardMaterial({ map: this.getTexture('carrara_marble'), roughness: 0.15 });
+                topMat = goldMat;
+                sofaColor = 0x0f5132;
+            }
+
+            const desk = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1.15, 1.4), bodyMat);
             desk.position.set(0, 0.58, -4);
             group.add(desk);
-            const glass = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.06, 1.4), new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 0.9, opacity: 1, transparent: true, roughness: 0.05 }));
-            glass.position.set(0, 1.18, -4);
-            group.add(glass);
-            const strip = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.04, 0.04), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-            strip.position.set(0, 0.05, -3.34);
-            group.add(strip);
-        } else if (optionId === 'opt_b') {
-            const neroTex = this.getTexture('nero_marble');
-            const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.15 });
-            const desk = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1.2, 1.4), new THREE.MeshStandardMaterial({ map: neroTex, roughness: 0.1 }));
-            desk.position.set(0, 0.6, -4);
-            group.add(desk);
-            const trim = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.1, 1.5), goldMat);
-            trim.position.set(0, 1.25, -4);
-            group.add(trim);
-            const comp = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 0.1), new THREE.MeshStandardMaterial({ color: 0x111111 }));
-            comp.position.set(0, 1.55, -4);
+
+            const counterTop = new THREE.Mesh(new THREE.BoxGeometry(5.45, 0.1, 1.55), topMat);
+            counterTop.position.set(0, 1.2, -4);
+            group.add(counterTop);
+
+            const baseTrim = new THREE.Mesh(new THREE.BoxGeometry(5.3, 0.08, 1.46), goldMat);
+            baseTrim.position.set(0, 0.04, -4);
+            group.add(baseTrim);
+
+            // Concierge iMac terminal & golden desk lamp
+            const comp = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.48, 0.06), new THREE.MeshStandardMaterial({ color: 0x11131a, metalness: 0.6 }));
+            comp.position.set(0, 1.5, -4);
             group.add(comp);
-            const lampLight = new THREE.PointLight(0xffeedd, 0.8, 4);
-            lampLight.position.set(-1.8, 1.6, -4);
-            group.add(lampLight);
-        } else if (optionId === 'opt_c') {
-            const whiteTex = this.getTexture('carrara_marble');
-            const brassMat = new THREE.MeshStandardMaterial({ color: 0xc5a059, metalness: 0.85, roughness: 0.2 });
-            const desk = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1.2, 1.4), new THREE.MeshStandardMaterial({ map: whiteTex, roughness: 0.15 }));
-            desk.position.set(0, 0.6, -4);
-            group.add(desk);
-            [-2.4, 2.4].forEach(x => {
-                const pil = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1.2, 12), brassMat);
-                pil.position.set(x, 0.6, -3.3);
-                group.add(pil);
+
+            [-1.9, 1.9].forEach(lx => {
+                const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.08, 0.38, 10), goldMat);
+                stem.position.set(lx, 1.44, -3.7);
+                const shade = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.22, 14), new THREE.MeshBasicMaterial({ color: 0xfff3c4 }));
+                shade.position.set(lx, 1.66, -3.7);
+                group.add(stem);
+                group.add(shade);
+            });
+
+            // Twin VIP Lobby Waiting Sofas flanking the lobby
+            const sofaMat = new THREE.MeshStandardMaterial({ color: sofaColor, roughness: 0.65 });
+            [-8.5, 8.5].forEach(sx => {
+                const seat = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.45, 3.2), sofaMat);
+                seat.position.set(sx, 0.25, 0);
+                const back = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.95, 3.2), sofaMat);
+                back.position.set(sx + (sx < 0 ? -0.5 : 0.5), 0.5, 0);
+                group.add(seat);
+                group.add(back);
             });
         }
         return group;
@@ -1534,25 +1774,45 @@ class Hotel3DSimulator {
     // 2. LOBBY CARPET 3D
     buildLobbyCarpet3D(optionId) {
         const group = new THREE.Group();
-        if (optionId === 'opt_a') {
-            const carpet = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 14), new THREE.MeshStandardMaterial({ color: 0x222633, roughness: 0.85 }));
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.18 });
+
+        if (!optionId) {
+            // Level 1: Faded worn grey-brown runner rug
+            const wornMat = new THREE.MeshStandardMaterial({ color: 0x5c5346, roughness: 0.95 });
+            const rug = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 11), wornMat);
+            rug.rotation.x = -Math.PI / 2;
+            rug.position.set(0, 0.012, 2);
+            group.add(rug);
+        } else {
+            let carpetMat;
+            if (optionId === 'opt_a') {
+                carpetMat = new THREE.MeshStandardMaterial({ color: 0x222634, roughness: 0.8 });
+            } else if (optionId === 'opt_b') {
+                const tex = this.getTexture('velvet_carpet');
+                tex.repeat.set(1, 4);
+                carpetMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8 });
+            } else {
+                const tex = this.getTexture('emerald_velvet');
+                tex.repeat.set(1, 4);
+                carpetMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8 });
+            }
+
+            const carpet = new THREE.Mesh(new THREE.PlaneGeometry(3.8, 14), carpetMat);
             carpet.rotation.x = -Math.PI / 2;
             carpet.position.set(0, 0.015, 2);
             group.add(carpet);
-        } else if (optionId === 'opt_b') {
-            const carpetTex = this.getTexture('velvet_carpet');
-            carpetTex.repeat.set(1, 4);
-            const carpet = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 14), new THREE.MeshStandardMaterial({ map: carpetTex, roughness: 0.85 }));
-            carpet.rotation.x = -Math.PI / 2;
-            carpet.position.set(0, 0.015, 2);
-            group.add(carpet);
-        } else if (optionId === 'opt_c') {
-            const emeraldTex = this.getTexture('emerald_velvet');
-            emeraldTex.repeat.set(1, 4);
-            const carpet = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 14), new THREE.MeshStandardMaterial({ map: emeraldTex, roughness: 0.85 }));
-            carpet.rotation.x = -Math.PI / 2;
-            carpet.position.set(0, 0.015, 2);
-            group.add(carpet);
+
+            // Golden VIP Stanchion Posts along the ceremonial carpet
+            [-1.5, 2.5, 6.5].forEach(zPos => {
+                [-2.1, 2.1].forEach(xPos => {
+                    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.95, 10), goldMat);
+                    post.position.set(xPos, 0.48, zPos);
+                    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), goldMat);
+                    ball.position.set(xPos, 0.98, zPos);
+                    group.add(post);
+                    group.add(ball);
+                });
+            });
         }
         return group;
     }
@@ -1563,42 +1823,47 @@ class Hotel3DSimulator {
         const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.95, roughness: 0.1 });
 
         if (!optionId) {
-            const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.5), goldMat);
-            cord.position.set(0, 4.25, -1);
+            const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.4), new THREE.MeshStandardMaterial({ color: 0x444444 }));
+            cord.position.set(0, 4.3, -1);
             group.add(cord);
-            const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.12), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-            bulb.position.set(0, 3.5, -1);
+            const shade = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.25, 12), new THREE.MeshStandardMaterial({ color: 0x554433 }));
+            shade.position.set(0, 3.6, -1);
+            group.add(shade);
+            const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.12), new THREE.MeshBasicMaterial({ color: 0xffddaa }));
+            bulb.position.set(0, 3.45, -1);
             group.add(bulb);
         } else if (optionId === 'opt_a') {
-            const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.04, 16, 32), new THREE.MeshBasicMaterial({ color: 0xffeedd }));
-            ring1.rotation.x = Math.PI / 2.3;
-            ring1.position.set(0, 3.8, -1);
-            group.add(ring1);
-            const ring2 = new THREE.Mesh(new THREE.TorusGeometry(0.8, 0.03, 16, 32), new THREE.MeshBasicMaterial({ color: 0xffeedd }));
-            ring2.rotation.x = -Math.PI / 2.5;
-            ring2.position.set(0, 3.4, -1);
-            group.add(ring2);
+            [1.45, 1.0, 0.55].forEach((r, idx) => {
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.045, 16, 36), new THREE.MeshBasicMaterial({ color: 0xfff3d1 }));
+                ring.rotation.x = Math.PI / 2.2;
+                ring.position.set(0, 4.0 - idx * 0.35, -1);
+                group.add(ring);
+            });
         } else if (optionId === 'opt_b') {
-            const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.2), goldMat);
-            stem.position.set(0, 4.4, -1);
+            const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.3), goldMat);
+            stem.position.set(0, 4.35, -1);
             group.add(stem);
-            const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.08, 12, 24), goldMat);
-            ring1.rotation.x = Math.PI / 2;
-            ring1.position.set(0, 3.8, -1);
-            group.add(ring1);
-            const glassMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 0.9, opacity: 1, transparent: true, roughness: 0.05, ior: 1.6 });
-            for (let i = 0; i < 16; i++) {
-                const angle = (i / 16) * Math.PI * 2;
-                const prism = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.4, 6), glassMat);
-                prism.position.set(Math.cos(angle) * 1.4, 3.5, -1 + Math.sin(angle) * 1.4);
-                group.add(prism);
-            }
+            const glassMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 0.9, opacity: 1, transparent: true, roughness: 0.05 });
+            [1.45, 0.9].forEach((radius, tierIdx) => {
+                const y = 3.9 - tierIdx * 0.45;
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.07, 12, 28), goldMat);
+                ring.rotation.x = Math.PI / 2;
+                ring.position.set(0, y, -1);
+                group.add(ring);
+                const count = tierIdx === 0 ? 16 : 10;
+                for (let i = 0; i < count; i++) {
+                    const angle = (i / count) * Math.PI * 2;
+                    const prism = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.42, 6), glassMat);
+                    prism.position.set(Math.cos(angle) * radius, y - 0.25, -1 + Math.sin(angle) * radius);
+                    group.add(prism);
+                }
+            });
         } else if (optionId === 'opt_c') {
-            for (let i = 0; i < 20; i++) {
-                const angle = (i / 20) * Math.PI * 2;
-                const r = (i % 2 === 0 ? 1.2 : 0.8);
-                const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.9, 12), goldMat);
-                tube.position.set(Math.cos(angle) * r, 3.6, -1 + Math.sin(angle) * r);
+            for (let i = 0; i < 24; i++) {
+                const angle = (i / 24) * Math.PI * 2;
+                const r = (i % 2 === 0 ? 1.25 : 0.75);
+                const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.0, 12), goldMat);
+                tube.position.set(Math.cos(angle) * r, 3.65, -1 + Math.sin(angle) * r);
                 group.add(tube);
             }
         }
@@ -1608,75 +1873,123 @@ class Hotel3DSimulator {
     // 4. ROOM 101 BED 3D
     buildRoom101Bed3D(optionId) {
         const group = new THREE.Group();
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
+
         if (!optionId) {
-            const frame = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.4, 3.5), new THREE.MeshStandardMaterial({ color: 0x555555 }));
+            // Level 1: Old iron bed frame, thin grey mattress & single pillow
+            const frame = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.35, 3.5), new THREE.MeshStandardMaterial({ color: 0x4a4542, roughness: 0.9 }));
             frame.position.set(-19, 0.2, -12);
             group.add(frame);
-        } else if (optionId === 'opt_a') {
-            const oakTex = this.getTexture('light_nordic_oak');
-            const bedBase = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.5, 3.8), new THREE.MeshStandardMaterial({ map: oakTex, roughness: 0.3 }));
-            bedBase.position.set(-19, 0.25, -12);
+            const oldHead = new THREE.Mesh(new THREE.BoxGeometry(3.0, 1.4, 0.15), new THREE.MeshStandardMaterial({ color: 0x3a3532 }));
+            oldHead.position.set(-19, 0.7, -13.7);
+            group.add(oldHead);
+            const mat = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.25, 3.2), new THREE.MeshStandardMaterial({ color: 0x99958e }));
+            mat.position.set(-19, 0.45, -11.9);
+            group.add(mat);
+        } else {
+            let baseMat, headMat, quiltColor;
+            if (optionId === 'opt_a') {
+                baseMat = new THREE.MeshStandardMaterial({ map: this.getTexture('light_nordic_oak'), roughness: 0.3 });
+                headMat = new THREE.MeshStandardMaterial({ color: 0xe6dec8, roughness: 0.7 });
+                quiltColor = 0xfaf8f5;
+            } else if (optionId === 'opt_b') {
+                baseMat = new THREE.MeshStandardMaterial({ color: 0x2b180d, roughness: 0.25 });
+                headMat = goldMat;
+                quiltColor = 0xfff8e7;
+            } else {
+                baseMat = new THREE.MeshStandardMaterial({ color: 0x3a2012, roughness: 0.3 });
+                headMat = new THREE.MeshStandardMaterial({ color: 0x7a0c1a, roughness: 0.75 });
+                quiltColor = 0xd4af37;
+            }
+
+            // Plush bedroom rug under bed
+            const rug = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 4.6), new THREE.MeshStandardMaterial({ color: 0x2b2320, roughness: 0.9 }));
+            rug.rotation.x = -Math.PI / 2;
+            rug.position.set(-19, 0.015, -11.8);
+            group.add(rug);
+
+            const bedBase = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.55, 3.8), baseMat);
+            bedBase.position.set(-19, 0.28, -12);
             group.add(bedBase);
-            const quilt = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.35, 3.2), new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.9 }));
-            quilt.position.set(-19, 0.65, -11.7);
-            group.add(quilt);
-        } else if (optionId === 'opt_b') {
-            const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
-            const bedBase = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.7, 3.8), new THREE.MeshStandardMaterial({ color: 0x2b180d, roughness: 0.3 }));
-            bedBase.position.set(-19, 0.35, -12);
-            group.add(bedBase);
-            const quilt = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.3, 3.2), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }));
-            quilt.position.set(-19, 0.85, -11.7);
-            group.add(quilt);
-            [[-20.6, -13.8], [-17.4, -13.8], [-20.6, -10.2], [-17.4, -10.2]].forEach(pos => {
-                const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 3.5), goldMat);
-                post.position.set(pos[0], 1.75, pos[1]);
-                group.add(post);
-            });
-            const topFrame = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.08, 3.7), goldMat);
-            topFrame.position.set(-19, 3.5, -12);
-            group.add(topFrame);
-        } else if (optionId === 'opt_c') {
-            const bedBase = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.7, 3.8), new THREE.MeshStandardMaterial({ color: 0x3a2012, roughness: 0.3 }));
-            bedBase.position.set(-19, 0.35, -12);
-            group.add(bedBase);
-            const head = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.5, 0.25), new THREE.MeshStandardMaterial({ color: 0x7a0c1a, roughness: 0.8 }));
-            head.position.set(-19, 1.5, -13.8);
+
+            const head = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.3, 0.25), headMat);
+            head.position.set(-19, 1.25, -13.85);
             group.add(head);
-            const quilt = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.3, 3.2), new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.6 }));
-            quilt.position.set(-19, 0.85, -11.7);
+
+            const quilt = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.35, 3.2), new THREE.MeshStandardMaterial({ color: quiltColor, roughness: 0.7 }));
+            quilt.position.set(-19, 0.72, -11.7);
             group.add(quilt);
+
+            // 4 Luxury Pillows
+            [-19.8, -18.2].forEach(px => {
+                const pillow = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.24, 0.65), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 }));
+                pillow.position.set(px, 0.98, -13.2);
+                pillow.rotation.x = 0.2;
+                group.add(pillow);
+            });
+
+            // Twin Nightstands & Warm Lamps
+            [-21.3, -16.7].forEach(nx => {
+                const stand = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.65, 0.75), baseMat);
+                stand.position.set(nx, 0.33, -13.4);
+                const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 0.35, 12), new THREE.MeshBasicMaterial({ color: 0xffe4b5 }));
+                lamp.position.set(nx, 0.85, -13.4);
+                group.add(stand);
+                group.add(lamp);
+            });
+
+            // 4-Poster Royal Canopy for Option B
+            if (optionId === 'opt_b') {
+                [[-20.6, -13.8], [-17.4, -13.8], [-20.6, -10.2], [-17.4, -10.2]].forEach(pos => {
+                    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 3.5), goldMat);
+                    post.position.set(pos[0], 1.75, pos[1]);
+                    group.add(post);
+                });
+                const topFrame = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.1, 3.8), goldMat);
+                topFrame.position.set(-19, 3.5, -12);
+                group.add(topFrame);
+            }
         }
         return group;
     }
 
-    // 5. ROOM 101 DECOR 3D
+    // 5. ROOM 101 DECOR & TERRACE LOUNGE 3D
     buildRoom101Decor3D(optionId) {
         const group = new THREE.Group();
-        if (optionId === 'opt_a') {
-            const mat = new THREE.MeshStandardMaterial({ color: 0x4a5568, roughness: 0.5 });
-            const chair1 = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.8, 1.0), mat);
-            chair1.position.set(-22, 0.4, -7);
-            const chair2 = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.8, 1.0), mat);
-            chair2.position.set(-20, 0.4, -7);
-            group.add(chair1); group.add(chair2);
-        } else if (optionId === 'opt_b') {
-            const emeraldMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.7 });
-            const chair1 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.9, 1.1), emeraldMat);
-            chair1.position.set(-22, 0.45, -7);
-            const chair2 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.9, 1.1), emeraldMat);
-            chair2.position.set(-20, 0.45, -7);
-            group.add(chair1); group.add(chair2);
-            const table = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.5, 16), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85 }));
-            table.position.set(-21, 0.25, -7);
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.88, roughness: 0.2 });
+
+        if (!optionId) {
+            // Level 1: Weathered wooden stools & old crate table
+            const oldWood = new THREE.MeshStandardMaterial({ color: 0x594a3c, roughness: 0.95 });
+            [-22.2, -19.8].forEach(cx => {
+                const stool = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.5, 0.85), oldWood);
+                stool.position.set(cx, 0.25, -7);
+                group.add(stool);
+            });
+            const crate = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.42, 0.9), oldWood);
+            crate.position.set(-21, 0.21, -7);
+            group.add(crate);
+        } else {
+            const chairColor = optionId === 'opt_a' ? 0x64748b : (optionId === 'opt_b' ? 0x14532d : 0xc89d66);
+            const chairMat = new THREE.MeshStandardMaterial({ color: chairColor, roughness: 0.65 });
+
+            [-22.3, -19.7].forEach(cx => {
+                const seat = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.45, 1.15), chairMat);
+                seat.position.set(cx, 0.25, -7);
+                const back = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.95, 0.25), chairMat);
+                back.position.set(cx, 0.55, -7.45);
+                group.add(seat);
+                group.add(back);
+            });
+
+            const table = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.48, 20), goldMat);
+            table.position.set(-21, 0.24, -6.8);
             group.add(table);
-        } else if (optionId === 'opt_c') {
-            const wickerMat = new THREE.MeshStandardMaterial({ color: 0xc89d66, roughness: 0.9 });
-            const chair1 = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.5, 0.8, 16), wickerMat);
-            chair1.position.set(-22, 0.4, -7);
-            const chair2 = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.5, 0.8, 16), wickerMat);
-            chair2.position.set(-20, 0.4, -7);
-            group.add(chair1); group.add(chair2);
+
+            // Silver Champagne Bucket on the coffee table
+            const bucket = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.14, 0.3, 14), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.15 }));
+            bucket.position.set(-21, 0.62, -6.8);
+            group.add(bucket);
         }
         return group;
     }
@@ -1684,33 +1997,54 @@ class Hotel3DSimulator {
     // 6. RESTAURANT BAR 3D
     buildRestaurantBar3D(optionId) {
         const group = new THREE.Group();
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
+
         if (!optionId) {
-            const oldBar = new THREE.Mesh(new THREE.BoxGeometry(6, 1.2, 1.2), new THREE.MeshStandardMaterial({ color: 0x443322 }));
-            oldBar.position.set(20, 0.6, -6);
+            const oldBar = new THREE.Mesh(new THREE.BoxGeometry(6.2, 1.15, 1.2), new THREE.MeshStandardMaterial({ color: 0x443322, roughness: 0.9 }));
+            oldBar.position.set(20, 0.58, -6);
             group.add(oldBar);
-        } else if (optionId === 'opt_a') {
-            const bar = new THREE.Mesh(new THREE.BoxGeometry(7.0, 1.2, 1.5), new THREE.MeshStandardMaterial({ color: 0xcc7722, roughness: 0.2, emissive: 0x552200 }));
-            bar.position.set(20, 0.6, -6);
-            group.add(bar);
-        } else if (optionId === 'opt_b') {
-            const marbleTex = this.getTexture('carrara_marble');
-            const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
-            const bar = new THREE.Mesh(new THREE.BoxGeometry(7.0, 1.2, 1.5), new THREE.MeshStandardMaterial({ map: marbleTex, roughness: 0.15 }));
-            bar.position.set(20, 0.6, -6);
-            group.add(bar);
-            const rail = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.1, 1.7), goldMat);
-            rail.position.set(20, 1.25, -6);
-            group.add(rail);
-            for (let x = 17.5; x <= 22.5; x += 1.4) {
-                const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.8, 12), goldMat);
-                stool.position.set(x, 0.4, -4.7);
-                group.add(stool);
+        } else {
+            let barMat;
+            if (optionId === 'opt_a') {
+                barMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.2, emissive: 0x451a03 });
+            } else if (optionId === 'opt_b') {
+                barMat = new THREE.MeshStandardMaterial({ map: this.getTexture('carrara_marble'), roughness: 0.15 });
+            } else {
+                barMat = new THREE.MeshStandardMaterial({ map: this.getTexture('dark_walnut'), roughness: 0.3 });
             }
-        } else if (optionId === 'opt_c') {
-            const walnutTex = this.getTexture('dark_walnut');
-            const bar = new THREE.Mesh(new THREE.BoxGeometry(7.0, 1.2, 1.5), new THREE.MeshStandardMaterial({ map: walnutTex, roughness: 0.3 }));
-            bar.position.set(20, 0.6, -6);
+
+            const bar = new THREE.Mesh(new THREE.BoxGeometry(7.2, 1.18, 1.45), barMat);
+            bar.position.set(20, 0.59, -6);
             group.add(bar);
+
+            const top = new THREE.Mesh(new THREE.BoxGeometry(7.45, 0.1, 1.65), goldMat);
+            top.position.set(20, 1.23, -6);
+            group.add(top);
+
+            // Illuminated Back-Bar Bottle Display Cabinet
+            const backCabinet = new THREE.Mesh(new THREE.BoxGeometry(6.8, 2.8, 0.45), new THREE.MeshStandardMaterial({ color: 0x1e1612, roughness: 0.4 }));
+            backCabinet.position.set(20, 1.8, -9.4);
+            group.add(backCabinet);
+
+            const bottleColors = [0x15803d, 0xb45309, 0x991b1b, 0x1d4ed8, 0xd4af37];
+            for (let bx = 17.2; bx <= 22.8; bx += 0.7) {
+                const bottle = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.07, 0.08, 0.38, 10),
+                    new THREE.MeshStandardMaterial({ color: bottleColors[Math.floor(Math.abs(bx * 3)) % bottleColors.length], roughness: 0.15, metalness: 0.3 })
+                );
+                bottle.position.set(bx, 1.65, -9.1);
+                group.add(bottle);
+            }
+
+            // 5 Luxury Barstools
+            for (let x = 17.2; x <= 22.8; x += 1.4) {
+                const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 0.75, 10), goldMat);
+                leg.position.set(x, 0.38, -4.65);
+                const cushion = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.12, 16), new THREE.MeshStandardMaterial({ color: 0x7a0c1a, roughness: 0.6 }));
+                cushion.position.set(x, 0.78, -4.65);
+                group.add(leg);
+                group.add(cushion);
+            }
         }
         return group;
     }
@@ -1718,29 +2052,65 @@ class Hotel3DSimulator {
     // 7. RESTAURANT TABLES 3D
     buildRestaurantTables3D(optionId) {
         const group = new THREE.Group();
-        if (optionId) {
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.88, roughness: 0.2 });
+        const tablePositions = [[17, 3.2], [22.5, 3.2], [17, -1.2], [22.5, -1.2]];
+
+        if (!optionId) {
+            // Level 1: 4 scratched old square wooden tables & simple stools
+            const oldWood = new THREE.MeshStandardMaterial({ color: 0x4d3b2c, roughness: 0.92 });
+            tablePositions.forEach(pos => {
+                const t = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.82, 1.3), oldWood);
+                t.position.set(pos[0], 0.41, pos[1]);
+                group.add(t);
+                [[-0.95, 0], [0.95, 0]].forEach(off => {
+                    const s = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.48, 0.45), oldWood);
+                    s.position.set(pos[0] + off[0], 0.24, pos[1] + off[1]);
+                    group.add(s);
+                });
+            });
+        } else {
             let tableMat, chairMat;
             if (optionId === 'opt_a') {
-                tableMat = new THREE.MeshStandardMaterial({ color: 0xd8b98b, roughness: 0.4 });
-                chairMat = new THREE.MeshStandardMaterial({ color: 0x4a5568, roughness: 0.6 });
+                tableMat = new THREE.MeshStandardMaterial({ color: 0xd8b98b, roughness: 0.35 });
+                chairMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
             } else if (optionId === 'opt_b') {
-                const neroTex = this.getTexture('nero_marble');
-                tableMat = new THREE.MeshStandardMaterial({ map: neroTex, roughness: 0.1 });
-                chairMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.7 });
+                tableMat = new THREE.MeshStandardMaterial({ map: this.getTexture('nero_marble'), roughness: 0.12 });
+                chairMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.65 });
             } else {
-                tableMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
-                chairMat = new THREE.MeshStandardMaterial({ color: 0x7a0c1a, roughness: 0.7 });
+                tableMat = new THREE.MeshStandardMaterial({ color: 0xfaf8f5, roughness: 0.3 });
+                chairMat = new THREE.MeshStandardMaterial({ color: 0x7a0c1a, roughness: 0.65 });
             }
 
-            [[17, 3], [22, 3], [17, -1], [22, -1]].forEach(pos => {
-                const t = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.9, 16), tableMat);
-                t.position.set(pos[0], 0.45, pos[1]);
-                group.add(t);
-                const c1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, 0.5), chairMat);
-                c1.position.set(pos[0] - 0.9, 0.4, pos[1]);
-                const c2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, 0.5), chairMat);
-                c2.position.set(pos[0] + 0.9, 0.4, pos[1]);
-                group.add(c1); group.add(c2);
+            tablePositions.forEach(pos => {
+                const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.38, 0.85, 14), goldMat);
+                ped.position.set(pos[0], 0.42, pos[1]);
+                const top = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.08, 24), tableMat);
+                top.position.set(pos[0], 0.88, pos[1]);
+                group.add(ped);
+                group.add(top);
+
+                // Candle & Rose centerpiece on every table
+                const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.26, 10), new THREE.MeshBasicMaterial({ color: 0xffe4a0 }));
+                candle.position.set(pos[0], 1.04, pos[1]);
+                group.add(candle);
+
+                // 4 Chairs with Backrests around each table
+                [[-1.15, 0], [1.15, 0], [0, -1.15], [0, 1.15]].forEach(off => {
+                    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.46, 0.52), chairMat);
+                    seat.position.set(pos[0] + off[0], 0.23, pos[1] + off[1]);
+                    const back = new THREE.Mesh(new THREE.BoxGeometry(
+                        off[0] !== 0 ? 0.12 : 0.52,
+                        0.52,
+                        off[1] !== 0 ? 0.12 : 0.52
+                    ), chairMat);
+                    back.position.set(
+                        pos[0] + off[0] * 1.18,
+                        0.68,
+                        pos[1] + off[1] * 1.18
+                    );
+                    group.add(seat);
+                    group.add(back);
+                });
             });
         }
         return group;
@@ -1749,10 +2119,12 @@ class Hotel3DSimulator {
     // 8. SWIMMING POOL 3D
     buildSwimmingPool3D(optionId) {
         const group = new THREE.Group();
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.2 });
+
         if (!optionId) {
-            const dry = new THREE.Mesh(new THREE.PlaneGeometry(15, 7), new THREE.MeshStandardMaterial({ color: 0x334444, roughness: 0.9 }));
+            const dry = new THREE.Mesh(new THREE.PlaneGeometry(15, 7), new THREE.MeshStandardMaterial({ color: 0x3b444b, roughness: 0.92 }));
             dry.rotation.x = -Math.PI / 2;
-            dry.position.set(0, -0.6, -22);
+            dry.position.set(0, -0.55, -22);
             group.add(dry);
         } else {
             let waterColor = 0x00f0ff;
@@ -1761,18 +2133,40 @@ class Hotel3DSimulator {
 
             const waterTex = this.getTexture('pool_water');
             const water = new THREE.Mesh(
-                new THREE.PlaneGeometry(15.2, 7.2),
-                new THREE.MeshPhysicalMaterial({ map: waterTex, color: waterColor, transparent: true, opacity: 0.85, roughness: 0.1 })
+                new THREE.PlaneGeometry(15.4, 7.4),
+                new THREE.MeshPhysicalMaterial({ map: waterTex, color: waterColor, transparent: true, opacity: 0.88, roughness: 0.08 })
             );
             water.rotation.x = -Math.PI / 2;
-            water.position.set(0, -0.1, -22);
+            water.position.set(0, -0.06, -22);
             group.add(water);
 
+            // Golden / Marble Pool Coping Border
+            const rim = new THREE.Mesh(new THREE.BoxGeometry(16.4, 0.12, 8.4), optionId === 'opt_b' ? goldMat : new THREE.MeshStandardMaterial({ color: 0xf4efe6 }));
+            rim.position.set(0, -0.02, -22);
+            group.add(rim);
+
+            // 4 Sun Loungers with Angled Headrests + 2 Riviera Sun Umbrellas
             const bedMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
-            [-5, -2, 2, 5].forEach(x => {
-                const lounger = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.35, 2.2), bedMat);
-                lounger.position.set(x, 0.2, -16.5);
+            [-5.2, -2.0, 2.0, 5.2].forEach(x => {
+                const lounger = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.32, 2.1), bedMat);
+                lounger.position.set(x, 0.18, -16.4);
+                const headrest = new THREE.Mesh(new THREE.BoxGeometry(1.12, 0.15, 0.65), bedMat);
+                headrest.position.set(x, 0.42, -15.6);
+                headrest.rotation.x = -0.45;
                 group.add(lounger);
+                group.add(headrest);
+            });
+
+            [-3.6, 3.6].forEach(ux => {
+                const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.5, 10), goldMat);
+                pole.position.set(ux, 1.25, -16.2);
+                const canopy = new THREE.Mesh(
+                    new THREE.ConeGeometry(1.65, 0.55, 16),
+                    new THREE.MeshStandardMaterial({ color: optionId === 'opt_b' ? 0x7a0c1a : 0x1e3a8a, roughness: 0.6 })
+                );
+                canopy.position.set(ux, 2.5, -16.2);
+                group.add(pole);
+                group.add(canopy);
             });
         }
         return group;
@@ -1781,20 +2175,39 @@ class Hotel3DSimulator {
     // 9. SPA JACUZZI 3D
     buildSpaJacuzzi3D(optionId) {
         const group = new THREE.Group();
-        if (optionId) {
-            let tubMat;
-            if (optionId === 'opt_a') tubMat = new THREE.MeshStandardMaterial({ color: 0xc89d66, roughness: 0.8 });
-            else if (optionId === 'opt_b') tubMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15 });
-            else tubMat = new THREE.MeshStandardMaterial({ color: 0xd8c29d, roughness: 0.6 });
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.2 });
 
-            const tub = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.0, 1.0, 24), tubMat);
-            tub.position.set(18, 0.5, -22);
+        if (!optionId) {
+            // Level 1: Empty unrenovated stone spa basin
+            const oldTub = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.0, 0.75, 20), new THREE.MeshStandardMaterial({ color: 0x64686e, roughness: 0.92 }));
+            oldTub.position.set(18, 0.38, -22);
+            group.add(oldTub);
+        } else {
+            let tubMat;
+            if (optionId === 'opt_a') tubMat = new THREE.MeshStandardMaterial({ color: 0xc89d66, roughness: 0.7 });
+            else if (optionId === 'opt_b') tubMat = new THREE.MeshStandardMaterial({ map: this.getTexture('carrara_marble'), roughness: 0.15 });
+            else tubMat = new THREE.MeshStandardMaterial({ map: this.getTexture('gold_mosaic'), roughness: 0.3 });
+
+            const tub = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.1, 0.95, 28), tubMat);
+            tub.position.set(18, 0.48, -22);
             group.add(tub);
 
-            const water = new THREE.Mesh(new THREE.CircleGeometry(1.9, 24), new THREE.MeshStandardMaterial({ color: 0x00d2ff, roughness: 0.1 }));
+            const water = new THREE.Mesh(new THREE.CircleGeometry(2.0, 28), new THREE.MeshStandardMaterial({ color: 0x22d3ee, roughness: 0.08, emissive: 0x064e3b }));
             water.rotation.x = -Math.PI / 2;
-            water.position.set(18, 0.85, -22);
+            water.position.set(18, 0.98, -22);
             group.add(water);
+
+            // Spa Massage Daybeds & Candle Lanterns
+            [-2.8, 2.8].forEach(ox => {
+                const bed = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.4, 2.0), new THREE.MeshStandardMaterial({ color: 0xf5efe6, roughness: 0.5 }));
+                bed.position.set(18 + ox, 0.2, -25.2);
+                group.add(bed);
+            });
+            [[15.5, -19.8], [20.5, -19.8]].forEach(lp => {
+                const lantern = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.5, 0.28), goldMat);
+                lantern.position.set(lp[0], 0.25, lp[1]);
+                group.add(lantern);
+            });
         }
         return group;
     }
@@ -1806,6 +2219,9 @@ class Hotel3DSimulator {
             const dryBasin = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.4, 0.4, 16), new THREE.MeshStandardMaterial({ color: 0x6b655e, roughness: 0.95 }));
             dryBasin.position.set(-12, 0.2, -22);
             group.add(dryBasin);
+            const oldPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.4, 0.9, 12), new THREE.MeshStandardMaterial({ color: 0x57534e }));
+            oldPillar.position.set(-12, 0.65, -22);
+            group.add(oldPillar);
         } else {
             const marbleMat = new THREE.MeshStandardMaterial({
                 color: optionId === 'opt_b' ? 0xd4af37 : (optionId === 'opt_a' ? 0x2d3748 : 0xf4efe6),
@@ -1834,30 +2250,86 @@ class Hotel3DSimulator {
                 roughness: 0.7
             });
             [[-14.8, -20], [-9.2, -20], [-14.8, -24], [-9.2, -24]].forEach(pos => {
+                const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.32, 0.55, 12), new THREE.MeshStandardMaterial({ color: 0x9c6644 }));
+                pot.position.set(pos[0], 0.28, pos[1]);
                 const bush = new THREE.Mesh(new THREE.SphereGeometry(0.65, 12, 12), foliageMat);
-                bush.position.set(pos[0], 0.65, pos[1]);
+                bush.position.set(pos[0], 0.85, pos[1]);
+                group.add(pot);
                 group.add(bush);
             });
         }
         return group;
     }
 
-    // 11. PENTHOUSE SUITE 3D
+    // 11. PENTHOUSE SUITE & CONCERT GRAND PIANO 3D
     buildPenthouseSuite3D(optionId) {
         const group = new THREE.Group();
-        if (optionId) {
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.15 });
+
+        if (!optionId) {
+            // Level 1: Dusty sheet-covered piano & worn couch on 2nd Floor
+            const sheetMat = new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.95 });
+            const oldPiano = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.0, 2.3), sheetMat);
+            oldPiano.position.set(-4, 6.5, 1.5);
+            const oldCouch = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.75, 1.2), sheetMat);
+            oldCouch.position.set(3, 6.38, -2.5);
+            group.add(oldPiano);
+            group.add(oldCouch);
+        } else {
             let pianoColor = 0xfafafa;
-            let couchColor = 0xd4af37;
-            if (optionId === 'opt_b') { pianoColor = 0xd4af37; couchColor = 0x111111; }
-            else if (optionId === 'opt_c') { pianoColor = 0x3a2012; couchColor = 0x7a0c1a; }
+            let couchColor = 0x1e293b;
+            if (optionId === 'opt_b') { pianoColor = 0x11131a; couchColor = 0x7a0c1a; }
+            else if (optionId === 'opt_c') { pianoColor = 0x3a2012; couchColor = 0x0f5132; }
 
-            const piano = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.1, 2.8), new THREE.MeshStandardMaterial({ color: pianoColor, roughness: 0.15, metalness: 0.2 }));
-            piano.position.set(-4, 6.6, 2);
-            group.add(piano);
+            const pianoMat = new THREE.MeshStandardMaterial({ color: pianoColor, roughness: 0.12, metalness: 0.25 });
+            const sofaMat = new THREE.MeshStandardMaterial({ color: couchColor, roughness: 0.65 });
 
-            const couch = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.9, 1.4), new THREE.MeshStandardMaterial({ color: couchColor, roughness: 0.6 }));
-            couch.position.set(3, 6.5, -3);
-            group.add(couch);
+            // Concert Grand Piano Body + 3 Legs + Open Angled Lid + Keyboard + Bench
+            const pianoBody = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.35, 2.6), pianoMat);
+            pianoBody.position.set(-4, 6.95, 1.5);
+            group.add(pianoBody);
+
+            const pianoLid = new THREE.Mesh(new THREE.BoxGeometry(2.15, 0.06, 2.5), optionId === 'opt_b' ? goldMat : pianoMat);
+            pianoLid.position.set(-3.6, 7.55, 1.5);
+            pianoLid.rotation.z = 0.42;
+            group.add(pianoLid);
+
+            const keyboard = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.32), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+            keyboard.position.set(-4, 6.92, 2.85);
+            group.add(keyboard);
+
+            [[-4.9, 0.4], [-3.1, 0.4], [-4.0, 2.6]].forEach(lp => {
+                const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.04, 0.8, 10), goldMat);
+                leg.position.set(lp[0], 6.4, lp[1]);
+                group.add(leg);
+            });
+
+            const bench = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.48, 0.45), sofaMat);
+            bench.position.set(-4, 6.24, 3.45);
+            group.add(bench);
+
+            // L-Shaped Luxury Sectional Sofa + Backrests + Marble Coffee Table
+            const sofaMain = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.48, 1.45), sofaMat);
+            sofaMain.position.set(3.2, 6.24, -2.5);
+            const sofaBack = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.98, 0.3), sofaMat);
+            sofaBack.position.set(3.2, 6.5, -3.15);
+            const sofaChaise = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.48, 2.8), sofaMat);
+            sofaChaise.position.set(4.8, 6.24, -1.1);
+            group.add(sofaMain);
+            group.add(sofaBack);
+            group.add(sofaChaise);
+
+            const coffeeTable = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.42, 24), goldMat);
+            coffeeTable.position.set(2.6, 6.21, -0.6);
+            group.add(coffeeTable);
+
+            // Glowing Marble Fireplace on West Wall of Penthouse
+            const hearth = new THREE.Mesh(new THREE.BoxGeometry(0.65, 2.2, 2.8), new THREE.MeshStandardMaterial({ map: this.getTexture('carrara_marble'), roughness: 0.2 }));
+            hearth.position.set(-11.5, 7.1, 1.5);
+            const fireGlow = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.9, 1.4), new THREE.MeshBasicMaterial({ color: 0xff6b00 }));
+            fireGlow.position.set(-11.15, 6.65, 1.5);
+            group.add(hearth);
+            group.add(fireGlow);
         }
         return group;
     }
@@ -2686,9 +3158,11 @@ class Hotel3DSimulator {
 
         const rooms = [
             { x: 0, z: 0, w: 24, d: 20, name: 'Lobi' },
-            { x: -20, z: -10.5, w: 14, d: 15, name: '101' },
+            { x: -21, z: -10.5, w: 14, d: 15, name: '101' },
             { x: 21, z: 0, w: 18, d: 20, name: 'Restoran' },
-            { x: 0, z: -22, w: 18, d: 10, name: 'Havuz' }
+            { x: 0, z: -22, w: 16, d: 8, name: 'Havuz' },
+            { x: 18, z: -22, w: 8, d: 8, name: 'Spa' },
+            { x: -12, z: -22, w: 8, d: 8, name: 'Bahçe' }
         ];
 
         rooms.forEach(r => {
@@ -2785,53 +3259,61 @@ class Hotel3DSimulator {
         const joyKnob = document.getElementById('joystickKnob');
         const lookZone = document.getElementById('mobileLookZone');
 
-        if (!joyZone || !lookZone) return;
+        if (joyZone) {
+            joyZone.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const touch = e.touches[0];
+                const rect = joyZone.getBoundingClientRect();
+                this.touch.joystickActive = true;
+                this.touch.joystickOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                this.updateJoystick(touch.clientX, touch.clientY, joyKnob);
+            }, { passive: false });
 
-        joyZone.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = joyZone.getBoundingClientRect();
-            this.touch.joystickActive = true;
-            this.touch.joystickOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-            this.updateJoystick(touch.clientX, touch.clientY, joyKnob);
-        }, { passive: false });
+            joyZone.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!this.touch.joystickActive) return;
+                const touch = e.touches[0];
+                this.updateJoystick(touch.clientX, touch.clientY, joyKnob);
+            }, { passive: false });
 
-        joyZone.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (!this.touch.joystickActive) return;
-            const touch = e.touches[0];
-            this.updateJoystick(touch.clientX, touch.clientY, joyKnob);
-        }, { passive: false });
+            const resetJoy = () => {
+                this.touch.joystickActive = false;
+                this.touch.joystickDelta = { x: 0, y: 0 };
+                if (joyKnob) joyKnob.style.transform = 'translate(-50%, -50%)';
+            };
 
-        const resetJoy = () => {
-            this.touch.joystickActive = false;
-            this.touch.joystickDelta = { x: 0, y: 0 };
-            if (joyKnob) joyKnob.style.transform = 'translate(-50%, -50%)';
+            joyZone.addEventListener('touchend', resetJoy);
+            joyZone.addEventListener('touchcancel', resetJoy);
+        }
+
+        const bindLookTarget = (el) => {
+            if (!el) return;
+            el.addEventListener('touchstart', (e) => {
+                const touch = e.touches[e.touches.length - 1];
+                this.touch.lookActive = true;
+                this.touch.lastLook = { x: touch.clientX, y: touch.clientY };
+            }, { passive: true });
+
+            el.addEventListener('touchmove', (e) => {
+                if (!this.touch.lookActive) return;
+                const touch = e.touches[e.touches.length - 1];
+                const dx = touch.clientX - this.touch.lastLook.x;
+                const dy = touch.clientY - this.touch.lastLook.y;
+                this.touch.lastLook = { x: touch.clientX, y: touch.clientY };
+
+                this.player.rot.yaw -= dx * 0.0055;
+                this.player.rot.pitch -= dy * 0.0045;
+                this.player.rot.pitch = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, this.player.rot.pitch));
+            }, { passive: true });
+
+            el.addEventListener('touchend', () => { this.touch.lookActive = false; });
+            el.addEventListener('touchcancel', () => { this.touch.lookActive = false; });
         };
 
-        joyZone.addEventListener('touchend', resetJoy);
-        joyZone.addEventListener('touchcancel', resetJoy);
-
-        lookZone.addEventListener('touchstart', (e) => {
-            const touch = e.touches[0];
-            this.touch.lookActive = true;
-            this.touch.lastLook = { x: touch.clientX, y: touch.clientY };
-        }, { passive: true });
-
-        lookZone.addEventListener('touchmove', (e) => {
-            if (!this.touch.lookActive) return;
-            const touch = e.touches[0];
-            const dx = touch.clientX - this.touch.lastLook.x;
-            const dy = touch.clientY - this.touch.lastLook.y;
-            this.touch.lastLook = { x: touch.clientX, y: touch.clientY };
-
-            this.player.rot.yaw -= dx * 0.005;
-            this.player.rot.pitch -= dy * 0.005;
-            this.player.rot.pitch = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, this.player.rot.pitch));
-        }, { passive: true });
-
-        lookZone.addEventListener('touchend', () => { this.touch.lookActive = false; });
-        lookZone.addEventListener('touchcancel', () => { this.touch.lookActive = false; });
+        bindLookTarget(lookZone);
+        bindLookTarget(this.renderer.domElement);
     }
 
     updateJoystick(clientX, clientY, knob) {
