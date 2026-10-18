@@ -427,6 +427,12 @@
     state.stars += order.rewardStars;
     state.ordersCompleted++;
 
+    if (window.hotel3D) {
+      window.hotel3D.state.coins += order.rewardCoins;
+      window.hotel3D.state.stars += order.rewardStars;
+      window.hotel3D.saveState();
+    }
+
     sfx.coin();
     if (clientX && clientY) {
       showFloatingText(`⭐ +${order.rewardStars} Yıldız!`, clientX, clientY);
@@ -998,6 +1004,16 @@
         });
         const targetPage = $(targetId);
         if (targetPage) targetPage.classList.add('active-page');
+
+        if (targetId === 'pageHotel') {
+          if (window.initHotel3D) window.initHotel3D();
+          if (window.hotel3D) {
+            window.hotel3D.onResize();
+            window.hotel3D.state.coins = Math.max(window.hotel3D.state.coins, state.prestige);
+            window.hotel3D.state.stars = Math.max(window.hotel3D.state.stars, state.stars);
+            window.hotel3D.saveState();
+          }
+        }
 
         sfx.pop();
         renderAll();

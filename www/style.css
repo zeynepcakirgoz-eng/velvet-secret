@@ -667,125 +667,521 @@ button:active {
 }
 
 /* ================= PAGE 2: HOTEL RENOVATION ================= */
+/* ================= PAGE 2: 3D WALKABLE HOTEL SIMULATOR ================= */
 .hotel-page-header {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
-.hotel-page-header h2 {
+.hotel-title-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.hotel-title-flex h2 {
   font-family: Georgia, serif;
-  font-size: 18px;
+  font-size: 16px;
   color: var(--gold);
-  margin: 0 0 4px;
+  margin: 0 0 2px;
 }
 
-.hotel-page-header p {
+.hotel-title-flex p {
   font-size: 11px;
   color: var(--muted);
   margin: 0;
-  line-height: 1.4;
 }
 
-.hotel-areas-grid {
-  display: grid;
-  gap: 14px;
-  margin-bottom: 16px;
+.hotel-rating-badge {
+  font-size: 13px;
+  letter-spacing: 2px;
+  background: rgba(223, 191, 131, 0.15);
+  border: 1px solid var(--gold);
+  padding: 4px 8px;
+  border-radius: 12px;
 }
 
-.hotel-room-card {
-  background: #171923;
+.quick-room-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+  scrollbar-width: none;
+}
+.quick-room-strip::-webkit-scrollbar { display: none; }
+
+.room-jump-btn {
+  white-space: nowrap;
+  background: #171a26;
+  border: 1px solid rgba(223, 191, 131, 0.25);
+  color: var(--cream);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+.room-jump-btn.active, .room-jump-btn:active {
+  background: linear-gradient(135deg, #d4af37, #aa8218);
+  color: #111;
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.hotel-economy-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #131622;
   border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+
+.econ-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.econ-label {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.econ-val {
+  font-size: 13px;
+  color: var(--gold-bright);
+}
+.econ-val.cash {
+  color: #2ecc71;
+}
+
+.collect-cash-btn {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  border: 0;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 7px 12px;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(46, 204, 113, 0.3);
+}
+
+/* 3D VIEWPORT */
+.hotel-3d-viewport {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  background: #080a10;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  margin-bottom: 14px;
 }
 
-.room-img-wrap {
+.viewport-hud-top {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.location-pill {
+  background: rgba(12, 14, 22, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  pointer-events: auto;
+}
+
+.radar-box {
   position: relative;
-  height: 145px;
+  width: 74px;
+  height: 74px;
+  background: rgba(12, 14, 22, 0.88);
+  border: 1.5px solid var(--gold);
+  border-radius: 50%;
   overflow: hidden;
+  box-shadow: 0 0 15px rgba(223, 191, 131, 0.3);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.room-img-wrap img {
+#radarCanvas {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+}
+
+.radar-label {
+  position: absolute;
+  bottom: 3px;
+  font-size: 7px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+/* Action Prompt */
+.action-prompt {
+  position: absolute;
+  bottom: 85px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(20, 24, 38, 0.95), rgba(30, 36, 56, 0.95));
+  border: 1.5px solid var(--gold-bright);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.45);
+  backdrop-filter: blur(10px);
+  border-radius: 28px;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  z-index: 10;
+  animation: promptPulse 1.6s infinite alternate ease-in-out;
+}
+
+@keyframes promptPulse {
+  0% { transform: translateX(-50%) scale(1); box-shadow: 0 0 14px rgba(255, 215, 0, 0.3); }
+  100% { transform: translateX(-50%) scale(1.05); box-shadow: 0 0 24px rgba(255, 215, 0, 0.7); }
+}
+
+.prompt-icon {
+  font-size: 20px;
+}
+
+.prompt-text strong {
+  display: block;
+  font-size: 12px;
+  color: var(--gold-bright);
+}
+
+.prompt-text span {
+  font-size: 10px;
+  color: var(--cream);
+  opacity: 0.85;
+}
+
+/* Mobile Controls Layer */
+.mobile-controls-layer {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.mobile-joystick-zone {
+  width: 85px;
+  height: 85px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(223, 191, 131, 0.4);
+  border-radius: 50%;
+  position: relative;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.joystick-knob {
+  width: 36px;
+  height: 36px;
+  background: radial-gradient(circle, #ffd700, #b8860b);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+  pointer-events: none;
+}
+
+.joy-label {
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.mobile-look-zone {
+  flex: 1;
+  height: 110px;
+  margin: 0 8px;
+  position: relative;
+  pointer-events: auto;
+  touch-action: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.look-crosshair {
+  font-size: 14px;
+  color: rgba(223, 191, 131, 0.4);
+}
+
+.look-guide-text {
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 4px;
+}
+
+.mobile-action-btn {
+  width: 58px;
+  height: 58px;
+  background: linear-gradient(135deg, #ffd700, #cc9900);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #111;
+  font-weight: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.6);
+  pointer-events: auto;
+  margin-bottom: 4px;
+}
+
+.mobile-action-btn span {
+  font-size: 16px;
+}
+
+.mobile-action-btn small {
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.desktop-hint-bar {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.hud-notification {
+  position: absolute;
+  top: 55px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14, 17, 26, 0.95);
+  border: 1px solid var(--gold);
+  color: var(--cream);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.8);
+  z-index: 20;
+  animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Renovation Modal Card */
+.reno-modal-card {
+  background: #141724;
+  border: 1.5px solid var(--gold);
+  border-radius: 20px;
+  padding: 16px;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+  position: relative;
+  animation: popIn 0.25s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.reno-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.reno-badge {
+  background: rgba(223, 191, 131, 0.15);
+  color: var(--gold);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  text-transform: uppercase;
+}
+
+.reno-close-btn {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  padding: 0;
+}
+
+.reno-preview-container {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.reno-preview-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.room-badge {
+.reno-status-badge {
   position: absolute;
-  top: 8px;
+  bottom: 8px;
   left: 8px;
-  background: rgba(12, 14, 20, 0.85);
-  backdrop-filter: blur(6px);
-  color: var(--gold);
+  background: rgba(46, 204, 113, 0.9);
+  color: #fff;
   font-size: 9px;
   font-weight: 800;
-  letter-spacing: 1px;
   padding: 4px 8px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
+  border-radius: 6px;
 }
 
-.room-details {
-  padding: 12px 14px;
-}
-
-.room-details h3 {
+.reno-title {
   font-family: Georgia, serif;
-  font-size: 15px;
-  color: var(--cream);
-  margin: 0 0 4px;
+  font-size: 16px;
+  color: var(--gold-bright);
+  margin: 0 0 6px;
 }
 
-.room-details p {
+.reno-desc {
   font-size: 11px;
-  line-height: 1.4;
-  color: #bbb;
-  margin: 0 0 10px;
+  color: #ccc;
+  line-height: 1.45;
+  margin: 0 0 12px;
 }
 
-.room-action-row {
+.reno-rewards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: #0f111a;
+  border-radius: 10px;
+  padding: 8px;
+  margin-bottom: 14px;
+}
+
+.reno-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-lbl {
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.stat-val.positive {
+  font-size: 13px;
+  font-weight: 800;
+  color: #2ecc71;
+}
+
+.stat-val.rep {
+  font-size: 13px;
+  font-weight: 800;
+  color: #3498db;
+}
+
+.reno-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.room-stat {
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.room-stat b {
-  color: var(--gold-bright);
-}
-
-.upgrade-room-btn {
+.reno-cost-tags {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: linear-gradient(135deg, #ffb703, #d48b00);
+  gap: 6px;
+}
+
+.cost-tag {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+.cost-tag.coin {
+  background: rgba(255, 215, 0, 0.15);
+  color: var(--gold-bright);
+  border: 1px solid var(--gold);
+}
+.cost-tag.star {
+  background: rgba(255, 183, 3, 0.2);
+  color: #ffb703;
+  border: 1px solid #ffb703;
+}
+
+.reno-action-btn {
   border: 0;
+  padding: 9px 16px;
   border-radius: 10px;
-  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.reno-action-btn.btn-active {
+  background: linear-gradient(135deg, #ffd700, #cc9900);
   color: #111;
-  font-weight: 900;
-  box-shadow: 0 0 12px rgba(255, 183, 3, 0.35);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
 
-.upgrade-room-btn span {
-  font-size: 11px;
+.reno-action-btn.btn-disabled {
+  background: #232735;
+  color: #777;
+  cursor: not-allowed;
 }
 
-.upgrade-room-btn small {
-  font-size: 8px;
-  opacity: 0.85;
-}
-
-.upgrade-room-btn.done-btn {
-  background: #232733;
-  color: var(--green);
-  box-shadow: none;
+.reno-action-btn.btn-done {
+  background: #1b382b;
+  color: #2ecc71;
   cursor: default;
 }
 

@@ -119,62 +119,95 @@
       </div>
     </section>
 
-    <!-- ========== SAYFA 2: OTEL RESTORASYONU (AURELIA OTELİ & SÜİTLER) ========== -->
+    <!-- ========== SAYFA 2: 3D GERÇEKÇİ GEZİLEBİLİR OTEL SİMÜLATÖRÜ ========== -->
     <section id="pageHotel" class="game-page">
       <div class="hotel-page-header">
-        <h2>AURELIA OTELİ RESTORASYONU</h2>
-        <p>Kazandığın Prestij (◆) ve Yıldızlarla (⭐) otelin bölümlerini yenile ve sırları çöz!</p>
+        <div class="hotel-title-flex">
+          <div>
+            <h2>🏨 AURELIA PALACE — 3D OTEL KEŞFİ</h2>
+            <p>Otel içinde serbestçe yürüyün, odaları gezin ve her alanı adım adım yenileyin!</p>
+          </div>
+          <div class="hotel-rating-badge" id="hudHotelStars">⭐⭐⭐</div>
+        </div>
+
+        <!-- Hızlı Işınlanma / Oda Seçim Çubuğu -->
+        <div class="quick-room-strip">
+          <button class="room-jump-btn active" onclick="jumpToRoom('lobby')">🏛️ Lobi &amp; Resepsiyon</button>
+          <button class="room-jump-btn" onclick="jumpToRoom('room101')">🛏️ Suit 101</button>
+          <button class="room-jump-btn" onclick="jumpToRoom('restaurant')">🍷 Riviera Restoran</button>
+          <button class="room-jump-btn" onclick="jumpToRoom('pool')">🏊 Sonsuzluk Havuzu</button>
+          <button class="room-jump-btn" onclick="jumpToRoom('penthouse')">👑 2. Kat Penthouse</button>
+        </div>
+
+        <!-- Canlı Ekonomi ve Kasa Çubuğu -->
+        <div class="hotel-economy-strip">
+          <div class="econ-item">
+            <span class="econ-label">Otel Geliri</span>
+            <b id="hudRate" class="econ-val">+₺35/dk</b>
+          </div>
+          <div class="econ-item">
+            <span class="econ-label">Biriken Kasa</span>
+            <b id="hudUncollected" class="econ-val cash">₺0</b>
+          </div>
+          <button id="collectIncomeBtn" class="collect-cash-btn" onclick="hotel3D.collectIncome()">
+            <span>💰 GELİRİ TOPLA</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Otel Alanları Galeri / Listesi -->
-      <div class="hotel-areas-grid">
-
-        <!-- Alan 1: Aurelia Oteli Meydanı & Girişi -->
-        <div class="hotel-room-card">
-          <div class="room-img-wrap">
-            <img src="assets/scene_hotel_exterior.jpg" alt="Aurelia Oteli">
-            <div class="room-badge">📍 ALAN 1 · OTEL MEYDANI</div>
-          </div>
-          <div class="room-details">
-            <h3>Aurelia Sarayı &amp; Fıskiye</h3>
-            <p>Monako körfezinin en görkemli saray girişi. Mermer fıskiyeleri onar ve VIP karşılama alanını hazırla.</p>
-            <div class="room-action-row">
-              <span class="room-stat">İlerleme: <b id="area1Progress">%35</b></span>
-              <button id="upgradeArea1Btn" class="upgrade-room-btn">
-                <span>⭐ 1 YILDIZ</span>
-                <small>VEYA 300 ◆</small>
-              </button>
-            </div>
+      <!-- 3D GERÇEKÇİ OTEL GÖRÜNÜMÜ & OYUN ALANI -->
+      <div class="hotel-3d-viewport" id="hotel3DContainer">
+        
+        <!-- Üst Bilgi Rozeti (Mevcut Konum) -->
+        <div class="viewport-hud-top">
+          <div id="hudLocationTag" class="location-pill">📍 Aurelia Palace Büyük Lobi &amp; Resepsiyon</div>
+          <!-- Sağ Üst: Radar / Minimap -->
+          <div class="radar-box">
+            <canvas id="radarCanvas" width="90" height="90"></canvas>
+            <span class="radar-label">RADAR</span>
           </div>
         </div>
 
-        <!-- Alan 2: Başkanlık Süiti (Penthouse) -->
-        <div class="hotel-room-card">
-          <div class="room-img-wrap">
-            <img src="assets/scene_presidential_suite.jpg" alt="Başkanlık Süiti">
-            <div class="room-badge">📍 ALAN 2 · BAŞKANLIK SÜİTİ</div>
+        <!-- Etkileşim Bildirimi ([E] RESTORASYON) -->
+        <div id="actionPrompt" class="action-prompt" style="display: none;" onclick="hotel3D.triggerActiveBeacon()"></div>
+
+        <!-- Mobil Kontroller: Sanal Joystick & Bakış Alanı -->
+        <div class="mobile-controls-layer">
+          <div id="mobileJoystickZone" class="mobile-joystick-zone">
+            <div id="joystickKnob" class="joystick-knob"></div>
+            <span class="joy-label">YÜRÜ</span>
           </div>
-          <div class="room-details">
-            <h3>Körfez Manzaralı Lüks Penthouse</h3>
-            <p>En özel anların ve en karanlık sırların paylaşıldığı çatı süiti. Jakuzi ve özel şömineyi tamamla.</p>
-            <div class="room-action-row">
-              <span class="room-stat">İlerleme: <b id="area2Progress">%20</b></span>
-              <button id="upgradeArea2Btn" class="upgrade-room-btn">
-                <span>⭐ 2 YILDIZ</span>
-                <small>VEYA 600 ◆</small>
-              </button>
-            </div>
+
+          <div id="mobileLookZone" class="mobile-look-zone">
+            <div class="look-crosshair">✦</div>
+            <span class="look-guide-text">Bakış için dokunup kaydırın 👁️</span>
           </div>
+
+          <button id="mobileActionBtn" class="mobile-action-btn" onclick="hotel3D.triggerActiveBeacon()">
+            <span>🛠️</span>
+            <small>YENİLE</small>
+          </button>
         </div>
+
+        <!-- Masaüstü Kontrol Rehberi -->
+        <div class="desktop-hint-bar">
+          <span>⌨️ <b>WASD / Oklar:</b> Yürü</span>
+          <span>🖱️ <b>Fare:</b> Çevreye Bak</span>
+          <span>🛠️ <b>[E]:</b> Restorasyon</span>
+          <span>⚡ <b>Shift:</b> Koş</span>
+        </div>
+
+        <!-- Bildirim Toast -->
+        <div id="hudNotification" class="hud-notification" style="display: none;"></div>
 
       </div>
 
-      <!-- Karakter Diyalog Paneli -->
+      <!-- Karakter Diyalog ve İpuçları Paneli -->
       <div class="story-character-callout">
         <img src="assets/avatar_isabella.jpg" alt="Isabella" class="callout-avatar">
         <div class="callout-content">
-          <strong>Isabella Laurent</strong>
-          <p id="hotelDialogueText">"Babamın mirası bu otelde büyük bir entrika dönüyor. Meydanı ve süiti yeniledikçe saklanan gizli evraklar ortaya çıkacak..."</p>
+          <strong>Isabella Laurent (Otel Sahibi)</strong>
+          <p id="hotelDialogueText">"Otelimizin her köşesini bizzat gezerek inceleyebilirsin! Masadan siparişleri tamamlayıp kazandığın altın ve yıldızlarla resepsiyonu, suitleri ve havuzu yenile. Her restorasyon otelin dakikalık gelirini katlar!"</p>
         </div>
       </div>
     </section>
@@ -275,7 +308,7 @@
     </button>
     <button class="nav-tab" data-target="pageHotel">
       <span class="nav-icon">🏨</span>
-      <span class="nav-label">OTEL</span>
+      <span class="nav-label">3D OTEL</span>
       <span id="hotelBadgeCount" class="nav-badge">1</span>
     </button>
     <button class="nav-tab" data-target="pageStory">
@@ -330,6 +363,13 @@
   </div>
 </div>
 
+<!-- ================= 3D OTEL RESTORASYON MODALI ================= -->
+<div id="renoModal" class="modal-overlay" style="display: none;">
+  <div id="renoModalContent" class="reno-modal-card"></div>
+</div>
+
+<script src="js/three.min.js"></script>
+<script src="js/hotel3d.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
