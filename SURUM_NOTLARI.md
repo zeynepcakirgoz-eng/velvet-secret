@@ -2,6 +2,54 @@
 
 Bu dosya, **Velvet Secrets (Aurelia Palace Hotel)** Android oyununun tüm versiyon güncellemelerini ve eklenen özellikleri Türkçe olarak detaylandırır.
 
+## 🏆 Sürüm `v2.6.0` (18 Ekim 2026) — *Gossip Harbor Mimarisinde 11 Sıralı Mobilya Kurulumu, Net Mekan Sahnesi, Kalıcı Tasarım Sabitlenmesi ve Tek Seferlik Seçim Düzeni*
+
+Bu sürümde, kullanıcının talebi ve *Gossip Harbor* oyununun orijinal dinamikleri doğrultusunda 7 temel kuralın tümü kod tabanında tek tek kontrol edilmiş ve eksiksiz olarak hayata geçirilmiştir:
+
+### 1. 🖼️ Net Mekan Sahnesi (Görsel Kirlilik ve Kutu Maskeler Kaldırıldı)
+- Mekan sahnesindeki (`#ghSceneStage`) fotoğrafları kapatan, görsel bütünlüğü bozan opak kartlar, konuşma balonları, koyu vinyet gölgeleri ve oda geçiş pinleri kaldırıldı.
+- Oda sahnesi 100% kristal netliğinde foto-gerçekçi oda panoraması ve izometrik haritadan oluşur. Mobilyalar sahneye şeffaf alfa geçişli dikişsiz katmanlar (`stage_{id}_{state}.png`) olarak yerleşir.
+
+### 2. 📋 11 Sıralı Mobilya Kurulumu (Sequential Renovation)
+- Mobilyalar tıpkı Gossip Harbor’daki gibi **kesin bir sıra** ile (Sıra 1'den 11'e) kurulur:
+  1. `reception_desk` — Sıra 1/11: Mermer Resepsiyon Bankosu
+  2. `lobby_chandelier` — Sıra 2/11: Büyük Lobi Kristal Avizesi
+  3. `lobby_carpet` — Sıra 3/11: Kraliyet Lobi Halısı & Koltukları
+  4. `restaurant_tables` — Sıra 4/11: Riviera Restoran Masaları
+  5. `restaurant_bar` — Sıra 5/11: Oniks Şampanya & Kokteyl Barı
+  6. `room101_bed` — Sıra 6/11: Suit 101 Dört Direkli Yatak
+  7. `room101_decor` — Sıra 7/11: Suit 101 Manzara Balkonu
+  8. `swimming_pool` — Sıra 8/11: Monako Sonsuzluk Havuzu
+  9. `spa_jacuzzi` — Sıra 9/11: Aurelia Zen Spa Jakuzisi
+  10. `garden_courtyard` — Sıra 10/11: Akdeniz Botanik Çeşmesi
+  11. `penthouse_suite` — Sıra 11/11: 2. Kat Penthouse Kuyruklu Piyanosu
+- Sıradaki mobilya kurulmadan bir sonrakine geçilemez (`isAreaCompleted` ve `getCurrentSequentialAreaId` kontrolleri). Sıra dışı eşyalara basıldığında kilit uyarısı verilir.
+
+### 3. 🔒 Tek Seferlik Kurulum & Seçim Hakkının Tamamlanması (One-Time Placement)
+- Her mobilya mekana **yalnızca 1 kez** konur.
+- Oyuncu alt çubuktan 3 tasarımdan birini seçip onayladığında:
+  1. Seçilen tasarım mekana **kalıcı olarak sabitlenir**.
+  2. Alt tasarım seçici çubuğu kapanır.
+  3. "Tasarımı Değiştir" gibi yapay butonlar kaldırılmıştır; o mobilya için seçim hakkı sona erer.
+  4. Mekanın üzerindeki çekiç balonu kaybolur ve mekan temiz, bitmiş haliyle kalır.
+
+### 4. 🎨 3 Farklı Tasarım ve Renk Seçeneği (44 Özel Üretilmiş Görsel)
+- Alt çubukta açılan her seçenekte sadece o mobilyaya odaklanmış yüksek çözünürlüklü görseller sunulur (`assets/designs/{id}_opt_a.jpg`, `_opt_b.jpg`, `_opt_c.jpg`).
+- Seçenekler arasında yalnızca ufak tonlama değil, belirgin materyal ve renk ayrımları bulunur:
+  - **Seçenek A:** Beyaz İtalyan Carrara Mermeri / Fildişi & 24K Altın Detaylar
+  - **Seçenek B:** Bordo / Kraliyet Yakut Kırmızısı & Siyah Nero Marquina Mermeri
+  - **Seçenek C:** Akdeniz Turkuaz Mozaik & Zümrüt Yeşili Riviera Dokusu
+
+### 5. 📜 Sıralı Görev Sistemi (`#tasks`)
+- 5x5 Birleştirme masasındaki görevler Gossip Harbor sisteminde sıralı hale getirildi:
+  - Aynı anda yalnızca **1 Aktif Görev** açık kalır.
+  - Önceki görevler "TAMAMLANDI", sıradaki görev "AKTİF", sonraki görevler ise "KİLİTLİ" olarak listelenir.
+  - Birleştirme masasından kazanılan altın ve ödüller doğrudan sıradaki mobilyanın maliyetine aktarılır.
+
+### 6. 📱 Mobil ve Tablet UI Deneyimi
+- 4 alt ana sekme (Birleştir, Otel, Hikaye, Prestij), dokunmatik kaydırma (Pan & Zoom) ve tam ekran mobil uyumluluk optimize edildi.
+- Arayüzdeki eski "Lv.1-4" ibareleri temizlenip Gossip Harbor'ın "11 Sıralı Mobilya Kurulumu" terminolojisiyle güncellendi.
+
 ---
 
 ## 🎨 Sürüm `v2.5.2` (18 Ekim 2026) — *44 Farklı Full-HD Tasarım Seçeneği Görseli (`assets/designs/`) ve Onay Sonrası Otomatik Kapanan Yenileme Çubuğu*

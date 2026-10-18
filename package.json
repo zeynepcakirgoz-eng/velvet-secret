@@ -1,8 +1,8 @@
 {
   "name": "velvet-secrets",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "private": true,
-  "description": "Velvet Secrets (v2.5.2) - 44 Farklı Full-HD Tasarım Görseli ve Seçim Onaylandığında Otomatik Kapanan Restorasyon Sistemi",
+  "description": "Velvet Secrets (v2.6.0) - Gossip Harbor Duzeninde 11 Sirali Mobilya Kurulumu, Net Mekan Sahnesi ve Kalici Tasarim Secimi",
   "scripts": {
     "sync:android": "npx cap sync android",
     "open:android": "npx cap open android"

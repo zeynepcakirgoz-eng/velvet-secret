@@ -197,7 +197,7 @@
       name: 'Riviera Gala & VIP Konuk Servisi',
       areaTag: '🥂 Riviera Restoran & Bar',
       desc: 'Adrian Vale, Serena Black ve VIP konukların siparişlerini hazırlayıp zamanında teslim edin.',
-      bgImg: 'assets/scene_restaurant_bar.jpg',
+      bgImg: 'assets/scene_restaurant_pool.jpg',
       subjectImg: 'assets/items/item_2_5.jpg',
       baseGoal: 2,
       metric: 'ordersCompleted',
@@ -371,16 +371,13 @@
     let count = state.hotelUpgrades || 0;
     if (window.GameEconomy && window.GameEconomy.state && window.GameEconomy.state.renovations) {
       const renos = window.GameEconomy.state.renovations;
-      let econUpgrades = 0;
-      Object.keys(renos).forEach((k) => {
-        const entry = renos[k];
-        if (entry && typeof entry === 'object' && entry.level > 1) {
-          econUpgrades += (entry.level - 1);
-        } else if (typeof entry === 'string') {
-          econUpgrades += 1;
-        }
-      });
+      const econUpgrades = Object.keys(renos).filter((k) => Boolean(renos[k])).length;
       count = Math.max(count, econUpgrades);
+    }
+    if (window.hotel3D && window.hotel3D.state && window.hotel3D.state.renovations) {
+      const hRenos = window.hotel3D.state.renovations;
+      const hCount = Object.keys(hRenos).filter((k) => Boolean(hRenos[k])).length;
+      count = Math.max(count, hCount);
     }
     return count;
   }
@@ -630,17 +627,15 @@
   /* ================= HOTEL RENOVATION (PAGE 2) ================= */
   function renderHotelPage() {
     let canUp = 0;
-    if (window.GameEconomy && window.GameEconomy.renovationCosts) {
-      const bal = window.GameEconomy.getBalance();
-      const st = window.GameEconomy.getStars();
-      Object.keys(window.GameEconomy.renovationCosts).forEach((id) => {
-        const curLvl = window.GameEconomy.getAreaLevel(id);
-        if (curLvl < 4) {
-          const nextCost = window.GameEconomy.getNextUpgradeCost(id);
-          const nextStars = window.GameEconomy.getNextUpgradeStars(id);
-          if (bal >= nextCost && st >= nextStars) canUp++;
-        }
-      });
+    if (window.hotel3D && typeof window.hotel3D.getCurrentSequentialAreaId === 'function') {
+      const nextId = window.hotel3D.getCurrentSequentialAreaId();
+      if (nextId && window.hotel3D.renovationDefs[nextId]) {
+        const bal = window.GameEconomy ? window.GameEconomy.getBalance() : window.hotel3D.state.coins;
+        const st = window.GameEconomy ? window.GameEconomy.getStars() : window.hotel3D.state.stars;
+        const cost = window.hotel3D.getNextUpgradeCost(nextId);
+        const starsReq = window.hotel3D.getNextUpgradeStars(nextId);
+        if (bal >= cost && st >= starsReq) canUp = 1;
+      }
     }
 
     const badge = $('hotelBadgeCount');
@@ -1119,16 +1114,31 @@
       }
     }
 
-    // 2. Render 5 Topic-Matched Photorealistic Quest Cards
-    tasks.forEach((t) => {
-      const stage = (state.questStages && state.questStages[t.id]) ? state.questStages[t.id] : 1;
-      const cumulativeGoal = t.baseGoal * stage;
-      const rawCount = getTaskMetricValue(t.metric);
-      const done = rawCount >= cumulativeGoal;
-      const pct = Math.min(100, Math.round((rawCount / cumulativeGoal) * 100));
+    // 2. Render Strictly Sequential Photorealistic Quest Chain (Sıra 1 -> Sıra 2 -> Sıra 3 -> Sıra 4 -> Sıra 5)
+    if (typeof state.activeQuestSeqIndex !== 'number') {
+      state.activeQuestSeqIndex = 0;
+    }
+    if (typeof state.questCycle !== 'number' || state.questCycle < 1) {
+      state.questCycle = 1;
+    }
 
-      // Scale rewards with stage
-      const scale = 1 + (stage - 1) * 0.35;
+    const activeSeqIdx = Math.max(0, Math.min(tasks.length - 1, state.activeQuestSeqIndex));
+    const cycle = state.questCycle;
+
+    tasks.forEach((t, idx) => {
+      const isCompletedInCycle = idx < activeSeqIdx;
+      const isActiveQuest = idx === activeSeqIdx;
+      const isLockedQuest = idx > activeSeqIdx;
+
+      const cumulativeGoal = t.baseGoal * cycle;
+      const rawCount = getTaskMetricValue(t.metric);
+      const done = isActiveQuest && rawCount >= cumulativeGoal;
+      const pct = isCompletedInCycle
+        ? 100
+        : (isLockedQuest ? 0 : Math.min(100, Math.round((rawCount / cumulativeGoal) * 100)));
+
+      // Scale rewards with cycle
+      const scale = 1 + (cycle - 1) * 0.35;
       const rEnergy = Math.round((t.rewards.energy || 0) * scale);
       const rCoins = Math.round((t.rewards.coins || 0) * scale);
       const rGems = Math.round((t.rewards.gems || 0) * scale);
@@ -1164,17 +1174,38 @@
           </span>`;
       }
 
+      const seqStatusPill = isCompletedInCycle
+        ? `<span class="quest-stage-pill" style="background:rgba(16,185,129,0.25);border-color:#10b981;color:#6ee7b7;">✅ SIRA ${idx + 1}/${tasks.length} TAMAMLANDI</span>`
+        : (isActiveQuest
+            ? `<span class="quest-stage-pill" style="background:rgba(245,158,11,0.28);border-color:#ffd700;color:#fde68a;">🎯 AKTİF GÖREV · SIRA ${idx + 1}/${tasks.length}</span>`
+            : `<span class="quest-stage-pill" style="background:rgba(100,116,139,0.25);border-color:#64748b;color:#cbd5e1;">🔒 SIRADAKİ · SIRA ${idx + 1}/${tasks.length}</span>`);
+
+      const progTextHtml = isCompletedInCycle
+        ? `<span class="quest-prog-text" style="color:#6ee7b7;"><b>✅ Bu görev tamamlandı!</b></span>`
+        : (isActiveQuest
+            ? `<span class="quest-prog-text">İlerleme: <b>${Math.min(rawCount, cumulativeGoal)} / ${cumulativeGoal}</b> (%${pct})</span>`
+            : `<span class="quest-prog-text" style="color:#94a3b8;">🔒 Önce <b>Sıra ${activeSeqIdx + 1}</b> görevini tamamlayın</span>`);
+
+      const btnLabel = isCompletedInCycle
+        ? '✓ TAMAMLANDI'
+        : (isActiveQuest
+            ? (done ? '🎁 ÖDÜLÜ AL & SIRADAKİNE GEÇ' : `DEVAM EDİYOR (${Math.min(rawCount, cumulativeGoal)}/${cumulativeGoal})`)
+            : `🔒 SIRA #${idx + 1} KİLİTLİ`);
+
       const d = document.createElement('div');
-      d.className = `task-item photoreal-quest-card ${done ? 'quest-ready' : ''}`;
+      d.className = `task-item photoreal-quest-card ${done ? 'quest-ready' : ''} ${isLockedQuest ? 'quest-seq-locked' : ''} ${isCompletedInCycle ? 'quest-seq-done' : ''}`;
+      if (isLockedQuest) {
+        d.style.opacity = '0.68';
+      }
       d.innerHTML = `
         <div class="quest-banner-top" style="background-image: linear-gradient(90deg, rgba(11,14,22,0.92) 22%, rgba(11,14,22,0.35) 100%), url('${t.bgImg}');">
           <img src="${t.subjectImg}" alt="${t.name}" class="quest-subject-thumb">
           <div class="quest-banner-titles">
             <div class="quest-tags-row">
               <span class="quest-area-pill">${t.areaTag}</span>
-              <span class="quest-stage-pill">AŞAMA ${stage}</span>
+              ${seqStatusPill}
             </div>
-            <h5 class="t-name">${t.name}</h5>
+            <h5 class="t-name">${idx + 1}. ${t.name}</h5>
           </div>
         </div>
 
@@ -1191,9 +1222,9 @@
           <div class="t-bar"><div style="width:${pct}%"></div></div>
 
           <div class="t-foot">
-            <span class="quest-prog-text">İlerleme: <b>${Math.min(rawCount, cumulativeGoal)} / ${cumulativeGoal}</b> (%${pct})</span>
+            ${progTextHtml}
             <button class="t-claim-btn ${done ? 'ready-pulse' : ''}" ${!done ? 'disabled' : ''}>
-              ${done ? '🎁 KAZANIMLARI TOPLA' : 'DEVAM EDİYOR'}
+              ${btnLabel}
             </button>
           </div>
         </div>
@@ -1203,20 +1234,27 @@
       if (claimBtn && done) {
         claimBtn.onclick = (e) => {
           e.preventDefault();
-          if (!state.questStages) state.questStages = {};
-          state.questStages[t.id] = stage + 1;
           state.totalQuestsClaimed = (state.totalQuestsClaimed || 0) + 1;
+
+          // Advance strictly to the next quest in sequence!
+          if (state.activeQuestSeqIndex + 1 < tasks.length) {
+            state.activeQuestSeqIndex = state.activeQuestSeqIndex + 1;
+          } else {
+            state.activeQuestSeqIndex = 0;
+            state.questCycle = (state.questCycle || 1) + 1;
+          }
 
           addCurrencyRewards(
             { energy: rEnergy, coins: rCoins, gems: rGems, stars: rStars },
-            `Görev Tamamlandı: ${t.name} (Aşama ${stage})`
+            `Sıralı Görev #${idx + 1} Tamamlandı: ${t.name}`
           );
           sfx.fanfare();
           if (e.clientX && e.clientY) {
             showFloatingText(`🎁 +$${rCoins} & +${rEnergy}⚡`, e.clientX, e.clientY);
           }
           addXP(40, e.clientX, e.clientY);
-          notify(`🎉 "${t.name}" (Aşama ${stage}) ödülleri toplandı! +$${rCoins}, +${rEnergy} Enerji${rGems ? `, +${rGems} Elmas` : ''}${rStars ? `, +${rStars} Yıldız` : ''}!`);
+          const nextQuestName = tasks[state.activeQuestSeqIndex] ? tasks[state.activeQuestSeqIndex].name : '';
+          notify(`🎉 Görev #${idx + 1} ("${t.name}") tamamlandı! Sıradaki görev açıldı: "${nextQuestName}"`);
           renderAll();
         };
       }

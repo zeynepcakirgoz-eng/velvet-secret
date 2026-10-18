@@ -3779,82 +3779,88 @@ button:active {
   border: 1.5px solid #a6e9ff;
 }
 
-.gh-furniture-visual-patch {
-  width: 100%;
-  height: 86px;
-  border-radius: 13px;
-  background-size: cover;
-  background-position: center;
-  border: 2px solid rgba(255, 215, 0, 0.72);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.8);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
+/* ================= GOSSIP HARBOR SEAMLESS STAGE FURNITURE & CLEAN PINS ================= */
+.gh-room-canvas {
   position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-size: 100% 100%;
+  background-position: center;
+  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 
-.gh-furniture-node.is-unrenovated .gh-furniture-visual-patch {
-  filter: grayscale(0.45) brightness(0.82) contrast(0.95);
-  border-style: dashed;
-  border-color: rgba(255, 195, 85, 0.65);
+.gh-seamless-stage-furniture {
+  position: absolute;
+  pointer-events: none;
+  object-fit: fill;
+  z-index: 5;
+  transition: opacity 0.28s ease, filter 0.28s ease;
 }
 
-.gh-furniture-node.is-selected .gh-furniture-visual-patch,
-.gh-furniture-node.is-previewing .gh-furniture-visual-patch {
-  border-color: #2ecc71;
-  box-shadow: 0 0 22px rgba(46, 204, 113, 0.75), 0 8px 24px rgba(0, 0, 0, 0.85);
+.gh-seamless-stage-furniture.is-previewing-layer {
+  z-index: 6;
+  filter: drop-shadow(0 0 16px rgba(46, 204, 113, 0.75));
+  animation: pulsePreview 1.8s infinite ease-in-out;
 }
 
-.gh-patch-top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 7px;
+@keyframes pulsePreview {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(46, 204, 113, 0.65)); }
+  50% { filter: drop-shadow(0 0 24px rgba(46, 204, 113, 0.95)) brightness(1.05); }
 }
 
-.gh-patch-lv {
-  background: rgba(10, 12, 20, 0.86);
-  color: var(--gold-bright);
-  font-size: 8.5px;
+.gh-stage-pin-btn {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 25;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: 900;
-  padding: 2px 6px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 215, 0, 0.45);
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1.5px solid transparent;
 }
 
-.gh-patch-sparkle {
-  color: #ffd700;
-  font-size: 13px;
-  text-shadow: 0 0 8px #ffd700;
+.gh-stage-pin-btn:hover {
+  transform: translate(-50%, -50%) scale(1.06);
 }
 
-.gh-patch-cobweb {
-  font-size: 12px;
-}
-
-.gh-patch-bottom-label {
-  background: linear-gradient(0deg, rgba(8, 10, 18, 0.95) 25%, rgba(8, 10, 18, 0.55) 85%, transparent);
-  padding: 5px 7px 4px;
-  text-align: left;
-}
-
-.gh-patch-bottom-label strong {
-  display: block;
-  font-size: 10px;
+.gh-stage-pin-btn.pin-active-ready {
+  background: linear-gradient(135deg, #2ecc71, #1e824c);
   color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border-color: #a8ffcb;
+  box-shadow: 0 0 20px rgba(46, 204, 113, 0.85);
+  animation: bouncePin 1.8s infinite ease-in-out;
 }
 
-.gh-patch-bottom-label small {
-  display: block;
-  font-size: 8.5px;
-  color: var(--gold-bright);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.gh-stage-pin-btn.pin-active-saving {
+  background: linear-gradient(135deg, #ffd700, #c59b27);
+  color: #141004;
+  border-color: #fff3b0;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.65);
+}
+
+.gh-stage-pin-btn.pin-previewing {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: #fff;
+  border-color: #b3ecff;
+  box-shadow: 0 0 18px rgba(0, 198, 255, 0.8);
+}
+
+.gh-stage-pin-btn.pin-seq-locked {
+  background: rgba(20, 24, 36, 0.88);
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+  opacity: 0.85;
+}
+
+@keyframes bouncePin {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+  50% { transform: translate(-50%, -50%) translateY(-5px); }
 }
 
 /* Connected Room Doorway Navigation Pins */
