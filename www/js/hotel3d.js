@@ -1,6 +1,7 @@
 // ========================================================
-// VELVET SECRETS — GOSSIP HARBOR STYLE PHOTOREALISTIC
-// SEQUENTIAL SINGLE-PLACEMENT HOTEL RENOVATION ENGINE
+// VELVET SECRETS — GOSSIP HARBOR STYLE HOTEL RENOVATION ENGINE
+// Independent Multi-Task Area Progression, Clear Room Environments,
+// 3 Distinct Design Choices & Real In-Scene Transformations
 // ========================================================
 
 class Hotel3DSimulator {
@@ -19,44 +20,29 @@ class Hotel3DSimulator {
             renovations: {}
         };
 
-        this.sequentialOrder = [
-            'reception_desk',
-            'lobby_chandelier',
-            'lobby_carpet',
-            'restaurant_tables',
-            'restaurant_bar',
-            'room101_bed',
-            'room101_decor',
-            'swimming_pool',
-            'spa_jacuzzi',
-            'garden_courtyard',
-            'penthouse_suite'
-        ];
-
-        this.currentRoom = 'lobby';
+        // Default primary focus is the Riviera Restaurant as requested
+        this.currentRoom = 'restaurant';
         this.isMapMode = false;
-        this.selectedAreaId = 'reception_desk';
+        this.selectedAreaId = 'restaurant_tables';
         this.selectedOptionIndex = 0;
         this.isRenovationDockOpen = false;
         this.previewingRenovation = null;
-        this.activeModalPoint = null;
         this.notifiedAffordable = new Set();
 
-        // Smooth pan & zoom state for Gossip Harbor room stage
+        // Smooth pan & zoom state for room panorama
         this.panX = 0;
         this.panY = 0;
         this.zoom = 1.0;
         this.isDraggingStage = false;
 
-        this.setupRenovationDefinitions();
         this.setupRoomDefinitions();
+        this.setupRenovationDefinitions();
         this.loadState();
 
-        // Default selection is always the current active sequential renovation item
-        const activeSeq = this.getCurrentSequentialAreaId();
-        if (activeSeq && this.renovationDefs[activeSeq]) {
-            this.selectedAreaId = activeSeq;
-            this.currentRoom = this.renovationDefs[activeSeq].room || 'lobby';
+        // Default active task selection for current room
+        const activeTask = this.getAreaActiveTask(this.currentRoom);
+        if (activeTask) {
+            this.selectedAreaId = activeTask.id;
         }
 
         this.initAudio();
@@ -79,9 +65,6 @@ class Hotel3DSimulator {
                 this.updateProximityPanel();
                 this.renderStage();
                 this.renderHotelAreaCards();
-                if (this.activeModalPoint) {
-                    this.renderModalContent(this.activeModalPoint);
-                }
             });
             setTimeout(() => this.checkAffordableNotifications(true), 800);
         }
@@ -93,94 +76,324 @@ class Hotel3DSimulator {
     }
 
     // ----------------------------------------------------
-    // ROOM & ISOMETRIC RESORT MAP DEFINITIONS
+    // 1. HOTEL ROOM / AREA DEFINITIONS (INDEPENDENT PROGRESSION)
     // ----------------------------------------------------
     setupRoomDefinitions() {
         this.rooms = {
-            lobby: {
-                id: 'lobby',
-                name: 'Aurelia Palace Büyük Lobi & Resepsiyon',
-                shortName: '🏛️ Büyük Lobi',
-                floorLabel: 'Zemin Kat · Merkez Kanat (Sıra 1–3)',
-                bgImg: 'assets/scene_lobby_reception.jpg',
-                mapPos: { x: 50, y: 66 },
-                areas: ['reception_desk', 'lobby_chandelier', 'lobby_carpet'],
-                dialogue: 'Büyük Lobi: Sırayla Mermer Resepsiyon Bankosu (Sıra 1), Kristal Avize (Sıra 2) ve Kraliyet Halısı & Koltuklarını (Sıra 3) kurun.'
-            },
             restaurant: {
                 id: 'restaurant',
                 name: 'Riviera Gurme Restoran & Şampanya Barı',
                 shortName: '🍷 Riviera Restoran',
-                floorLabel: 'Zemin Kat · Doğu Terası (Sıra 4–5)',
+                floorLabel: 'Zemin Kat · Doğu Terası',
                 bgImg: 'assets/scene_restaurant_pool.jpg',
                 mapPos: { x: 80, y: 60 },
-                areas: ['restaurant_tables', 'restaurant_bar'],
-                dialogue: 'Riviera Restoran: Sıra 4 Gurme Masaları ve Sıra 5 Şampanya & Kokteyl Barı burada kurulur.'
+                description: 'Monako yat limanı manzaralı açık hava lüks gurme restoranı.',
+                dialogue: 'Riviera Restoran: Gurme yemek masalarını kurup şampanya barı ve teras aydınlatmasıyla mekanı dönüştürün!',
+                tasks: ['restaurant_tables', 'restaurant_bar', 'restaurant_lighting', 'restaurant_terrace']
+            },
+            lobby: {
+                id: 'lobby',
+                name: 'Aurelia Palace Büyük Lobi & Resepsiyon',
+                shortName: '🏛️ Büyük Lobi',
+                floorLabel: 'Zemin Kat · Merkez Kanat',
+                bgImg: 'assets/scene_lobby_reception.jpg',
+                mapPos: { x: 50, y: 66 },
+                description: 'Kraliyet karşılamasının ve otel ihtişamının mermer salonu.',
+                dialogue: 'Büyük Lobi: Resepsiyon bankosu, Bohemya avizesi ve ipek halılarla otelimize layık bir karşılama salonu yaratın!',
+                tasks: ['reception_desk', 'lobby_chandelier', 'lobby_carpet', 'lobby_columns']
             },
             room101: {
                 id: 'room101',
                 name: 'Deluxe Deniz Manzaralı Suit (Oda 101)',
                 shortName: '🛏️ Suit 101',
-                floorLabel: 'Zemin Kat · Batı Kanadı (Sıra 6–7)',
+                floorLabel: '1. Kat · Batı Kanadı',
                 bgImg: 'assets/scene_presidential_suite.jpg',
                 mapPos: { x: 20, y: 60 },
-                areas: ['room101_bed', 'room101_decor'],
-                dialogue: 'Deluxe Suit 101: Sıra 6 Kraliyet Yatağı & Lounge ve Sıra 7 Panoramik Deniz Terası burada yer alır.'
+                description: 'Panoramik Akdeniz manzaralı ultra-lüks VIP konuk suiti.',
+                dialogue: 'Deluxe Suit 101: Dört direkli kraliyet yatağı ve manzara balkonuyla Monako sosyetesine layık bir suit hazırlayın.',
+                tasks: ['room101_bed', 'room101_decor', 'room101_lounge']
             },
             pool: {
                 id: 'pool',
                 name: 'Aurelia Sonsuzluk Havuzu & Güneş Terası',
                 shortName: '🏊 Sonsuzluk Havuzu',
-                floorLabel: 'Kuzey Sahil Terası (Sıra 8)',
+                floorLabel: 'Kuzey Sahil Terası',
                 bgImg: 'assets/scene_infinity_pool.jpg',
                 mapPos: { x: 50, y: 36 },
-                areas: ['swimming_pool'],
-                dialogue: 'Sonsuzluk Havuzu: Sıra 8 Güneşlenme Locaları & Havuz tasarımı burada seçilir.'
+                description: 'Monako körfezini tepeden gören altın mozaikli sonsuzluk havuzu.',
+                dialogue: 'Sonsuzluk Havuzu: Havuzu yenileyin, VIP locaları ve akşam ateş çukurunu kurarak muhteşem bir teras oluşturun.',
+                tasks: ['swimming_pool', 'pool_cabanas', 'pool_lounge']
             },
             spa: {
                 id: 'spa',
-                name: 'Aurelia Zen Termal Spa & Jakuzi Pavyonu',
+                name: 'Aurelia Zen Termal Spa & Jakuzi',
                 shortName: '♨️ Zen Spa',
-                floorLabel: 'Kuzeydoğu Mermer Pavyonu (Sıra 9)',
+                floorLabel: 'Kuzeydoğu Mermer Pavyonu',
                 bgImg: 'assets/scene_spa_wellness.jpg',
                 mapPos: { x: 80, y: 32 },
-                areas: ['spa_jacuzzi'],
-                dialogue: 'Zen Termal Spa: Sıra 9 Mermer Termal Jakuzi kurulumu burada yapılır.'
+                description: 'Doğal sıcak mineralli kaynak suyu ve masaj pavyonu.',
+                dialogue: 'Zen Termal Spa: Mermer jakuzi ve dinlenme yataklarıyla huzur dolu bir şifa merkezi inşa edin.',
+                tasks: ['spa_jacuzzi', 'spa_beds', 'spa_waterfall']
             },
             garden: {
                 id: 'garden',
-                name: 'Akdeniz Botanik Gül Bahçesi & Mermer Çeşme',
+                name: 'Akdeniz Botanik Bahçesi & Çeşme',
                 shortName: '🌹 Botanik Bahçe',
-                floorLabel: 'Kuzeybatı Kraliyet Avlusu (Sıra 10)',
+                floorLabel: 'Kuzeybatı Kraliyet Avlusu',
                 bgImg: 'assets/scene_garden_terrace.jpg',
                 mapPos: { x: 20, y: 32 },
-                areas: ['garden_courtyard'],
-                dialogue: 'Botanik Bahçe: Sıra 10 Mermer Kraliyet Çeşmesi burada kurulur.'
+                description: 'Nadir güller, mermer saray çeşmesi ve gölgeli pergolalar.',
+                dialogue: 'Botanik Bahçe: 3 katlı saray çeşmesini onarın, sarmaşık güllü pergolayla avluyu canlandırın.',
+                tasks: ['garden_courtyard', 'garden_pergola', 'garden_pavilion']
             },
             penthouse: {
                 id: 'penthouse',
-                name: '2. Kat Kraliyet Penthouse & Piyano Salonu',
+                name: '2. Kat Başkanlık Penthouse & Piyano Salonu',
                 shortName: '👑 2. Kat Penthouse',
-                floorLabel: '2. Kat · Çatı Katı Suiti (Sıra 11)',
+                floorLabel: '2. Kat · Çatı Katı Suiti',
                 bgImg: 'assets/scene_penthouse_piano.jpg',
                 mapPos: { x: 50, y: 14 },
-                areas: ['penthouse_suite'],
-                dialogue: '2. Kat Penthouse: Sıra 11 Kuyruklu Konser Piyanosu & Şömine Salonu final adımıdır.'
+                description: 'Çatı katı suitinde kuyruklu konser piyanosu ve şömine salonu.',
+                dialogue: '2. Kat Penthouse: Konser piyanosu ve mermer şömineli salonu kurarak en seçkin gala süitini tamamlayın.',
+                tasks: ['penthouse_suite', 'penthouse_fireplace', 'penthouse_terrace']
             }
         };
     }
 
     // ----------------------------------------------------
-    // 11 SEQUENTIAL SINGLE-PLACEMENT FURNITURE DEFINITIONS
+    // 2. RENOVATION TASK DEFINITIONS WITH 3 DISTINCT CHOICES
     // ----------------------------------------------------
     setupRenovationDefinitions() {
         this.renovationDefs = {
+            // === RIVIERA RESTORAN TASKS ===
+            restaurant_tables: {
+                id: 'restaurant_tables',
+                room: 'restaurant',
+                order: 1,
+                name: 'Riviera Yemek Masalarını Değiştir',
+                area: 'Riviera Restoran · Görev 1/4',
+                sceneImg: 'assets/scene_restaurant_pool.jpg',
+                stageBox: [0.20, 0.46, 0.60, 0.44],
+                pinX: 48,
+                pinY: 64,
+                defaultDesc: 'Örtüsüz eski ahşap masalar ve sade sandalyeler (Yenilenmedi)',
+                baseCost: 1200,
+                starsNeeded: 1,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Beyaz Carrara Mermeri & Açık Meşe',
+                        style: 'Modern Zarafet',
+                        cost: 1200,
+                        stars: 1,
+                        incomeBoost: 35,
+                        repBoost: 50,
+                        icon: '🍽️',
+                        desc: 'Açık meşe ahşap ayaklar, İtalyan Carrara mermeri masa tablası ve fırçalanmış pirinç detaylar.',
+                        previewImg: 'assets/designs/restaurant_tables_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_tables_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Siyah Nero Marquina & Bordo Kadife',
+                        style: 'Kraliyet Kadife',
+                        cost: 1200,
+                        stars: 1,
+                        incomeBoost: 40,
+                        repBoost: 60,
+                        icon: '🌹',
+                        desc: 'Derin siyah İspanyol mermeri gövde, bordo kapitone kadife koltuklar ve altın şamdanlar.',
+                        previewImg: 'assets/designs/restaurant_tables_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_tables_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Koyu Maun Ahşap & Akdeniz Riviera',
+                        style: 'Klasik Premium',
+                        cost: 1200,
+                        stars: 1,
+                        incomeBoost: 45,
+                        repBoost: 70,
+                        icon: '🍷',
+                        desc: 'Doğal koyu maun masif ahşap, turkuaz ipek yastıklar ve Akdeniz ferforje sandalyeler.',
+                        previewImg: 'assets/designs/restaurant_tables_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_tables_opt_c.png'
+                    }
+                ]
+            },
+            restaurant_bar: {
+                id: 'restaurant_bar',
+                room: 'restaurant',
+                order: 2,
+                name: 'Oniks Şampanya & Kokteyl Barı',
+                area: 'Riviera Restoran · Görev 2/4',
+                sceneImg: 'assets/scene_restaurant_pool.jpg',
+                stageBox: [0.55, 0.28, 0.42, 0.45],
+                pinX: 78,
+                pinY: 45,
+                defaultDesc: 'Boş raflı, ışıksız eski içecek tezgâhı (Yenilenmedi)',
+                baseCost: 1800,
+                starsNeeded: 2,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Arkadan Aydınlatmalı Amber Oniks & Altın Bar',
+                        style: 'Modern Zarafet',
+                        cost: 1800,
+                        stars: 2,
+                        incomeBoost: 50,
+                        repBoost: 75,
+                        icon: '🍸',
+                        desc: 'Sıcak amber ışıltılı bal oniksi bar tezgâhı, altın fırçalanmış pirinç bar tabureleri ve kristal raflar.',
+                        previewImg: 'assets/designs/restaurant_bar_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_bar_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Zümrüt Yeşili Mermer & Siyah Kadife Bar',
+                        style: 'Kraliyet Kadife',
+                        cost: 1800,
+                        stars: 2,
+                        incomeBoost: 55,
+                        repBoost: 85,
+                        icon: '🍾',
+                        desc: 'Nadir zümrüt damarlı mermer ön panel, siyah kadife oturma grubu ve konyak vitrini.',
+                        previewImg: 'assets/designs/restaurant_bar_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_bar_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Beyaz Carrara Mermeri & Akdeniz Mozaik Bar',
+                        style: 'Klasik Premium',
+                        cost: 1800,
+                        stars: 2,
+                        incomeBoost: 60,
+                        repBoost: 95,
+                        icon: '🥂',
+                        desc: 'Beyaz Carrara mermeri, Akdeniz mavisi cam mozaikler ve tik ağacı ada bar tabureleri.',
+                        previewImg: 'assets/designs/restaurant_bar_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_bar_opt_c.png'
+                    }
+                ]
+            },
+            restaurant_lighting: {
+                id: 'restaurant_lighting',
+                room: 'restaurant',
+                order: 3,
+                name: 'Teras Avizeleri & Sıcak Aydınlatma',
+                area: 'Riviera Restoran · Görev 3/4',
+                sceneImg: 'assets/scene_restaurant_pool.jpg',
+                stageBox: [0.15, 0.10, 0.35, 0.35],
+                pinX: 30,
+                pinY: 28,
+                defaultDesc: 'Sönük eski fenerler ve yetersiz gece ışıklandırması',
+                baseCost: 1500,
+                starsNeeded: 1,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Geometrik Altın Halkalı Kristal Sarkıtlar',
+                        style: 'Modern Zarafet',
+                        cost: 1500,
+                        stars: 1,
+                        incomeBoost: 40,
+                        repBoost: 60,
+                        icon: '✨',
+                        desc: 'Altın kaplama iç içe geçen geometrik halkalar ve sıcak ışık saçan elmas kristaller.',
+                        previewImg: 'assets/designs/restaurant_tables_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_tables_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Mum Işıklı 3 Kollu Pirinç Kraliyet Şamdanları',
+                        style: 'Kraliyet Kadife',
+                        cost: 1500,
+                        stars: 1,
+                        incomeBoost: 45,
+                        repBoost: 68,
+                        icon: '🕯️',
+                        desc: 'Bordo mumlu, antika pirinçten dövülmüş masif kraliyet masa şamdanları.',
+                        previewImg: 'assets/designs/restaurant_tables_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_tables_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Asma Bohemya Cam Fenerler & Sıcak LED Işıklar',
+                        style: 'Klasik Premium',
+                        cost: 1500,
+                        stars: 1,
+                        incomeBoost: 50,
+                        repBoost: 75,
+                        icon: '🏮',
+                        desc: 'El yapımı turkuaz Bohemya cam fenerler ve pergoladan sarkan yıldız LED zincirleri.',
+                        previewImg: 'assets/designs/restaurant_tables_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_tables_opt_c.png'
+                    }
+                ]
+            },
+            restaurant_terrace: {
+                id: 'restaurant_terrace',
+                room: 'restaurant',
+                order: 4,
+                name: 'Mermer Teras Zemini & Gala Dekoru',
+                area: 'Riviera Restoran · Görev 4/4',
+                sceneImg: 'assets/scene_restaurant_pool.jpg',
+                stageBox: [0.05, 0.38, 0.35, 0.45],
+                pinX: 20,
+                pinY: 56,
+                defaultDesc: 'Yıpranmış taş zemin ve sade teras korkulukları',
+                baseCost: 2200,
+                starsNeeded: 2,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Fildişi Mermer Zemin & Beyaz Orkide Aranjmanları',
+                        style: 'Modern Zarafet',
+                        cost: 2200,
+                        stars: 2,
+                        incomeBoost: 60,
+                        repBoost: 90,
+                        icon: '🌸',
+                        desc: 'Parlak fildişi cilalı İtalyan mermer zemin ve 24K altın ayaklıklı beyaz orkideler.',
+                        previewImg: 'assets/designs/restaurant_bar_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_bar_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Bordo Halı Yolu & Kırmızı Kadife Güller',
+                        style: 'Kraliyet Kadife',
+                        cost: 2200,
+                        stars: 2,
+                        incomeBoost: 65,
+                        repBoost: 100,
+                        icon: '🌹',
+                        desc: 'Özel dokuma bordo kadife protokol halısı ve kristal vazolarda kırmızı taze güller.',
+                        previewImg: 'assets/designs/restaurant_bar_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_bar_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Tik Ağacı Güverte & Monako Limon Ağaçları',
+                        style: 'Klasik Premium',
+                        cost: 2200,
+                        stars: 2,
+                        incomeBoost: 70,
+                        repBoost: 110,
+                        icon: '🍋',
+                        desc: 'Yat güvertesi tarzı doğal masif tik zemin ve pişmiş toprak saksılarda Akdeniz limon ağaçları.',
+                        previewImg: 'assets/designs/restaurant_bar_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_restaurant_bar_opt_c.png'
+                    }
+                ]
+            },
+
+            // === BÜYÜK LOBİ & RESEPSİYON TASKS ===
             reception_desk: {
                 id: 'reception_desk',
-                seqOrder: 1,
                 room: 'lobby',
+                order: 1,
                 name: 'Mermer Resepsiyon Bankosu',
-                area: 'Sıra 1/11 · Büyük Lobi',
+                area: 'Büyük Lobi · Görev 1/4',
                 sceneImg: 'assets/scene_lobby_reception.jpg',
                 stageBox: [0.33, 0.49, 0.33, 0.27],
                 pinX: 50,
@@ -192,44 +405,50 @@ class Hotel3DSimulator {
                     {
                         id: 'opt_a',
                         name: 'Beyaz Carrara Mermeri & 24K Altın Banko',
-                        style: 'Beyaz Mermer & Altın',
+                        style: 'Modern Zarafet',
                         cost: 1500,
                         stars: 1,
                         incomeBoost: 30,
                         repBoost: 45,
                         icon: '🏛️',
-                        desc: 'Parlak beyaz İtalyan Carrara mermeri, 24 ayar altın sütun şeritleri ve sıcak karşılama ışığı.'
+                        desc: 'Parlak beyaz İtalyan Carrara mermeri, 24 ayar altın sütun şeritleri ve sıcak karşılama ışığı.',
+                        previewImg: 'assets/designs/reception_desk_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_reception_desk_opt_a.png'
                     },
                     {
                         id: 'opt_b',
                         name: 'Bordo Kraliyet Kadifesi & Siyah Mermer Banko',
-                        style: 'Bordo Kadife & Siyah',
+                        style: 'Kraliyet Kadife',
                         cost: 1500,
                         stars: 1,
                         incomeBoost: 35,
                         repBoost: 55,
                         icon: '🌹',
-                        desc: 'Kapitone bordo kraliyet kadifesi, siyah Nero mermer gövde ve pembe-altın LED aydınlatma.'
+                        desc: 'Kapitone bordo kraliyet kadifesi, siyah Nero mermer gövde ve pembe-altın LED aydınlatma.',
+                        previewImg: 'assets/designs/reception_desk_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_reception_desk_opt_b.png'
                     },
                     {
                         id: 'opt_c',
                         name: 'Turkuaz-Zümrüt Damarlı Mermer & Maun Banko',
-                        style: 'Turkuaz & Zümrüt Riviera',
+                        style: 'Klasik Premium',
                         cost: 1500,
                         stars: 1,
                         incomeBoost: 40,
                         repBoost: 65,
                         icon: '💎',
-                        desc: 'Akdeniz turkuazı ve zümrüt damarlı nadir mermer gövde, fırçalanmış pirinç detaylar.'
+                        desc: 'Akdeniz turkuazı ve zümrüt damarlı nadir mermer gövde, fırçalanmış pirinç detaylar.',
+                        previewImg: 'assets/designs/reception_desk_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_reception_desk_opt_c.png'
                     }
                 ]
             },
             lobby_chandelier: {
                 id: 'lobby_chandelier',
-                seqOrder: 2,
                 room: 'lobby',
+                order: 2,
                 name: 'Büyük Lobi Kristal Avizesi',
-                area: 'Sıra 2/11 · Büyük Lobi',
+                area: 'Büyük Lobi · Görev 2/4',
                 sceneImg: 'assets/scene_lobby_reception.jpg',
                 stageBox: [0.37, 0.00, 0.26, 0.41],
                 pinX: 50,
@@ -241,338 +460,496 @@ class Hotel3DSimulator {
                     {
                         id: 'opt_a',
                         name: 'Beyaz Elmas & 24K Altın Saray Avizesi',
-                        style: 'Elmas Beyaz & Altın',
+                        style: 'Modern Zarafet',
                         cost: 2200,
                         stars: 2,
                         incomeBoost: 45,
                         repBoost: 70,
                         icon: '✨',
-                        desc: '3 katlı elmas kesim beyaz Bohemya kristalleri ve 24 ayar altın mum kolları.'
+                        desc: '3 katlı elmas kesim beyaz Bohemya kristalleri ve 24 ayar altın mum kolları.',
+                        previewImg: 'assets/designs/lobby_chandelier_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_lobby_chandelier_opt_a.png'
                     },
                     {
                         id: 'opt_b',
                         name: 'Yakut Kırmızısı & Pembe Altın İmparatorluk Avizesi',
-                        style: 'Yakut Kırmızısı & Altın',
+                        style: 'Kraliyet Kadife',
                         cost: 2200,
                         stars: 2,
                         incomeBoost: 50,
                         repBoost: 80,
                         icon: '🌺',
-                        desc: 'Kızıl yakut kristal damlalar ve sıcak romantik gala aydınlatması.'
+                        desc: 'Kızıl yakut kristal damlalar ve sıcak romantik gala aydınlatması.',
+                        previewImg: 'assets/designs/lobby_chandelier_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_lobby_chandelier_opt_b.png'
                     },
                     {
                         id: 'opt_c',
                         name: 'Venedik Murano Turkuaz & Zümrüt Kristal Avize',
-                        style: 'Turkuaz Murano Cam',
+                        style: 'Klasik Premium',
                         cost: 2200,
                         stars: 2,
                         incomeBoost: 55,
                         repBoost: 90,
                         icon: '💎',
-                        desc: 'El üflemesi turkuaz ve zümrüt Venedik Murano kristalleriyle deniz ışıltısı.'
+                        desc: 'El üflemesi turkuaz ve zümrüt Venedik Murano kristalleriyle deniz ışıltısı.',
+                        previewImg: 'assets/designs/lobby_chandelier_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_lobby_chandelier_opt_c.png'
                     }
                 ]
             },
             lobby_carpet: {
                 id: 'lobby_carpet',
-                seqOrder: 3,
                 room: 'lobby',
-                name: 'Lobi Kraliyet Halısı & Dinlenme Koltukları',
-                area: 'Sıra 3/11 · Büyük Lobi',
+                order: 3,
+                name: 'Lobi Kraliyet Halısı & Koltukları',
+                area: 'Büyük Lobi · Görev 3/4',
                 sceneImg: 'assets/scene_lobby_reception.jpg',
-                stageBox: [0.66, 0.46, 0.32, 0.34],
-                pinX: 80,
-                pinY: 58,
-                defaultDesc: 'Soluk halı ve yıpranmış eski koltuklar (Yenilenmedi)',
-                baseCost: 950,
-                starsNeeded: 1,
-                options: [
-                    {
-                        id: 'opt_a',
-                        name: 'Krem İpek Halı & İnci Beyazı Berjer Koltuklar',
-                        style: 'Krem İpek & Altın',
-                        cost: 950,
-                        stars: 1,
-                        incomeBoost: 22,
-                        repBoost: 35,
-                        icon: '🛋️',
-                        desc: 'Fildişi-altın dokuma saray halısı ve inci beyazı lüks dinlenme berjerleri.'
-                    },
-                    {
-                        id: 'opt_b',
-                        name: 'Kızıl Bordo Kadife Koltuklar & Kraliyet Halısı',
-                        style: 'Bordo Kraliyet Kadifesi',
-                        cost: 950,
-                        stars: 1,
-                        incomeBoost: 26,
-                        repBoost: 40,
-                        icon: '🌹',
-                        desc: 'Derin bordo kadife berjer koltuklar, altın sehpa ve kızıl ipek halı.'
-                    },
-                    {
-                        id: 'opt_c',
-                        name: 'Turkuaz & Zümrüt İpek Riviera Lounge Takımı',
-                        style: 'Turkuaz & Zümrüt',
-                        cost: 950,
-                        stars: 1,
-                        incomeBoost: 30,
-                        repBoost: 45,
-                        icon: '🦚',
-                        desc: 'Zümrüt ve turkuaz kadife koltuklar ile Akdeniz motifli ipek halı.'
-                    }
-                ]
-            },
-            restaurant_tables: {
-                id: 'restaurant_tables',
-                seqOrder: 4,
-                room: 'restaurant',
-                name: 'Riviera Restoran Yemek Masaları',
-                area: 'Sıra 4/11 · Restoran',
-                sceneImg: 'assets/scene_restaurant_pool.jpg',
-                stageBox: [0.28, 0.62, 0.70, 0.38],
-                pinX: 58,
-                pinY: 74,
-                defaultDesc: 'Örtüsüz eski masalar ve sade sandalyeler (Yenilenmedi)',
+                stageBox: [0.22, 0.62, 0.56, 0.36],
+                pinX: 50,
+                pinY: 78,
+                defaultDesc: 'Soluk koridor halısı ve eski koltuklar (Yenilenmedi)',
                 baseCost: 1200,
                 starsNeeded: 1,
                 options: [
                     {
                         id: 'opt_a',
-                        name: 'Yuvarlak Beyaz İpek & Altın Fenerli Gala Masası',
-                        style: 'Beyaz İpek & Altın',
+                        name: 'Krem İpek Halı & İnci Beyazı Berjer Koltuklar',
+                        style: 'Modern Zarafet',
+                        cost: 1200,
+                        stars: 1,
+                        incomeBoost: 25,
+                        repBoost: 40,
+                        icon: '🛋️',
+                        desc: 'Fildişi-altın dokuma saray halısı ve inci beyazı lüks dinlenme berjerleri.',
+                        previewImg: 'assets/designs/lobby_carpet_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_lobby_carpet_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Bordo Kraliyet Madalyon Halı & Kadife Kanepeler',
+                        style: 'Kraliyet Kadife',
                         cost: 1200,
                         stars: 1,
                         incomeBoost: 30,
-                        repBoost: 45,
-                        icon: '🥂',
-                        desc: 'Beyaz ipek örtülü yuvarlak masa, altın fener ve kraliyet mavisi-altın koltuklar.'
+                        repBoost: 50,
+                        icon: '👑',
+                        desc: 'Koyu bordo saray halısı, altın saçaklar ve bordo kraliyet kadife kanepeleri.',
+                        previewImg: 'assets/designs/lobby_carpet_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_lobby_carpet_opt_b.png'
                     },
                     {
-                        id: 'opt_b',
-                        name: 'Bordo-Kızıl Mum Işıklı Romantik Oval Masa',
-                        style: 'Bordo Romantik Gala',
+                        id: 'opt_c',
+                        name: 'Turkuaz & Zümrüt Riviera Halı & Maun Koltuklar',
+                        style: 'Klasik Premium',
                         cost: 1200,
                         stars: 1,
                         incomeBoost: 35,
-                        repBoost: 52,
-                        icon: '🕯️',
-                        desc: 'Kızıl-bordo mum ışığı ambiyanslı oval VIP masa ve kadife sandalyeler.'
-                    },
-                    {
-                        id: 'opt_c',
-                        name: 'Turkuaz Lagün Işıklı Kare Akdeniz Masası',
-                        style: 'Turkuaz Akdeniz',
-                        cost: 1200,
-                        stars: 1,
-                        incomeBoost: 38,
-                        repBoost: 58,
+                        repBoost: 60,
                         icon: '🌊',
-                        desc: 'Havuz kenarı turkuaz aydınlatmalı kare gurme masa ve tik ağacı sandalyeler.'
+                        desc: 'Zümrüt ve turkuaz Akdeniz motifli halı ve oymalı masif maun koltuklar.',
+                        previewImg: 'assets/designs/lobby_carpet_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_lobby_carpet_opt_c.png'
                     }
                 ]
             },
-            restaurant_bar: {
-                id: 'restaurant_bar',
-                seqOrder: 5,
-                room: 'restaurant',
-                name: 'Şampanya & Kokteyl Barı',
-                area: 'Sıra 5/11 · Restoran & Bar',
-                sceneImg: 'assets/scene_restaurant_pool.jpg',
-                stageBox: [0.00, 0.44, 0.36, 0.52],
-                pinX: 20,
-                pinY: 64,
-                defaultDesc: 'Işıksız eski teras bar köşesi (Yenilenmedi)',
-                baseCost: 1800,
-                starsNeeded: 2,
+            lobby_columns: {
+                id: 'lobby_columns',
+                room: 'lobby',
+                order: 4,
+                name: 'Saray Karşılama Sütunları & Kemeri',
+                area: 'Büyük Lobi · Görev 4/4',
+                sceneImg: 'assets/scene_lobby_reception.jpg',
+                stageBox: [0.72, 0.25, 0.24, 0.55],
+                pinX: 82,
+                pinY: 50,
+                defaultDesc: 'Sade sıvalı giriş kapısı',
+                baseCost: 1700,
+                starsNeeded: 1,
                 options: [
                     {
                         id: 'opt_a',
-                        name: 'Fildişi Mermer Kemerli & Altın Şampanya Barı',
-                        style: 'Beyaz Mermer & Altın',
-                        cost: 1800,
-                        stars: 2,
+                        name: 'İyonik Beyaz Mermer Sütunlar & Altın Işık',
+                        style: 'Modern Zarafet',
+                        cost: 1700,
+                        stars: 1,
                         incomeBoost: 40,
-                        repBoost: 60,
-                        icon: '🍾',
-                        desc: 'Aydınlık fildişi taş kemerler altında altın fenerli VIP şampanya locası.'
+                        repBoost: 65,
+                        icon: '🏛️',
+                        desc: 'Klasik İyonik beyaz mermer sütunlar ve gizli altın LED aydınlatma.',
+                        previewImg: 'assets/designs/reception_desk_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_reception_desk_opt_a.png'
                     },
                     {
                         id: 'opt_b',
-                        name: 'Kızıl Yakut Işıklı Gece Kokteyl Barı',
-                        style: 'Bordo & Yakut Lounge',
-                        cost: 1800,
-                        stars: 2,
+                        name: 'Siyah Nero Sütunlar & Bordo Yaldızlı Kemer',
+                        style: 'Kraliyet Kadife',
+                        cost: 1700,
+                        stars: 1,
                         incomeBoost: 45,
-                        repBoost: 68,
-                        icon: '🍸',
-                        desc: 'Bordo-kızıl ambiyans aydınlatmalı romantik teras kokteyl barı.'
+                        repBoost: 75,
+                        icon: '🌹',
+                        desc: 'Siyah mermer gövde, bordo yaldızlı saray kemeri ve altın arma.',
+                        previewImg: 'assets/designs/reception_desk_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_reception_desk_opt_b.png'
                     },
                     {
                         id: 'opt_c',
-                        name: 'Turkuaz & Zümrüt Esintili Riviera Barı',
-                        style: 'Turkuaz Riviera Bar',
-                        cost: 1800,
-                        stars: 2,
+                        name: 'Akdeniz Oymalı Maun & Turkuaz Mozaik Sütun',
+                        style: 'Klasik Premium',
+                        cost: 1700,
+                        stars: 1,
                         incomeBoost: 50,
-                        repBoost: 75,
-                        icon: '🥃',
-                        desc: 'Turkuaz ve zümrüt aydınlatmalı Akdeniz sahil kulübü barı.'
+                        repBoost: 85,
+                        icon: '💎',
+                        desc: 'Nadir maun oymalar ve turkuaz-zümrüt cam mozaikli sütun başlıkları.',
+                        previewImg: 'assets/designs/reception_desk_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_reception_desk_opt_c.png'
                     }
                 ]
             },
+
+            // === DELUXE SUIT 101 TASKS ===
             room101_bed: {
                 id: 'room101_bed',
-                seqOrder: 6,
                 room: 'room101',
-                name: 'Deluxe Suit Kraliyet Yatağı & Lounge (Oda 101)',
-                area: 'Sıra 6/11 · Suit 101',
+                order: 1,
+                name: 'Deluxe Suit Kraliyet Yatağı',
+                area: 'Suit 101 · Görev 1/3',
                 sceneImg: 'assets/scene_presidential_suite.jpg',
-                stageBox: [0.01, 0.48, 0.46, 0.46],
-                pinX: 26,
-                pinY: 66,
-                defaultDesc: 'Soluk ve yıpranmış eski suit mobilyası (Yenilenmedi)',
+                stageBox: [0.18, 0.38, 0.64, 0.48],
+                pinX: 50,
+                pinY: 55,
+                defaultDesc: 'Standart eski karyola ve sade başlık (Yenilenmedi)',
                 baseCost: 1600,
                 starsNeeded: 1,
                 options: [
                     {
                         id: 'opt_a',
-                        name: 'İnci Beyazı Kaşmir & 24K Altın Suit Takımı',
-                        style: 'Beyaz Kaşmir & Altın',
-                        cost: 1600,
-                        stars: 1,
-                        incomeBoost: 36,
-                        repBoost: 52,
-                        icon: '🛏️',
-                        desc: 'İnci beyazı kaşmir döşeme, ipek yastıklar ve 24 ayar altın mermer orta sehpa.'
-                    },
-                    {
-                        id: 'opt_b',
-                        name: 'Kızıl Bordo Kadife & Pembe Altın Balayı Takımı',
-                        style: 'Bordo Kadife Suit',
+                        name: 'Beyaz İpek ve 24K Altın Dört Direkli Yatak',
+                        style: 'Modern Zarafet',
                         cost: 1600,
                         stars: 1,
                         incomeBoost: 40,
-                        repBoost: 58,
-                        icon: '🌹',
-                        desc: 'Derin bordo kraliyet kadifesi, kırmızı ipek yastıklar ve pembe-altın sehpa.'
+                        repBoost: 60,
+                        icon: '🛏️',
+                        desc: 'Bembeyaz ipek çarşaflar, 24K altın direkli saray yatak başlığı ve ortopedik kral yatak.',
+                        previewImg: 'assets/designs/room101_bed_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_room101_bed_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Bordo Kraliyet Kadifesi ve Siyah Karyola',
+                        style: 'Kraliyet Kadife',
+                        cost: 1600,
+                        stars: 1,
+                        incomeBoost: 45,
+                        repBoost: 70,
+                        icon: '👑',
+                        desc: 'Koyu bordo kapitone kadife yatak başlığı, siyah lake gövde ve kaz tüyü yastıklar.',
+                        previewImg: 'assets/designs/room101_bed_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_room101_bed_opt_b.png'
                     },
                     {
                         id: 'opt_c',
-                        name: 'Turkuaz & Zümrüt İpek Körfez Suit Takımı',
-                        style: 'Turkuaz & Zümrüt',
+                        name: 'Turkuaz Tül Cibinlikli ve Masif Maun Yatak',
+                        style: 'Klasik Premium',
                         cost: 1600,
                         stars: 1,
-                        incomeBoost: 44,
-                        repBoost: 64,
-                        icon: '💎',
-                        desc: 'Zümrüt-turkuaz kadife döşeme, turkuaz ipek yastıklar ve gümüş-mermer sehpa.'
+                        incomeBoost: 50,
+                        repBoost: 80,
+                        icon: '🌊',
+                        desc: 'Doğal maun ağacı oymalı yatak, deniz esintili turkuaz tül cibinlik ve keten örtüler.',
+                        previewImg: 'assets/designs/room101_bed_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_room101_bed_opt_c.png'
                     }
                 ]
             },
             room101_decor: {
                 id: 'room101_decor',
-                seqOrder: 7,
                 room: 'room101',
-                name: 'Suit 101 Şömine & Panoramik Deniz Köşesi',
-                area: 'Sıra 7/11 · Suit 101',
+                order: 2,
+                name: 'Panoramik Deniz Balkonu & Şezlonglar',
+                area: 'Suit 101 · Görev 2/3',
                 sceneImg: 'assets/scene_presidential_suite.jpg',
-                stageBox: [0.48, 0.34, 0.50, 0.54],
-                pinX: 72,
-                pinY: 56,
-                defaultDesc: 'Bakımsız şömine ve sönük pencere köşesi (Yenilenmedi)',
+                stageBox: [0.65, 0.30, 0.32, 0.45],
+                pinX: 82,
+                pinY: 52,
+                defaultDesc: 'Boş pencere önü ve eski sehpa (Yenilenmedi)',
                 baseCost: 1400,
                 starsNeeded: 1,
                 options: [
                     {
                         id: 'opt_a',
-                        name: 'Beyaz Carrara Mermer Şömine & Altın Köşe',
-                        style: 'Beyaz Mermer & Altın',
+                        name: 'Beyaz Deri Şezlonglar & Cam Şampanya Sehpası',
+                        style: 'Modern Zarafet',
                         cost: 1400,
                         stars: 1,
-                        incomeBoost: 30,
-                        repBoost: 45,
-                        icon: '🔥',
-                        desc: 'Parlak beyaz İtalyan mermeri şömine ve altın kristal aplikler.'
+                        incomeBoost: 35,
+                        repBoost: 50,
+                        icon: '🥂',
+                        desc: 'Modern beyaz deri teras şezlongları ve krom şampanya kovası masası.',
+                        previewImg: 'assets/designs/room101_decor_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_room101_decor_opt_a.png'
                     },
                     {
                         id: 'opt_b',
-                        name: 'Bordo & Kırmızı Kehribar Romantik Şömine Köşesi',
-                        style: 'Bordo & Kızıl Kehribar',
+                        name: 'Zümrüt Kadife Koltuk & Şömineli Teras Masası',
+                        style: 'Kraliyet Kadife',
                         cost: 1400,
                         stars: 1,
-                        incomeBoost: 34,
-                        repBoost: 50,
-                        icon: '🕯️',
-                        desc: 'Kızıl mermer şömine ve sıcak romantik akşam aydınlatması.'
+                        incomeBoost: 40,
+                        repBoost: 60,
+                        icon: '🔥',
+                        desc: 'Zümrüt yeşili kadife berjerler ve mini bio-etanol ateş masası.',
+                        previewImg: 'assets/designs/room101_decor_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_room101_decor_opt_b.png'
                     },
                     {
                         id: 'opt_c',
-                        name: 'Turkuaz & Zümrüt Mermer Deniz Köşesi',
-                        style: 'Turkuaz & Zümrüt',
+                        name: 'Tik Ağacı Akdeniz Teras Takımı & Begonviller',
+                        style: 'Klasik Premium',
                         cost: 1400,
                         stars: 1,
-                        incomeBoost: 38,
-                        repBoost: 56,
-                        icon: '🌊',
-                        desc: 'Turkuaz damarlı mermer şömine ve Akdeniz esintili dekorasyon.'
+                        incomeBoost: 45,
+                        repBoost: 70,
+                        icon: '🌺',
+                        desc: 'Masif tik ağacı oturma grubu ve deniz manzaralı canlı begonvil saksıları.',
+                        previewImg: 'assets/designs/room101_decor_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_room101_decor_opt_c.png'
                     }
                 ]
             },
+            room101_lounge: {
+                id: 'room101_lounge',
+                room: 'room101',
+                order: 3,
+                name: 'Mermer Şömine & Gece Aydınlatması',
+                area: 'Suit 101 · Görev 3/3',
+                sceneImg: 'assets/scene_presidential_suite.jpg',
+                stageBox: [0.08, 0.40, 0.30, 0.42],
+                pinX: 22,
+                pinY: 55,
+                defaultDesc: 'Boş oda köşesi',
+                baseCost: 1800,
+                starsNeeded: 2,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Beyaz Mermer Elektrikli Şömine & Altın Ayna',
+                        style: 'Modern Zarafet',
+                        cost: 1800,
+                        stars: 2,
+                        incomeBoost: 45,
+                        repBoost: 70,
+                        icon: '🔥',
+                        desc: 'İtalyan mermeri şömine, 24K altın varaklı boy aynası ve kristal abajurlar.',
+                        previewImg: 'assets/designs/room101_decor_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_room101_decor_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Siyah Granit Şömine & Bordo Puf Alanı',
+                        style: 'Kraliyet Kadife',
+                        cost: 1800,
+                        stars: 2,
+                        incomeBoost: 50,
+                        repBoost: 80,
+                        icon: '🌹',
+                        desc: 'Cilalı siyah granit şömine, bordo kapitone kadife puflar ve şamdanlar.',
+                        previewImg: 'assets/designs/room101_decor_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_room101_decor_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Akdeniz Doğal Taş Şömine & Masif Paravan',
+                        style: 'Klasik Premium',
+                        cost: 1800,
+                        stars: 2,
+                        incomeBoost: 55,
+                        repBoost: 90,
+                        icon: '💎',
+                        desc: 'Akdeniz kalker taşı şömine, oyma ahşap giyinme paravanı ve deniz kabuğu aplikler.',
+                        previewImg: 'assets/designs/room101_decor_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_room101_decor_opt_c.png'
+                    }
+                ]
+            },
+
+            // === MONAKO SONSUZLUK HAVUZU TASKS ===
             swimming_pool: {
                 id: 'swimming_pool',
-                seqOrder: 8,
                 room: 'pool',
-                name: 'Sonsuzluk Havuzu & Güneşlenme Locaları',
-                area: 'Sıra 8/11 · Havuz & Teras',
+                order: 1,
+                name: 'Sonsuzluk Havuzu & Mozaik Zemin',
+                area: 'Sonsuzluk Havuzu · Görev 1/3',
                 sceneImg: 'assets/scene_infinity_pool.jpg',
-                stageBox: [0.02, 0.36, 0.90, 0.62],
+                stageBox: [0.12, 0.42, 0.76, 0.52],
                 pinX: 48,
-                pinY: 62,
-                defaultDesc: 'Soluk, bakımsız şezlonglar ve havuz kenarı (Yenilenmedi)',
+                pinY: 64,
+                defaultDesc: 'Bakımsız havuz ve boş teras (Yenilenmedi)',
                 baseCost: 3500,
                 starsNeeded: 2,
                 options: [
                     {
                         id: 'opt_a',
-                        name: 'Beyaz İpek Kabanalar & 24K Altın Mozaik Havuz',
-                        style: 'Beyaz İpek & Altın',
+                        name: 'Işıltılı Beyaz & Altın Mozaikli Sonsuzluk Havuzu',
+                        style: 'Modern Zarafet',
                         cost: 3500,
                         stars: 2,
-                        incomeBoost: 70,
-                        repBoost: 100,
+                        incomeBoost: 75,
+                        repBoost: 110,
                         icon: '🏊',
-                        desc: 'Fildişi-beyaz ipek kabanalar, altın mozaik havuz kenarı ve tik şezlonglar.'
+                        desc: 'Bembeyaz cam mozaikler, 24K altın su tahliye bordürü ve Monako koyuna taşan ufuk çizgisi.',
+                        previewImg: 'assets/designs/swimming_pool_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_swimming_pool_opt_a.png'
                     },
                     {
                         id: 'opt_b',
-                        name: 'Kraliyet Kırmızısı & Bordo VIP Günbatımı Locaları',
-                        style: 'Kızıl Kraliyet Locaları',
+                        name: 'Kraliyet Laciverti & Yakut Işıklı Gece Havuzu',
+                        style: 'Kraliyet Kadife',
                         cost: 3500,
                         stars: 2,
                         incomeBoost: 80,
-                        repBoost: 115,
-                        icon: '☀️',
-                        desc: 'Bordo-kızıl minderli VIP şezlonglar ve sıcak yakut havuz aydınlatması.'
+                        repBoost: 120,
+                        icon: '✨',
+                        desc: 'Derin kobalt mavisi mozaikler, gece yakut ışıltısı yayan LED havuz lambaları.',
+                        previewImg: 'assets/designs/swimming_pool_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_swimming_pool_opt_b.png'
                     },
                     {
                         id: 'opt_c',
-                        name: 'Zümrüt-Turkuaz Lagün Havuzu & Sahil Locaları',
-                        style: 'Turkuaz Lagün VIP',
+                        name: 'Turkuaz-Zümrüt Lagün Havuzu & Doğal Taş',
+                        style: 'Klasik Premium',
                         cost: 3500,
                         stars: 2,
                         incomeBoost: 90,
-                        repBoost: 130,
+                        repBoost: 135,
                         icon: '🌴',
-                        desc: 'Parlak turkuaz-zümrüt lagün havuzu ve Akdeniz mavisi güneşlenme yatakları.'
+                        desc: 'Parlak turkuaz zümrüt lagün suyu, traverten taş kenarlar ve sahil taşları.',
+                        previewImg: 'assets/designs/swimming_pool_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_swimming_pool_opt_c.png'
                     }
                 ]
             },
+            pool_cabanas: {
+                id: 'pool_cabanas',
+                room: 'pool',
+                order: 2,
+                name: 'VIP Güneşlenme Locaları & Şemsiyeler',
+                area: 'Sonsuzluk Havuzu · Görev 2/3',
+                sceneImg: 'assets/scene_infinity_pool.jpg',
+                stageBox: [0.65, 0.30, 0.32, 0.45],
+                pinX: 80,
+                pinY: 46,
+                defaultDesc: 'Eski plastik şezlonglar',
+                baseCost: 2000,
+                starsNeeded: 1,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Beyaz İpek Tüllü 24K Altın Detaylı VIP Localar',
+                        style: 'Modern Zarafet',
+                        cost: 2000,
+                        stars: 1,
+                        incomeBoost: 50,
+                        repBoost: 75,
+                        icon: '⛱️',
+                        desc: 'Rüzgarda salınan beyaz ipek perdeler, kraliyet minderleri ve altın tavan pervanesi.',
+                        previewImg: 'assets/designs/swimming_pool_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_swimming_pool_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Bordo Kadife Minderli Güneşlenme Köşkleri',
+                        style: 'Kraliyet Kadife',
+                        cost: 2000,
+                        stars: 1,
+                        incomeBoost: 55,
+                        repBoost: 85,
+                        icon: '👑',
+                        desc: 'Güneşe dayanıklı bordo kadife yataklar ve siyah güneşlikler.',
+                        previewImg: 'assets/designs/swimming_pool_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_swimming_pool_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Tik Ağacı Riviera Şezlongları & Çizgili Şemsiyeler',
+                        style: 'Klasik Premium',
+                        cost: 2000,
+                        stars: 1,
+                        incomeBoost: 60,
+                        repBoost: 95,
+                        icon: '🏖️',
+                        desc: 'Masif tik ağacı çift kişilik şezlonglar ve sarı-beyaz çizgili Riviera şemsiyeleri.',
+                        previewImg: 'assets/designs/swimming_pool_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_swimming_pool_opt_c.png'
+                    }
+                ]
+            },
+            pool_lounge: {
+                id: 'pool_lounge',
+                room: 'pool',
+                order: 3,
+                name: 'Havuz Başı Ateş Çukuru & Su Barı',
+                area: 'Sonsuzluk Havuzu · Görev 3/3',
+                sceneImg: 'assets/scene_infinity_pool.jpg',
+                stageBox: [0.08, 0.36, 0.32, 0.45],
+                pinX: 20,
+                pinY: 52,
+                defaultDesc: 'Boş beton teras kenarı',
+                baseCost: 2400,
+                starsNeeded: 2,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Gömme Mermer Ateş Çukuru & Su Barı',
+                        style: 'Modern Zarafet',
+                        cost: 2400,
+                        stars: 2,
+                        incomeBoost: 60,
+                        repBoost: 90,
+                        icon: '🔥',
+                        desc: 'Su seviyesinde gömme dairesel mermer oturma grubu ve ortasında gazlı ateş çukuru.',
+                        previewImg: 'assets/designs/swimming_pool_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_swimming_pool_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Siyah Bazalt Ateş Kasesi & Kadife Koltuklar',
+                        style: 'Kraliyet Kadife',
+                        cost: 2400,
+                        stars: 2,
+                        incomeBoost: 65,
+                        repBoost: 100,
+                        icon: '🍸',
+                        desc: 'Siyah bazalt taştan oyulmuş lav taşı ateşliği ve su geçirmez bordo koltuklar.',
+                        previewImg: 'assets/designs/swimming_pool_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_swimming_pool_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Doğal Kaya Ateş Pavyonu & Fenerli Teras',
+                        style: 'Klasik Premium',
+                        cost: 2400,
+                        stars: 2,
+                        incomeBoost: 70,
+                        repBoost: 110,
+                        icon: '🍹',
+                        desc: 'Akdeniz kayalarından örülmüş şömine pavyonu ve asma deniz fenerleri.',
+                        previewImg: 'assets/designs/swimming_pool_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_swimming_pool_opt_c.png'
+                    }
+                ]
+            },
+
+            // === ZEN TERMAL SPA TASKS ===
             spa_jacuzzi: {
                 id: 'spa_jacuzzi',
-                seqOrder: 9,
                 room: 'spa',
-                name: 'Aurelia Zen Spa & Termal Jakuzi',
-                area: 'Sıra 9/11 · Zen Spa',
+                order: 1,
+                name: 'Aurelia Termal Jakuzi Havuzu',
+                area: 'Zen Spa · Görev 1/3',
                 sceneImg: 'assets/scene_spa_wellness.jpg',
                 stageBox: [0.30, 0.54, 0.62, 0.42],
                 pinX: 56,
@@ -584,44 +961,162 @@ class Hotel3DSimulator {
                     {
                         id: 'opt_a',
                         name: 'Beyaz Carrara Mermeri & Altın Mozaik Roma Jakuzisi',
-                        style: 'Beyaz Mermer & Altın',
+                        style: 'Modern Zarafet',
                         cost: 2800,
                         stars: 2,
                         incomeBoost: 55,
                         repBoost: 85,
                         icon: '♨️',
-                        desc: 'Bembeyaz İtalyan mermeri jakuzi, 24K altın mozaik iç havuz ve sıcak mumlar.'
+                        desc: 'Bembeyaz İtalyan mermeri jakuzi gövdesi, 24K altın mozaik iç havuz ve aromaterapi buharı.',
+                        previewImg: 'assets/designs/spa_jacuzzi_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_spa_jacuzzi_opt_a.png'
                     },
                     {
                         id: 'opt_b',
                         name: 'Kızıl Gül Suyu & Yakut Mumlu Romantik Termal Spa',
-                        style: 'Kızıl Gül & Yakut',
+                        style: 'Kraliyet Kadife',
                         cost: 2800,
                         stars: 2,
                         incomeBoost: 62,
                         repBoost: 95,
                         icon: '🌺',
-                        desc: 'Pembe-kızıl gül terapili termal su ve yakut ışıltılı mermer jakuzi.'
+                        desc: 'Pembe-kızıl gül terapili termal kaynak suyu ve yakut ışıltılı mermer jakuzi.',
+                        previewImg: 'assets/designs/spa_jacuzzi_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_spa_jacuzzi_opt_b.png'
                     },
                     {
                         id: 'opt_c',
-                        name: 'Zümrüt-Turkuaz Mineral Havuz & Zen Terapisi',
-                        style: 'Turkuaz & Zümrüt Zen',
+                        name: 'Zümrüt-Turkuaz Mineral Havuz & Zen Taş Jakuzisi',
+                        style: 'Klasik Premium',
                         cost: 2800,
                         stars: 2,
                         incomeBoost: 68,
                         repBoost: 105,
                         icon: '🎋',
-                        desc: 'Derin turkuaz ve zümrüt mineralli sıcak kaynak suyu jakuzisi.'
+                        desc: 'Derin turkuaz ve zümrüt mineralli şifalı kaplıca suyu, nehir taşları ve bambu süslemeleri.',
+                        previewImg: 'assets/designs/spa_jacuzzi_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_spa_jacuzzi_opt_c.png'
                     }
                 ]
             },
+            spa_beds: {
+                id: 'spa_beds',
+                room: 'spa',
+                order: 2,
+                name: 'Aromaterapi Dinlenme Yatakları',
+                area: 'Zen Spa · Görev 2/3',
+                sceneImg: 'assets/scene_spa_wellness.jpg',
+                stageBox: [0.10, 0.42, 0.35, 0.40],
+                pinX: 22,
+                pinY: 55,
+                defaultDesc: 'Boş dinlenme köşesi',
+                baseCost: 1800,
+                starsNeeded: 1,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Isıtmalı Beyaz Seramik Yataklar & İpek Perdeler',
+                        style: 'Modern Zarafet',
+                        cost: 1800,
+                        stars: 1,
+                        incomeBoost: 40,
+                        repBoost: 60,
+                        icon: '🛏️',
+                        desc: 'Vücut ısısına duyarlı seramik şezlonglar, beyaz keten yastıklar ve lavanta buharı.',
+                        previewImg: 'assets/designs/spa_jacuzzi_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_spa_jacuzzi_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Bordo Kadife Şezlonglar & Masaj İstasyonu',
+                        style: 'Kraliyet Kadife',
+                        cost: 1800,
+                        stars: 1,
+                        incomeBoost: 45,
+                        repBoost: 70,
+                        icon: '💆',
+                        desc: 'Suya dayanıklı bordo kadife yataklar, sıcak bazalt taş masaj seti ve tütsülük.',
+                        previewImg: 'assets/designs/spa_jacuzzi_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_spa_jacuzzi_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Doğal Bambu Dinlenme Sedirleri & Şifalı Çay Barı',
+                        style: 'Klasik Premium',
+                        cost: 1800,
+                        stars: 1,
+                        incomeBoost: 50,
+                        repBoost: 80,
+                        icon: '🍵',
+                        desc: 'Masif bambu sedirler, Akdeniz bitki çayları sunum masası ve turkuaz yastıklar.',
+                        previewImg: 'assets/designs/spa_jacuzzi_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_spa_jacuzzi_opt_c.png'
+                    }
+                ]
+            },
+            spa_waterfall: {
+                id: 'spa_waterfall',
+                room: 'spa',
+                order: 3,
+                name: 'Zen Şelalesi & Himalaya Tuz Duvarı',
+                area: 'Zen Spa · Görev 3/3',
+                sceneImg: 'assets/scene_spa_wellness.jpg',
+                stageBox: [0.68, 0.22, 0.28, 0.50],
+                pinX: 80,
+                pinY: 40,
+                defaultDesc: 'Sade taş duvar',
+                baseCost: 2200,
+                starsNeeded: 2,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Işıklı Kristal Cam Su Duvarı & Beyaz Mermer',
+                        style: 'Modern Zarafet',
+                        cost: 2200,
+                        stars: 2,
+                        incomeBoost: 50,
+                        repBoost: 75,
+                        icon: '💧',
+                        desc: 'Cam arkasından süzülen su perdesi ve altın LED aydınlatmalı beyaz mermer havuz.',
+                        previewImg: 'assets/designs/spa_jacuzzi_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_spa_jacuzzi_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Kehribar Işıklı Pembe Himalaya Tuzu Taş Duvarı',
+                        style: 'Kraliyet Kadife',
+                        cost: 2200,
+                        stars: 2,
+                        incomeBoost: 55,
+                        repBoost: 85,
+                        icon: '🧱',
+                        desc: 'Arkadan ışıklandırılmış hakiki pembe kaya tuzu blokları ve bronz fıskiye.',
+                        previewImg: 'assets/designs/spa_jacuzzi_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_spa_jacuzzi_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Doğal Nehir Taşlı Çağlayan & Bambu Süsleri',
+                        style: 'Klasik Premium',
+                        cost: 2200,
+                        stars: 2,
+                        incomeBoost: 60,
+                        repBoost: 95,
+                        icon: '🎋',
+                        desc: 'Yuvarlak çakıl taşları üzerinden akan mini şelale ve yeşil bonsai saksıları.',
+                        previewImg: 'assets/designs/spa_jacuzzi_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_spa_jacuzzi_opt_c.png'
+                    }
+                ]
+            },
+
+            // === AKDENİZ BOTANİK BAHÇESİ TASKS ===
             garden_courtyard: {
                 id: 'garden_courtyard',
-                seqOrder: 10,
                 room: 'garden',
-                name: 'Akdeniz Botanik Bahçesi & Mermer Çeşme',
-                area: 'Sıra 10/11 · Botanik Bahçe',
+                order: 1,
+                name: '3 Katlı Mermer Saray Çeşmesi',
+                area: 'Botanik Bahçe · Görev 1/3',
                 sceneImg: 'assets/scene_garden_terrace.jpg',
                 stageBox: [0.31, 0.33, 0.38, 0.62],
                 pinX: 50,
@@ -633,44 +1128,162 @@ class Hotel3DSimulator {
                     {
                         id: 'opt_a',
                         name: '3 Katlı Beyaz Carrara Mermeri & Altın Çeşme',
-                        style: 'Beyaz Mermer & Altın',
+                        style: 'Modern Zarafet',
                         cost: 2000,
                         stars: 1,
                         incomeBoost: 45,
                         repBoost: 70,
                         icon: '⛲',
-                        desc: 'Parlak fildişi-beyaz mermerden 3 katlı saray çeşmesi ve altın su aydınlatması.'
+                        desc: 'Parlak fildişi-beyaz mermerden 3 katlı saray çeşmesi ve altın su aydınlatması.',
+                        previewImg: 'assets/designs/garden_courtyard_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_garden_courtyard_opt_a.png'
                     },
                     {
                         id: 'opt_b',
                         name: 'Kızıl Gül Yapraklı & Yakut Işıklı Romantik Çeşme',
-                        style: 'Kızıl Gül & Yakut',
+                        style: 'Kraliyet Kadife',
                         cost: 2000,
                         stars: 1,
                         incomeBoost: 50,
                         repBoost: 78,
                         icon: '🌹',
-                        desc: 'Kırmızı gül yapraklarıyla dolu yakut ve pembe mermer kraliyet çeşmesi.'
+                        desc: 'Kırmızı gül yapraklarıyla dolu yakut ve pembe mermer kraliyet çeşmesi.',
+                        previewImg: 'assets/designs/garden_courtyard_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_garden_courtyard_opt_b.png'
                     },
                     {
                         id: 'opt_c',
-                        name: 'Turkuaz Mozaik & Zümrüt Su Havuzlu Riviera Çeşmesi',
-                        style: 'Turkuaz & Zümrüt',
+                        name: 'Turkuaz Mozaik & Zümrüt Havuzlu Riviera Çeşmesi',
+                        style: 'Klasik Premium',
                         cost: 2000,
                         stars: 1,
                         incomeBoost: 56,
                         repBoost: 86,
                         icon: '🌴',
-                        desc: 'Parlayan turkuaz-zümrüt mozaik havuzlu Akdeniz avlu çeşmesi.'
+                        desc: 'Parlayan turkuaz-zümrüt mozaik havuzlu Akdeniz avlu çeşmesi.',
+                        previewImg: 'assets/designs/garden_courtyard_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_garden_courtyard_opt_c.png'
                     }
                 ]
             },
+            garden_pergola: {
+                id: 'garden_pergola',
+                room: 'garden',
+                order: 2,
+                name: 'Kraliyet Gül Pergolası & Yürüyüş Yolu',
+                area: 'Botanik Bahçe · Görev 2/3',
+                sceneImg: 'assets/scene_garden_terrace.jpg',
+                stageBox: [0.65, 0.30, 0.32, 0.50],
+                pinX: 80,
+                pinY: 48,
+                defaultDesc: 'Bakımsız toprak patika',
+                baseCost: 1600,
+                starsNeeded: 1,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Beyaz Sarmaşık Güllü Ferforje Pergola & Taş Yol',
+                        style: 'Modern Zarafet',
+                        cost: 1600,
+                        stars: 1,
+                        incomeBoost: 35,
+                        repBoost: 55,
+                        icon: '🌿',
+                        desc: 'Beyaz güllerle sarılı ferforje kemer tüneli ve beyaz kireçtaşı yürüyüş yolu.',
+                        previewImg: 'assets/designs/garden_courtyard_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_garden_courtyard_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Bordo Kadife Güllü Kemerler & Fenerli Mermer Yol',
+                        style: 'Kraliyet Kadife',
+                        cost: 1600,
+                        stars: 1,
+                        incomeBoost: 40,
+                        repBoost: 65,
+                        icon: '🌺',
+                        desc: 'Derin kırmızı güller ve akşamları parıldayan pirinç bahçe fenerleri.',
+                        previewImg: 'assets/designs/garden_courtyard_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_garden_courtyard_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Doğal Ahşap Pergola, Begonviller & Mozaik Kaldırım',
+                        style: 'Klasik Premium',
+                        cost: 1600,
+                        stars: 1,
+                        incomeBoost: 45,
+                        repBoost: 75,
+                        icon: '🌸',
+                        desc: 'Akdeniz sedir ağacı kemerler, pembe begonviller ve renkli taş mozaik yol.',
+                        previewImg: 'assets/designs/garden_courtyard_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_garden_courtyard_opt_c.png'
+                    }
+                ]
+            },
+            garden_pavilion: {
+                id: 'garden_pavilion',
+                room: 'garden',
+                order: 3,
+                name: 'Akdeniz Çay Pavyonu & Fenerler',
+                area: 'Botanik Bahçe · Görev 3/3',
+                sceneImg: 'assets/scene_garden_terrace.jpg',
+                stageBox: [0.08, 0.32, 0.32, 0.48],
+                pinX: 20,
+                pinY: 50,
+                defaultDesc: 'Boş çim alan',
+                baseCost: 2100,
+                starsNeeded: 2,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Neoklasik Beyaz Mermer Pavyon & Altın Süs Havuzu',
+                        style: 'Modern Zarafet',
+                        cost: 2100,
+                        stars: 2,
+                        incomeBoost: 48,
+                        repBoost: 72,
+                        icon: '🏛️',
+                        desc: 'Kubbe tavanlı beyaz mermer dinlenme köşkü ve mermer çay masası.',
+                        previewImg: 'assets/designs/garden_courtyard_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_garden_courtyard_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Bordo Tenteli Gala Köşkü & Bronz Aslan Heykelleri',
+                        style: 'Kraliyet Kadife',
+                        cost: 2100,
+                        stars: 2,
+                        incomeBoost: 52,
+                        repBoost: 80,
+                        icon: '🦁',
+                        desc: 'Bordo kumaş tenteli kraliyet çardağı ve koruyucu bronz heykeller.',
+                        previewImg: 'assets/designs/garden_courtyard_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_garden_courtyard_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Sarmaşıklı Çay Çardağı & Antik Taş Banklar',
+                        style: 'Klasik Premium',
+                        cost: 2100,
+                        stars: 2,
+                        incomeBoost: 58,
+                        repBoost: 90,
+                        icon: '☕',
+                        desc: 'Yeşillikler içinde gizli çay çardağı ve gölgeli antik Akdeniz taş bankları.',
+                        previewImg: 'assets/designs/garden_courtyard_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_garden_courtyard_opt_c.png'
+                    }
+                ]
+            },
+
+            // === 2. KAT BAŞKANLIK PENTHOUSE TASKS ===
             penthouse_suite: {
                 id: 'penthouse_suite',
-                seqOrder: 11,
                 room: 'penthouse',
-                name: 'Başkanlık Penthouse Kuyruklu Piyanosu',
-                area: 'Sıra 11/11 · 2. Kat Penthouse',
+                order: 1,
+                name: 'Kuyruklu Konser Piyanosu',
+                area: '2. Kat Penthouse · Görev 1/3',
                 sceneImg: 'assets/scene_penthouse_piano.jpg',
                 stageBox: [0.20, 0.32, 0.32, 0.54],
                 pinX: 36,
@@ -682,35 +1295,151 @@ class Hotel3DSimulator {
                     {
                         id: 'opt_a',
                         name: 'Fildişi Beyaz & 24K Altın Kraliyet Konser Piyanosu',
-                        style: 'Fildişi Beyaz & Altın',
+                        style: 'Modern Zarafet',
                         cost: 5000,
                         stars: 3,
                         incomeBoost: 120,
                         repBoost: 180,
                         icon: '🎹',
-                        desc: 'Sedefli fildişi-beyaz gövdeli, 24 ayar altın telli kraliyet konser piyanosu.'
+                        desc: 'Sedefli fildişi-beyaz gövdeli, 24 ayar altın telli ve parlak cilalı konser piyanosu.',
+                        previewImg: 'assets/designs/penthouse_suite_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_penthouse_suite_opt_a.png'
                     },
                     {
                         id: 'opt_b',
                         name: 'Bordo Kızıl Lake & Altın Filigranlı Gala Piyanosu',
-                        style: 'Bordo Kızıl & Altın',
+                        style: 'Kraliyet Kadife',
                         cost: 5000,
                         stars: 3,
                         incomeBoost: 135,
                         repBoost: 200,
                         icon: '👑',
-                        desc: 'Parlak bordo-kızıl lake kaplama, kadife tabure ve altın işlemeli konser piyanosu.'
+                        desc: 'Parlak bordo-kızıl lake kaplama, kadife tabure ve altın işlemeli konser piyanosu.',
+                        previewImg: 'assets/designs/penthouse_suite_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_penthouse_suite_opt_b.png'
                     },
                     {
                         id: 'opt_c',
-                        name: 'Zümrüt-Turkuaz Kristal & Maun Özel Koleksiyon Piyano',
-                        style: 'Turkuaz & Zümrüt',
+                        name: 'Zümrüt-Turkuaz Sedef & Maun Özel Koleksiyon Piyano',
+                        style: 'Klasik Premium',
                         cost: 5000,
                         stars: 3,
                         incomeBoost: 150,
                         repBoost: 220,
                         icon: '💎',
-                        desc: 'Zümrüt ve turkuaz sedef kakmalı, Monako yat limanı manzaralı özel piyano.'
+                        desc: 'Zümrüt ve turkuaz sedef kakmalı, Monako yat limanı manzaralı özel kuyruklu piyano.',
+                        previewImg: 'assets/designs/penthouse_suite_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_penthouse_suite_opt_c.png'
+                    }
+                ]
+            },
+            penthouse_fireplace: {
+                id: 'penthouse_fireplace',
+                room: 'penthouse',
+                order: 2,
+                name: 'Mermer Şömine & Dairesel Kadife Salon',
+                area: '2. Kat Penthouse · Görev 2/3',
+                sceneImg: 'assets/scene_penthouse_piano.jpg',
+                stageBox: [0.52, 0.36, 0.44, 0.50],
+                pinX: 68,
+                pinY: 58,
+                defaultDesc: 'Kullanılmayan soğuk şömine',
+                baseCost: 3200,
+                starsNeeded: 2,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Krem Deri Dairesel Koltuk & Beyaz Mermer Şömine',
+                        style: 'Modern Zarafet',
+                        cost: 3200,
+                        stars: 2,
+                        incomeBoost: 70,
+                        repBoost: 105,
+                        icon: '🛋️',
+                        desc: 'Şöminenin etrafını saran geniş krem İtalyan deri koltuk ve altın ayna.',
+                        previewImg: 'assets/designs/penthouse_suite_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_penthouse_suite_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Derin Bordo Kadife Oturma Grubu & Siyah Granit Şömine',
+                        style: 'Kraliyet Kadife',
+                        cost: 3200,
+                        stars: 2,
+                        incomeBoost: 80,
+                        repBoost: 120,
+                        icon: '🔥',
+                        desc: 'Monako geceleri için romantik bordo kadife koltuklar ve çıtırdayan şömine ateşi.',
+                        previewImg: 'assets/designs/penthouse_suite_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_penthouse_suite_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Zümrüt İpek Koltuklar & Oyma Ahşap Şömine Başlığı',
+                        style: 'Klasik Premium',
+                        cost: 3200,
+                        stars: 2,
+                        incomeBoost: 90,
+                        repBoost: 135,
+                        icon: '💎',
+                        desc: 'Akdeniz zümrüt ipek kumaş kaplı geniş salon berjerleri ve ceviz ağacı şömine.',
+                        previewImg: 'assets/designs/penthouse_suite_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_penthouse_suite_opt_c.png'
+                    }
+                ]
+            },
+            penthouse_terrace: {
+                id: 'penthouse_terrace',
+                room: 'penthouse',
+                order: 3,
+                name: 'Monako Körfezi Özel Manzara Terası Barı',
+                area: '2. Kat Penthouse · Görev 3/3',
+                sceneImg: 'assets/scene_penthouse_piano.jpg',
+                stageBox: [0.70, 0.20, 0.28, 0.45],
+                pinX: 82,
+                pinY: 40,
+                defaultDesc: 'Boş teras korkuluğu',
+                baseCost: 3800,
+                starsNeeded: 2,
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Aydınlatmalı Kristal Bar & Altın Bar Tabureleri',
+                        style: 'Modern Zarafet',
+                        cost: 3800,
+                        stars: 2,
+                        incomeBoost: 85,
+                        repBoost: 125,
+                        icon: '🍸',
+                        desc: 'Büyüleyici gece manzarasına bakan arkadan ışıklı kristal kokteyl barı.',
+                        previewImg: 'assets/designs/penthouse_suite_opt_a.jpg',
+                        stageImg: 'assets/designs/stage_penthouse_suite_opt_a.png'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Yakut Aynalı Şampanya Barı & Bordo Deri Koltuklar',
+                        style: 'Kraliyet Kadife',
+                        cost: 3800,
+                        stars: 2,
+                        incomeBoost: 95,
+                        repBoost: 140,
+                        icon: '🍾',
+                        desc: 'Özel vintage şampanyaların sergilendiği yakut aynalı VIP bar köşesi.',
+                        previewImg: 'assets/designs/penthouse_suite_opt_b.jpg',
+                        stageImg: 'assets/designs/stage_penthouse_suite_opt_b.png'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Yat Güvertesi Tarzı Tik Bar & Akdeniz Manzarası',
+                        style: 'Klasik Premium',
+                        cost: 3800,
+                        stars: 2,
+                        incomeBoost: 105,
+                        repBoost: 155,
+                        icon: '⛵',
+                        desc: 'Süperyat güvertesi işçiliğinde doğal tik ağacı açık hava teras barı.',
+                        previewImg: 'assets/designs/penthouse_suite_opt_c.jpg',
+                        stageImg: 'assets/designs/stage_penthouse_suite_opt_c.png'
                     }
                 ]
             }
@@ -718,7 +1447,79 @@ class Hotel3DSimulator {
     }
 
     // ----------------------------------------------------
-    // STATE PERSISTENCE & SEQUENTIAL SINGLE-PLACEMENT HELPERS
+    // 3. AREA & TASK PROGRESSION QUERY METHODS
+    // ----------------------------------------------------
+    getAreaTasks(roomKey) {
+        const rm = this.rooms[roomKey || this.currentRoom];
+        if (!rm || !rm.tasks) return [];
+        return rm.tasks.map(id => this.renovationDefs[id]).filter(Boolean);
+    }
+
+    isTaskCompleted(taskId) {
+        if (this.state.renovations && this.state.renovations[taskId] && this.state.renovations[taskId].completed) {
+            return true;
+        }
+        if (window.GameEconomy && window.GameEconomy.data && window.GameEconomy.data.renovations && window.GameEconomy.data.renovations[taskId] && window.GameEconomy.data.renovations[taskId].completed) {
+            return true;
+        }
+        return false;
+    }
+
+    isAreaCompleted(taskId) {
+        return this.isTaskCompleted(taskId);
+    }
+
+    getInstalledOption(taskId) {
+        if (this.state.renovations && this.state.renovations[taskId] && this.state.renovations[taskId].completed) {
+            return this.state.renovations[taskId];
+        }
+        if (window.GameEconomy && window.GameEconomy.data && window.GameEconomy.data.renovations && window.GameEconomy.data.renovations[taskId] && window.GameEconomy.data.renovations[taskId].completed) {
+            return window.GameEconomy.data.renovations[taskId];
+        }
+        return null;
+    }
+
+    getAreaCompletedTasks(roomKey) {
+        const tasks = this.getAreaTasks(roomKey);
+        return tasks.filter(t => this.isTaskCompleted(t.id));
+    }
+
+    getAreaActiveTask(roomKey) {
+        const tasks = this.getAreaTasks(roomKey);
+        return tasks.find(t => !this.isTaskCompleted(t.id)) || null;
+    }
+
+    getAreaLevel(roomKey) {
+        const done = this.getAreaCompletedTasks(roomKey).length;
+        return done + 1;
+    }
+
+    getAreaProgress(roomKey) {
+        const tasks = this.getAreaTasks(roomKey);
+        if (!tasks.length) return 0;
+        const done = this.getAreaCompletedTasks(roomKey).length;
+        return Math.round((done / tasks.length) * 100);
+    }
+
+    getCurrentSequentialAreaId() {
+        const active = this.getAreaActiveTask(this.currentRoom);
+        return active ? active.id : null;
+    }
+
+    getNextUpgradeCost(taskId) {
+        if (this.isTaskCompleted(taskId)) return 0;
+        const def = this.renovationDefs[taskId];
+        return def ? def.baseCost : 1200;
+    }
+
+    getNextUpgradeStars(taskId) {
+        if (this.isTaskCompleted(taskId)) return 0;
+        const def = this.renovationDefs[taskId];
+        return def ? def.starsNeeded : 1;
+    }
+
+    // ----------------------------------------------------
+    // 4. STATE PERSISTENCE
     // ----------------------------------------------------
     loadState() {
         try {
@@ -729,7 +1530,7 @@ class Hotel3DSimulator {
                     this.state.renovations = { ...window.GameEconomy.data.renovations };
                 }
             }
-            const raw = localStorage.getItem('velvetSecrets3DHotelV3');
+            const raw = localStorage.getItem('velvetSecretsGossipHarborHotel_v1');
             if (raw) {
                 const parsed = JSON.parse(raw);
                 this.state = { ...this.state, ...parsed };
@@ -746,48 +1547,12 @@ class Hotel3DSimulator {
 
     saveState() {
         try {
-            localStorage.setItem('velvetSecrets3DHotelV3', JSON.stringify(this.state));
+            localStorage.setItem('velvetSecretsGossipHarborHotel_v1', JSON.stringify(this.state));
             if (window.GameEconomy && window.GameEconomy.data) {
-                window.GameEconomy.data.renovations = { ...this.state.renovations };
+                window.GameEconomy.data.renovations = { ...window.GameEconomy.data.renovations, ...this.state.renovations };
                 window.GameEconomy.save();
             }
         } catch (e) {}
-    }
-
-    getInstalledOption(id) {
-        const entry = this.state.renovations[id];
-        if (!entry) return null;
-        if (typeof entry === 'string') {
-            return { optionId: entry, completed: true };
-        }
-        if (entry && entry.optionId) {
-            return { optionId: entry.optionId, completed: true };
-        }
-        return null;
-    }
-
-    isAreaCompleted(id) {
-        return Boolean(this.getInstalledOption(id));
-    }
-
-    getCurrentSequentialAreaId() {
-        return this.sequentialOrder.find(id => !this.isAreaCompleted(id)) || null;
-    }
-
-    getAreaLevel(id) {
-        return this.isAreaCompleted(id) ? 2 : 1;
-    }
-
-    getNextUpgradeCost(id) {
-        if (this.isAreaCompleted(id)) return 0;
-        const def = this.renovationDefs[id];
-        return def ? def.baseCost : 1500;
-    }
-
-    getNextUpgradeStars(id) {
-        if (this.isAreaCompleted(id)) return 0;
-        const def = this.renovationDefs[id];
-        return def ? (def.starsNeeded || 1) : 1;
     }
 
     recalcHotelStats() {
@@ -795,9 +1560,9 @@ class Hotel3DSimulator {
         let baseRep = 120;
         let completedCount = 0;
 
-        this.sequentialOrder.forEach(key => {
-            const def = this.renovationDefs[key];
-            const installed = this.getInstalledOption(key);
+        Object.keys(this.renovationDefs).forEach((taskId) => {
+            const def = this.renovationDefs[taskId];
+            const installed = this.getInstalledOption(taskId);
             if (def && installed) {
                 const opt = def.options.find(o => o.id === installed.optionId) || def.options[0];
                 if (opt) {
@@ -810,30 +1575,28 @@ class Hotel3DSimulator {
 
         this.state.incomePerMin = baseIncome;
         this.state.reputation = baseRep;
-        this.state.hotelStars = Math.min(5, 3 + Math.floor(completedCount / 4));
+        this.state.hotelStars = Math.min(5, 3 + Math.floor(completedCount / 3));
         this.updateHUD();
     }
 
     // ----------------------------------------------------
-    // AUTOMATIC AFFORDABILITY NOTIFICATIONS (ACTIVE SEQUENTIAL ITEM ONLY)
+    // 5. AFFORDABILITY NOTIFICATION FOR ACTIVE TASK
     // ----------------------------------------------------
     checkAffordableNotifications(silentFirstLoad = false) {
-        const activeId = this.getCurrentSequentialAreaId();
-        if (!activeId) return;
-        const def = this.renovationDefs[activeId];
-        if (!def || this.isAreaCompleted(activeId)) return;
+        const activeTask = this.getAreaActiveTask(this.currentRoom);
+        if (!activeTask) return;
 
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
         const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
-        const cost = this.getNextUpgradeCost(activeId);
-        const starsReq = this.getNextUpgradeStars(activeId);
-        const notifyKey = `${activeId}_seq`;
+        const cost = activeTask.baseCost;
+        const starsReq = activeTask.starsNeeded;
+        const notifyKey = `${activeTask.id}_ready`;
 
         if (balance >= cost && stars >= starsReq) {
             if (!this.notifiedAffordable.has(notifyKey)) {
                 this.notifiedAffordable.add(notifyKey);
                 if (!silentFirstLoad) {
-                    this.showAffordabilityToast(def, cost);
+                    this.showAffordabilityToast(activeTask, cost);
                 }
             }
         } else {
@@ -841,7 +1604,7 @@ class Hotel3DSimulator {
         }
     }
 
-    showAffordabilityToast(def, cost = 1500) {
+    showAffordabilityToast(task, cost) {
         this.playSound('chime');
         let toast = document.getElementById('budgetAlertToast');
         if (!toast) return;
@@ -851,11 +1614,11 @@ class Hotel3DSimulator {
             <div class="budget-toast-inner">
                 <div class="bt-icon">🔔</div>
                 <div class="bt-content">
-                    <strong>SIRA #${def.seqOrder} İÇİN BÜTÇENİZ HAZIR! ($${balance})</strong>
-                    <p>Birikiminiz <b>${def.name}</b> ($${cost}) için yeterli! Şimdi 3 farklı tasarımdan birini seçip kalıcı olarak kurun.</p>
+                    <strong>BÜTÇENİZ HAZIR! (${task.name})</strong>
+                    <p>Mevcut kasanız ($${balance}) bu restorasyon için yeterli ($${cost})! Şimdi 3 farklı lüks tasarımdan birini seçip mekana kurun.</p>
                 </div>
                 <div class="bt-actions">
-                    <button class="bt-go-btn" onclick="hotel3D.goToAndOpenRenovation('${def.id}')">🛠️ 3 Tasarımdan Seç</button>
+                    <button class="bt-go-btn" onclick="hotel3D.openBottomDesignDock('${task.id}', true)">🎨 3 Tasarımdan Seç</button>
                     <button class="bt-close-btn" onclick="document.getElementById('budgetAlertToast').style.display='none'">&times;</button>
                 </div>
             </div>
@@ -867,49 +1630,8 @@ class Hotel3DSimulator {
         }, 8000);
     }
 
-    goToAndOpenRenovation(id) {
-        const toast = document.getElementById('budgetAlertToast');
-        if (toast) toast.style.display = 'none';
-
-        if (window.switchMainPage) {
-            window.switchMainPage('pageHotel');
-        }
-
-        const def = this.renovationDefs[id];
-        if (!def) return;
-
-        this.isMapMode = false;
-        this.currentRoom = def.room || 'lobby';
-        this.selectedAreaId = id;
-
-        // If this furniture item is already placed once, selection right has ended!
-        if (this.isAreaCompleted(id)) {
-            this.closeBottomDesignDock();
-            this.renderStage();
-            this.updateProximityPanel();
-            this.showBanner(`✅ "${def.name}" kalıcı olarak kuruldu ve seçim tamamlandı!`);
-            return;
-        }
-
-        // Strict sequential check: only the current active sequential item can open the 3-design selector!
-        const activeSeqId = this.getCurrentSequentialAreaId();
-        if (activeSeqId && id !== activeSeqId) {
-            const activeDef = this.renovationDefs[activeSeqId];
-            this.closeBottomDesignDock();
-            this.renderStage();
-            this.updateProximityPanel();
-            this.showBanner(`🔒 Sıralı Görev: Önce Sıra #${activeDef.seqOrder} (${activeDef.name}) tamamlanmalı!`);
-            return;
-        }
-
-        this.focusCameraOnPin(def.pinX, def.pinY);
-        this.openBottomDesignDock(id, true);
-        this.updateProximityPanel();
-        this.renderStage();
-    }
-
     // ----------------------------------------------------
-    // AUDIO SYNTHESIZER
+    // 6. AUDIO SYNTHESIZER
     // ----------------------------------------------------
     initAudio() {
         this.audioCtx = null;
@@ -992,7 +1714,7 @@ class Hotel3DSimulator {
     }
 
     // ----------------------------------------------------
-    // PAN & ZOOM INTERACTION FOR CRYSTAL-CLEAR ROOM STAGE
+    // 7. PAN & ZOOM INTERACTIONS
     // ----------------------------------------------------
     initStageInteractions() {
         const stage = document.getElementById('ghSceneStage');
@@ -1055,7 +1777,7 @@ class Hotel3DSimulator {
     }
 
     // ----------------------------------------------------
-    // RENDER CRYSTAL-CLEAR ROOM STAGE OR ISOMETRIC RESORT MAP
+    // 8. RENDER CRYSTAL-CLEAR ROOM PANORAMA OR RESORT MAP
     // ----------------------------------------------------
     toggleMapMode(forceState) {
         if (typeof forceState === 'boolean') {
@@ -1092,33 +1814,30 @@ class Hotel3DSimulator {
     }
 
     renderIsometricResortMap(stage) {
-        const activeSeqId = this.getCurrentSequentialAreaId();
-
         let nodesHtml = '';
         Object.keys(this.rooms).forEach((roomKey) => {
             const rm = this.rooms[roomKey];
+            const tasks = rm.tasks || [];
             let completedInRoom = 0;
-            let hasActiveSeq = false;
-
-            rm.areas.forEach((aId) => {
-                if (this.isAreaCompleted(aId)) completedInRoom++;
-                if (aId === activeSeqId) hasActiveSeq = true;
+            tasks.forEach(tId => {
+                if (this.isTaskCompleted(tId)) completedInRoom++;
             });
 
-            const allDone = (completedInRoom >= rm.areas.length);
+            const allDone = (completedInRoom >= tasks.length);
             const isActiveRoom = (this.currentRoom === roomKey);
+            const activeTask = this.getAreaActiveTask(roomKey);
 
             nodesHtml += `
-                <div class="gh-map-room-node ${isActiveRoom ? 'current-room' : ''} ${hasActiveSeq ? 'has-ready' : ''}"
+                <div class="gh-map-room-node ${isActiveRoom ? 'current-room' : ''} ${activeTask ? 'has-ready' : ''}"
                      style="left: ${rm.mapPos.x}%; top: ${rm.mapPos.y}%;"
                      onclick="hotel3D.jumpTo('${roomKey}')">
                     <div class="gh-map-thumb" style="background-image: url('${rm.bgImg}');">
-                        <span class="gh-map-lv-pill">${completedInRoom}/${rm.areas.length} Mobilya</span>
-                        ${hasActiveSeq ? `<span class="gh-map-ready-hammer">🔨 Sıradaki Görev!</span>` : ''}
+                        <span class="gh-map-lv-pill">${completedInRoom}/${tasks.length} Görev</span>
+                        ${activeTask ? `<span class="gh-map-ready-hammer">🔨 Restorasyon</span>` : ''}
                     </div>
                     <div class="gh-map-node-body">
                         <strong>${rm.shortName}</strong>
-                        <small>${allDone ? '✅ Tamamlandı' : (hasActiveSeq ? '🎯 Aktif Sıra Burada' : '🔒 Sıra Bekliyor')}</small>
+                        <small>${allDone ? '✅ Tamamlandı' : (activeTask ? `🎯 ${activeTask.name}` : 'İlerlemede')}</small>
                     </div>
                 </div>
             `;
@@ -1127,7 +1846,7 @@ class Hotel3DSimulator {
         stage.innerHTML = `
             <div class="gh-room-canvas gh-isometric-map-canvas" style="background-image: linear-gradient(180deg, rgba(10,14,24,0.35), rgba(10,14,24,0.68)), url('assets/scene_hotel_exterior.jpg');">
                 <div class="gh-map-header-banner">
-                    <span>✦ AURELIA PALACE OTEL HARİTASI — Gitmek istediğiniz odaya dokunun!</span>
+                    <span>✦ AURELIA PALACE OTEL HARİTASI — Gitmek istediğiniz alana dokunun!</span>
                 </div>
                 <svg class="gh-map-paths" viewBox="0 0 100 100" preserveAspectRatio="none">
                     <line x1="50" y1="66" x2="20" y2="60" stroke="rgba(255,215,0,0.55)" stroke-width="0.9" stroke-dasharray="2,1.5" />
@@ -1143,39 +1862,39 @@ class Hotel3DSimulator {
     }
 
     renderRoomPanorama(stage) {
-        const rm = this.rooms[this.currentRoom] || this.rooms.lobby;
+        const rm = this.rooms[this.currentRoom] || this.rooms.restaurant;
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
         const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
-        const activeSeqId = this.getCurrentSequentialAreaId();
+        const activeTask = this.getAreaActiveTask(this.currentRoom);
+        const activeTaskId = activeTask ? activeTask.id : null;
 
         // Update character dialogue banner below the stage
         const dlgEl = document.getElementById('hotelDialogueText');
         if (dlgEl) {
-            if (activeSeqId && this.renovationDefs[activeSeqId]) {
-                const aDef = this.renovationDefs[activeSeqId];
-                dlgEl.textContent = `Sıradaki Aktif Görev (Sıra #${aDef.seqOrder}/11): ${aDef.name} — Her mobilya 1 kez seçilir ve kalıcı olarak mekana yerleşir!`;
+            if (activeTask) {
+                dlgEl.textContent = `${rm.shortName} Sıradaki Görev: "${activeTask.name}" ($${activeTask.baseCost}) — 3 farklı lüks tasarımdan beğendiğinizi seçip mekana kurun!`;
             } else {
-                dlgEl.textContent = rm.dialogue || 'Tüm otel mobilyaları kalıcı olarak kuruldu!';
+                dlgEl.textContent = `👑 Tebrikler! ${rm.shortName} tüm restorasyon görevleri başarıyla tamamlandı!`;
             }
         }
 
-        // 1. Render Seamless Alpha-Feathered Furniture Layers + Clean Action Pin ONLY for unrenovated items
         let furnitureLayersHtml = '';
         let pinsHtml = '';
 
-        rm.areas.forEach((areaId) => {
-            const def = this.renovationDefs[areaId];
+        const taskList = rm.tasks || [];
+        taskList.forEach((tId) => {
+            const def = this.renovationDefs[tId];
             if (!def) return;
 
-            const installed = this.getInstalledOption(areaId);
+            const installed = this.getInstalledOption(tId);
             const isCompleted = Boolean(installed);
-            const isCurrentSeq = (areaId === activeSeqId);
-            const isPreviewingThis = (this.previewingRenovation && this.previewingRenovation.id === areaId);
+            const isActive = (tId === activeTaskId);
+            const isPreviewingThis = (this.previewingRenovation && this.previewingRenovation.id === tId);
 
-            // Determine exact visual state for this furniture piece in the room scene:
-            // - If previewing an option in the bottom bar: show that option ('opt_a', 'opt_b', or 'opt_c')
-            // - If already completed & confirmed: permanently show the installed option ('opt_a', 'opt_b', or 'opt_c')
-            // - Otherwise: show the worn unrenovated state ('old')
+            // Determine visual state:
+            // 1. Previewing option in bottom dock: show chosen preview option
+            // 2. Already installed & completed: permanently show installed option
+            // 3. Otherwise: show worn old state ('old')
             const stateKey = isPreviewingThis
                 ? this.previewingRenovation.optionId
                 : (installed ? installed.optionId : 'old');
@@ -1188,46 +1907,33 @@ class Hotel3DSimulator {
 
             furnitureLayersHtml += `
                 <img class="gh-seamless-stage-furniture ${isPreviewingThis ? 'is-previewing-layer' : ''}"
-                     src="assets/designs/stage_${areaId}_${stateKey}.png"
+                     src="assets/designs/stage_${tId}_${stateKey}.png"
+                     onerror="this.style.display='none'"
                      alt="${def.name}"
                      style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%;" />
             `;
 
-            // Pin logic:
-            // - Once a furniture item is completed (isCompleted === true), NO pin or box covers the scene!
-            //   Its chosen visual stays permanently fixed and crystal clear in the room.
-            // - For the current active sequential item: show a clean Gossip Harbor hammer button (hidden while previewing so the furniture is 100% unobstructed!).
-            // - For future sequential items in the same room: show a subtle small lock badge.
-            if (!isCompleted) {
-                const cost = this.getNextUpgradeCost(areaId);
-                const starsReq = this.getNextUpgradeStars(areaId);
+            // Clean action hotspot ONLY for the active unrenovated task in this room
+            if (!isCompleted && isActive) {
+                const cost = def.baseCost;
+                const starsReq = def.starsNeeded;
                 const canAfford = (balance >= cost && stars >= starsReq);
 
-                if (isCurrentSeq) {
-                    if (isPreviewingThis) {
-                        const optObj = def.options[this.selectedOptionIndex] || def.options[0];
-                        pinsHtml += `
-                            <button class="gh-stage-pin-btn pin-previewing"
-                                    style="left: ${def.pinX}%; top: ${Math.max(10, def.pinY - 16)}%;"
-                                    onclick="hotel3D.selectFurnitureOnStage('${areaId}', event)">
-                                👁️ ${optObj.style}
-                            </button>
-                        `;
-                    } else {
-                        pinsHtml += `
-                            <button class="gh-stage-pin-btn ${canAfford ? 'pin-active-ready' : 'pin-active-saving'}"
-                                    style="left: ${def.pinX}%; top: ${def.pinY}%;"
-                                    onclick="hotel3D.selectFurnitureOnStage('${areaId}', event)">
-                                🔨 Sıra #${def.seqOrder}: ${def.name} ($${cost})
-                            </button>
-                        `;
-                    }
+                if (isPreviewingThis) {
+                    const optObj = def.options[this.selectedOptionIndex] || def.options[0];
+                    pinsHtml += `
+                        <button class="gh-stage-pin-btn pin-previewing"
+                                style="left: ${def.pinX}%; top: ${Math.max(12, def.pinY - 14)}%;"
+                                onclick="hotel3D.openBottomDesignDock('${tId}', true)">
+                            👁️ ${optObj.style} Önizleniyor
+                        </button>
+                    `;
                 } else {
                     pinsHtml += `
-                        <button class="gh-stage-pin-btn pin-seq-locked"
+                        <button class="gh-stage-pin-btn ${canAfford ? 'pin-active-ready' : 'pin-active-saving'}"
                                 style="left: ${def.pinX}%; top: ${def.pinY}%;"
-                                onclick="hotel3D.selectFurnitureOnStage('${areaId}', event)">
-                            🔒 Sıra #${def.seqOrder}
+                                onclick="hotel3D.openBottomDesignDock('${tId}', true)">
+                            🔨 Görev ${def.order}: ${def.name} ($${cost})
                         </button>
                     `;
                 }
@@ -1242,62 +1948,213 @@ class Hotel3DSimulator {
         `;
     }
 
-    selectFurnitureOnStage(areaId, e) {
-        if (e) e.stopPropagation();
-        const def = this.renovationDefs[areaId];
-        if (!def) return;
+    // ----------------------------------------------------
+    // 9. GOSSIP HARBOR AREA RENOVATION HUB / TASK SHEET (#renovationProximityPanel)
+    // ----------------------------------------------------
+    updateProximityPanel() {
+        const proxPanel = document.getElementById('renovationProximityPanel');
+        if (!proxPanel) return;
 
-        this.playSound('step');
+        const rm = this.rooms[this.currentRoom] || this.rooms.restaurant;
+        const tasks = this.getAreaTasks(this.currentRoom);
+        const completedTasks = this.getAreaCompletedTasks(this.currentRoom);
+        const activeTask = this.getAreaActiveTask(this.currentRoom);
+        const areaLevel = this.getAreaLevel(this.currentRoom);
+        const progressPct = this.getAreaProgress(this.currentRoom);
 
-        // 1. If already renovated once, selection right has ended!
-        if (this.isAreaCompleted(areaId)) {
-            this.selectedAreaId = areaId;
-            this.closeBottomDesignDock();
-            this.updateProximityPanel();
-            this.renderStage();
-            this.showBanner(`✅ "${def.name}" kalıcı olarak kuruldu. Seçim hakkı tamamlandı!`);
-            return;
+        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
+
+        // Build list of all tasks for this area
+        let tasksListHtml = '';
+        tasks.forEach((t) => {
+            const installed = this.getInstalledOption(t.id);
+            const isCompleted = Boolean(installed);
+            const isActive = (activeTask && t.id === activeTask.id);
+            const isLocked = (!isCompleted && !isActive);
+
+            let rowClass = 'task-row-locked';
+            let badgeClass = 'badge-locked';
+            let badgeText = `🔒 Görev ${t.order}`;
+            let descText = t.defaultDesc;
+
+            if (isCompleted) {
+                const opt = t.options.find(o => o.id === installed.optionId) || t.options[0];
+                rowClass = 'task-row-completed';
+                badgeClass = 'badge-done';
+                badgeText = '✅ TAMAMLANDI';
+                descText = `Kuruldu: <b>${opt.name}</b> (${opt.style})`;
+            } else if (isActive) {
+                const canAfford = (balance >= t.baseCost && stars >= t.starsNeeded);
+                rowClass = 'task-row-active';
+                badgeClass = canAfford ? 'badge-ready' : 'badge-saving';
+                badgeText = canAfford ? `🟢 HAZIR ($${t.baseCost})` : `🎯 AKTİF GÖREV ($${t.baseCost})`;
+                descText = t.shortDesc || t.defaultDesc;
+            } else {
+                descText = `Önceki görev tamamlandığında açılır ($${t.baseCost})`;
+            }
+
+            tasksListHtml += `
+                <div class="gh-area-task-item ${rowClass}">
+                    <div class="task-item-left">
+                        <span class="task-order-pill ${badgeClass}">${badgeText}</span>
+                        <div class="task-item-text">
+                            <strong>${t.order}. ${t.name}</strong>
+                            <small>${descText}</small>
+                        </div>
+                    </div>
+                    <div class="task-item-right">
+                        ${isCompleted ? `
+                            <span class="task-check-mark">✓</span>
+                        ` : (isActive ? `
+                            <button class="task-action-btn ${balance >= t.baseCost ? 'btn-green' : 'btn-gold'}"
+                                    onclick="hotel3D.openBottomDesignDock('${t.id}', true)">
+                                ${balance >= t.baseCost ? '3 Tasarımdan Seç ➔' : `Maliyet: $${t.baseCost}`}
+                            </button>
+                        ` : `
+                            <span class="task-locked-icon">🔒</span>
+                        `)}
+                    </div>
+                </div>
+            `;
+        });
+
+        // Exact requirements layout inspired by Gossip Harbour
+        let activeCardHtml = '';
+        if (activeTask) {
+            const cost = activeTask.baseCost;
+            const canAfford = (balance >= cost && stars >= activeTask.starsNeeded);
+            const stillNeeded = Math.max(0, cost - balance);
+            const taskThumb = `assets/designs/${activeTask.id}_opt_a.jpg`;
+
+            activeCardHtml = `
+                <div class="gh-gossip-task-card ${canAfford ? 'card-ready' : 'card-saving'}">
+                    <div class="gh-gt-header">
+                        <span class="gh-gt-tag ${canAfford ? 'tag-ready' : 'tag-saving'}">
+                            ${canAfford ? '🟢 BÜTÇE HAZIR! TASARIM SEÇEBİLİRSİNİZ' : '⏳ BÜTÇE BİRİKTİRİLİYOR (IN PROGRESS)'}
+                        </span>
+                        <span class="gh-gt-step">GÖREV ${activeTask.order} / ${tasks.length}</span>
+                    </div>
+
+                    <div class="gh-gt-body">
+                        <div class="gh-gt-thumb" style="background-image: url('${taskThumb}');">
+                            <span class="gh-gt-thumb-badge">${activeTask.order}</span>
+                        </div>
+                        <div class="gh-gt-info">
+                            <h4>${activeTask.name}</h4>
+                            <p>${activeTask.shortDesc || activeTask.defaultDesc}</p>
+                            <div class="gh-gt-reward-pills">
+                                <span class="rw-pill income">+$${activeTask.incomeBoost}/dk Gelir</span>
+                                <span class="rw-pill rep">+${activeTask.repBoost} Prestij</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4 Clear Metrics: Cost, Balance, Still Needed, Status -->
+                    <div class="gh-gt-metrics-grid">
+                        <div class="gt-metric-box">
+                            <label>Görev Maliyeti</label>
+                            <b class="text-gold">$${cost}</b>
+                        </div>
+                        <div class="gt-metric-box">
+                            <label>Mevcut Kasa</label>
+                            <b>$${balance}</b>
+                        </div>
+                        <div class="gt-metric-box highlight">
+                            <label>${canAfford ? 'Kalan Bütçe' : 'Kalan İhtiyaç'}</label>
+                            <b class="${canAfford ? 'text-green' : 'text-danger'}">
+                                ${canAfford ? '+$' + (balance - cost) : '-$' + stillNeeded}
+                            </b>
+                        </div>
+                        <div class="gt-metric-box">
+                            <label>Durum</label>
+                            <b class="${canAfford ? 'text-green' : 'text-warn'}">
+                                ${canAfford ? 'Hazır!' : 'İlerlemede'}
+                            </b>
+                        </div>
+                    </div>
+
+                    <!-- Prominent Action Buttons -->
+                    <div class="gh-gt-action-bar">
+                        ${canAfford ? `
+                            <button class="gh-gt-btn-renovate pulse" onclick="hotel3D.openBottomDesignDock('${activeTask.id}', true)">
+                                🔨 3 FARKLI TASARIMDAN BİRİNİ SEÇ &amp; KUR ($${cost})
+                            </button>
+                        ` : `
+                            <button class="gh-gt-btn-earn" onclick="hotel3D.goToMergeBoardForFunds('${activeTask.id}', ${stillNeeded})">
+                                ⚡ Birleştirme Masasında Kazan ($${stillNeeded} Eksik)
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+        } else {
+            activeCardHtml = `
+                <div class="gh-area-completed-banner">
+                    <div class="completed-icon">👑</div>
+                    <div class="completed-text">
+                        <h4>${rm.name.toUpperCase()} TAMAMEN RESTORE EDİLDİ!</h4>
+                        <p>Bu alandaki tüm lüks mobilyalar ve dekorasyonlar kalıcı olarak kuruldu. Otelinizin prestiji en üst seviyeye ulaştı!</p>
+                    </div>
+                </div>
+            `;
         }
 
-        // 2. Strict sequential order check:
-        const activeSeqId = this.getCurrentSequentialAreaId();
-        if (activeSeqId && areaId !== activeSeqId) {
-            const activeDef = this.renovationDefs[activeSeqId];
-            this.selectedAreaId = areaId;
-            this.closeBottomDesignDock();
-            this.updateProximityPanel();
-            this.renderStage();
-            this.showBanner(`🔒 Sıralı Görev: Önce Sıra #${activeDef.seqOrder} ("${activeDef.name}") kurulmalıdır!`);
-            return;
-        }
+        proxPanel.innerHTML = `
+            <div class="gh-area-hub-wrapper">
+                <div class="gh-hub-header">
+                    <div class="gh-hub-title-box">
+                        <span class="gh-hub-crest">✦ AURELIA PALACE RESTORASYON MERKEZİ</span>
+                        <h3>${rm.name.toUpperCase()}</h3>
+                        <p>${rm.description}</p>
+                    </div>
+                    <div class="gh-hub-lvl-badge">
+                        <span class="gh-hub-lvl-num">SEVİYE ${areaLevel}</span>
+                        <span class="gh-hub-lvl-pct">%${progressPct} (${completedTasks.length}/${tasks.length} Görev)</span>
+                    </div>
+                </div>
 
-        // 3. Current active sequential furniture item -> open the 3-design bottom dock!
-        this.selectedAreaId = areaId;
-        this.focusCameraOnPin(def.pinX, def.pinY);
-        this.openBottomDesignDock(areaId, true);
-        this.updateProximityPanel();
-        this.renderStage();
+                <div class="gh-hub-progress-track">
+                    <div class="gh-hub-progress-bar" style="width: ${progressPct}%;"></div>
+                </div>
+
+                ${activeCardHtml}
+
+                <div class="gh-area-tasks-section">
+                    <h4 class="gh-tasks-sec-title">📋 ${rm.shortName} Tüm Restorasyon Görevleri (${tasks.length} Aşama)</h4>
+                    <div class="gh-area-task-list">
+                        ${tasksListHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+        proxPanel.style.display = 'block';
+    }
+
+    goToMergeBoardForFunds(taskId, neededAmount) {
+        if (window.switchMainPage) {
+            window.switchMainPage('pageBoard');
+        }
+        const noticeEl = document.getElementById('notice');
+        if (noticeEl) {
+            noticeEl.innerHTML = `🎯 <b>Restoran Görevi İçin:</b> Masadaki siparişleri hazırlayıp teslim ederek eksik <b>$${neededAmount}</b> altın kazanın!`;
+        }
+        this.showBanner(`🧩 Masadaki siparişleri teslim ederek eksik $${neededAmount} kazanın!`);
     }
 
     // ----------------------------------------------------
-    // GOSSIP HARBOR SIGNATURE BOTTOM 3-OPTION DESIGN DOCK
+    // 10. GOSSIP HARBOR 3-DESIGN SELECTION DOCK (#ghBottomDesignDock)
     // ----------------------------------------------------
-    openBottomDesignDock(areaId, scrollAndPulse = false) {
+    openBottomDesignDock(taskId, scrollAndPulse = false) {
         const dock = document.getElementById('ghBottomDesignDock');
         if (!dock) return;
-        const targetId = areaId || this.selectedAreaId || this.getCurrentSequentialAreaId();
+        const targetId = taskId || this.getCurrentSequentialAreaId();
         const def = this.renovationDefs[targetId];
         if (!def) return;
 
-        // Never open design selector for an already-placed furniture item or out-of-sequence item!
-        const activeSeqId = this.getCurrentSequentialAreaId();
-        if (this.isAreaCompleted(targetId) || (activeSeqId && targetId !== activeSeqId)) {
-            this.closeBottomDesignDock();
-            return;
-        }
-
         this.selectedAreaId = targetId;
         this.isRenovationDockOpen = true;
+
         if (!this.previewingRenovation || this.previewingRenovation.id !== targetId) {
             this.selectedOptionIndex = 0;
         }
@@ -1343,20 +2200,18 @@ class Hotel3DSimulator {
         this.renderStage();
     }
 
-    selectBottomDockOption(areaId, idx) {
-        if (this.isAreaCompleted(areaId)) return;
-        const def = this.renovationDefs[areaId];
+    selectBottomDockOption(taskId, idx) {
+        const def = this.renovationDefs[taskId];
         if (!def || !def.options[idx]) return;
-        this.selectedAreaId = areaId;
+        this.selectedAreaId = taskId;
         this.selectedOptionIndex = idx;
-        this.isRenovationDockOpen = true;
         const opt = def.options[idx];
-        this.previewingRenovation = { id: areaId, optionId: opt.id };
+        this.previewingRenovation = { id: taskId, optionId: opt.id };
         this.playSound('chime');
         this.renderBottomDesignDock();
         this.updateProximityPanel();
         this.renderStage();
-        this.showBanner(`👁️ Seçenek ${idx + 1} (${opt.style}) sahnede önizleniyor!`);
+        this.showBanner(`👁️ ${opt.name} (${opt.style}) sahnede önizleniyor!`);
     }
 
     renderBottomDesignDock() {
@@ -1366,17 +2221,17 @@ class Hotel3DSimulator {
             dock.style.display = 'none';
             return;
         }
+
         const activeId = this.selectedAreaId || this.getCurrentSequentialAreaId();
         const def = this.renovationDefs[activeId];
-        if (!def || this.isAreaCompleted(activeId)) {
+        if (!def || this.isTaskCompleted(activeId)) {
             this.closeBottomDesignDock();
             return;
         }
 
         dock.style.display = 'block';
-        const id = def.id;
-        const cost = this.getNextUpgradeCost(id);
-        const starsNeeded = this.getNextUpgradeStars(id);
+        const cost = def.baseCost;
+        const starsNeeded = def.starsNeeded;
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
         const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
         const canAfford = (balance >= cost && stars >= starsNeeded);
@@ -1385,18 +2240,19 @@ class Hotel3DSimulator {
         let cardsHtml = '';
         def.options.forEach((opt, idx) => {
             const isSelected = (idx === this.selectedOptionIndex);
-            const thumbSrc = `assets/designs/${id}_${opt.id}.jpg`;
+            const thumbSrc = opt.previewImg || `assets/designs/${def.id}_${opt.id}.jpg`;
 
             cardsHtml += `
                 <div class="gh-dock-option-card ${isSelected ? 'active' : ''}"
-                     onclick="hotel3D.selectBottomDockOption('${id}', ${idx})">
+                     onclick="hotel3D.selectBottomDockOption('${def.id}', ${idx})">
                     <div class="gh-dock-thumb" style="background-image: url('${thumbSrc}');">
                         <span class="gh-dock-opt-num">${idx + 1}. ${opt.style}</span>
-                        ${isSelected ? '<span class="gh-dock-check-tag">✓ SEÇİLİ</span>' : '<span class="gh-dock-lock-tag">👁️ Dene</span>'}
+                        ${isSelected ? '<span class="gh-dock-check-tag">✓ SEÇİLİ</span>' : '<span class="gh-dock-lock-tag">👁️ Önizle</span>'}
                     </div>
                     <div class="gh-dock-opt-meta">
                         <strong>${opt.icon} ${opt.name}</strong>
-                        <small>+$${opt.incomeBoost}/dk · +${opt.repBoost} Prestij</small>
+                        <p class="opt-desc-snippet">${opt.desc}</p>
+                        <small>+$${opt.incomeBoost}/dk Gelir · +${opt.repBoost} Prestij</small>
                     </div>
                 </div>
             `;
@@ -1407,11 +2263,11 @@ class Hotel3DSimulator {
         dock.innerHTML = `
             <div class="gh-dock-header">
                 <div class="gh-dock-title-wrap">
-                    <span class="gh-dock-lvl-badge">🔨 SIRA #${def.seqOrder}/11 · TEK SEFERLİK KALICI KURULUM</span>
-                    <h4>${def.name} — 3 Farklı Tasarım ve Renkten Birini Seçin:</h4>
+                    <span class="gh-dock-lvl-badge">🎨 GÖREV ${def.order} · 3 FARKLI TASARIM VE RENK SEÇENEĞİ</span>
+                    <h4>${def.name} — Beğendiğiniz Tasarımı Seçip Onaylayın:</h4>
                 </div>
-                <div class="gh-dock-header-right" style="display:flex; gap:6px; align-items:center;">
-                    <button class="gh-dock-detail-btn" onclick="hotel3D.closeBottomDesignDock()" style="background: rgba(239,68,68,0.22); border-color: rgba(239,68,68,0.65); color: #fecaca;">✕ Kapat</button>
+                <div class="gh-dock-header-right">
+                    <button class="gh-dock-close-btn" onclick="hotel3D.closeBottomDesignDock()">&times;</button>
                 </div>
             </div>
 
@@ -1421,20 +2277,20 @@ class Hotel3DSimulator {
 
             <div class="gh-dock-footer">
                 <div class="gh-dock-budget-info">
-                    <span>Maliyet: <b class="text-gold">$${cost} & ⭐${starsNeeded}</b></span>
-                    <span>Kasanız: <b>$${balance} & ⭐${stars}</b></span>
+                    <span>Maliyet: <b class="text-gold">$${cost}</b></span>
+                    <span>Kasanız: <b>$${balance}</b></span>
                     <span class="${canAfford ? 'text-green' : 'text-warn'}">
-                        ${canAfford ? `🟢 Bütçe Hazır! (Kalan: +$${balance - cost})` : `⏳ $${stillNeeded} Daha Gerekli`}
+                        ${canAfford ? `🟢 Bütçe Hazır! (Kalan: $${balance - cost})` : `⏳ $${stillNeeded} Daha Gerekli`}
                     </span>
                 </div>
                 <div class="gh-dock-action-btns">
                     ${canAfford ? `
-                        <button class="gh-dock-confirm-btn ready" onclick="hotel3D.executePurchase('${id}', '${chosenOpt.id}')">
-                            ✓ Seçimi Onayla & Kalıcı Kur ($${cost})
+                        <button class="gh-dock-confirm-btn ready" onclick="hotel3D.executePurchase('${def.id}', '${chosenOpt.id}')">
+                            ✓ Seçimi Onayla &amp; Mekana Kur ($${cost})
                         </button>
                     ` : `
-                        <button class="gh-dock-confirm-btn locked" onclick="hotel3D.closeBottomDesignDock(); window.switchMainPage && window.switchMainPage('pageBoard')">
-                            🧩 Masada Sipariş Tamamla ($${stillNeeded} Eksik)
+                        <button class="gh-dock-confirm-btn locked" onclick="hotel3D.goToMergeBoardForFunds('${def.id}', ${stillNeeded})">
+                            ⚡ Masada Kazan ($${stillNeeded} Eksik)
                         </button>
                     `}
                 </div>
@@ -1443,79 +2299,47 @@ class Hotel3DSimulator {
     }
 
     // ----------------------------------------------------
-    // FULL RENOVATION MODAL & ONE-TIME PURCHASE EXECUTION
+    // 11. CONFIRMATION & PERMANENT ONE-TIME PURCHASE
     // ----------------------------------------------------
-    openRenovationModal(id) {
-        if (this.isAreaCompleted(id)) {
-            this.showBanner('✅ Bu mobilya kalıcı olarak kuruldu ve seçim tamamlandı.');
-            return;
-        }
-        const activeSeqId = this.getCurrentSequentialAreaId();
-        if (activeSeqId && id !== activeSeqId) {
-            const activeDef = this.renovationDefs[activeSeqId];
-            this.showBanner(`🔒 Sıralı Görev: Önce Sıra #${activeDef.seqOrder} (${activeDef.name}) tamamlanmalı!`);
-            return;
-        }
-        this.goToAndOpenRenovation(id);
-    }
-
-    cancelPreviewAndClose() {
-        const modal = document.getElementById('renoModal');
-        if (modal) modal.style.display = 'none';
-        this.activeModalPoint = null;
-    }
-
-    renderModalContent() {}
-
-    executePurchase(id, optionId) {
-        const def = this.renovationDefs[id];
+    executePurchase(taskId, optionId) {
+        const def = this.renovationDefs[taskId];
         if (!def) return;
 
-        // Prevent duplicate placement: each furniture item can only be placed ONCE!
-        if (this.isAreaCompleted(id)) {
+        if (this.isTaskCompleted(taskId)) {
             this.closeBottomDesignDock();
-            this.showBanner('✅ Bu mobilya zaten kalıcı olarak kuruldu!');
-            return;
-        }
-
-        // Enforce strict sequential order
-        const activeSeqId = this.getCurrentSequentialAreaId();
-        if (activeSeqId && id !== activeSeqId) {
-            const activeDef = this.renovationDefs[activeSeqId];
-            this.showBanner(`🔒 Önce Sıra #${activeDef.seqOrder} (${activeDef.name}) kurulmalıdır!`);
+            this.showBanner('✅ Bu görev zaten tamamlandı!');
             return;
         }
 
         const opt = def.options.find(o => o.id === optionId) || def.options[0];
         if (!opt) return;
 
-        const costCoins = this.getNextUpgradeCost(id);
-        const costStars = this.getNextUpgradeStars(id);
+        const costCoins = def.baseCost;
+        const costStars = def.starsNeeded;
 
         if (window.GameEconomy) {
             const res = window.GameEconomy.purchaseRenovation(
-                id,
+                taskId,
                 optionId,
                 costCoins,
                 costStars,
-                `Sıra #${def.seqOrder}: ${def.name} (${opt.name})`
+                `${def.name} (${opt.name})`
             );
             if (!res.success) {
-                this.showBanner('Yetersiz bakiye! Masadan sipariş tamamlayın veya otel gelirini toplayın.');
+                this.showBanner('Yetersiz bakiye! Masadan sipariş teslim edin.');
                 return;
             }
             this.state.coins = res.remainingBalance;
         } else {
-            if (this.state.coins < costCoins || this.state.stars < costStars) {
-                this.showBanner('Yetersiz bakiye! Masadan sipariş tamamlayın.');
+            if (this.state.coins < costCoins) {
+                this.showBanner('Yetersiz bakiye!');
                 return;
             }
             this.state.coins -= costCoins;
-            this.state.stars -= costStars;
         }
 
-        // Permanently lock the chosen furniture visual & end selection right for this item!
-        this.state.renovations[id] = { optionId: optionId, completed: true, level: 2 };
+        // Permanently record completed task with chosen design
+        this.state.renovations[taskId] = { optionId: optionId, completed: true, timestamp: Date.now() };
         this.isRenovationDockOpen = false;
         this.previewingRenovation = null;
 
@@ -1523,13 +2347,12 @@ class Hotel3DSimulator {
         this.saveState();
 
         this.playSound('renovate');
-        this.cancelPreviewAndClose();
         this.closeBottomDesignDock();
 
-        // Advance selectedAreaId to the next sequential furniture item
-        const nextSeqId = this.getCurrentSequentialAreaId();
-        if (nextSeqId) {
-            this.selectedAreaId = nextSeqId;
+        // Update selectedAreaId to the next available task in this area
+        const nextTask = this.getAreaActiveTask(this.currentRoom);
+        if (nextTask) {
+            this.selectedAreaId = nextTask.id;
         }
 
         this.renderStage();
@@ -1543,274 +2366,49 @@ class Hotel3DSimulator {
             }, 60);
         }
 
-        const nextDef = nextSeqId ? this.renovationDefs[nextSeqId] : null;
-        if (nextDef) {
-            this.showBanner(`✅ "${opt.name}" kalıcı olarak kuruldu! Sıradaki görev açıldı: Sıra #${nextDef.seqOrder} ${nextDef.name}`);
+        if (nextTask) {
+            this.showBanner(`✅ "${opt.name}" mekana kalıcı olarak kuruldu! Sıradaki görev açıldı: "${nextTask.name}"`);
         } else {
-            this.showBanner(`👑 Tebrikler! "${opt.name}" kuruldu ve oteldeki tüm 11 mobilya tamamlandı!`);
-        }
-    }
-
-    goToNextUnrenovatedArea() {
-        const nextSeqId = this.getCurrentSequentialAreaId();
-        if (nextSeqId) {
-            this.goToAndOpenRenovation(nextSeqId);
-        } else {
-            this.showBanner('👑 Oteldeki tüm 11 mobilya kalıcı olarak kuruldu!');
+            const rm = this.rooms[this.currentRoom];
+            this.showBanner(`👑 Tebrikler! "${rm.shortName}" tüm restorasyon görevleri başarıyla tamamlandı!`);
         }
     }
 
     // ----------------------------------------------------
-    // VISUAL HOTEL AREA SHOWCASE CARDS (#hotelAreasVisualGrid)
+    // 12. ROOM JUMP & NAVIGATION
     // ----------------------------------------------------
-    renderHotelAreaCards() {
-        const grid = document.getElementById('hotelAreasVisualGrid');
-        if (!grid || !this.renovationDefs) return;
+    jumpTo(roomKey) {
+        if (!this.rooms[roomKey]) return;
 
-        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
-        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
-        const activeSeqId = this.getCurrentSequentialAreaId();
-
-        let cardsHtml = '';
-        this.sequentialOrder.forEach((id) => {
-            const def = this.renovationDefs[id];
-            if (!def) return;
-
-            const installed = this.getInstalledOption(id);
-            const isCompleted = Boolean(installed);
-            const isCurrentSeq = (id === activeSeqId);
-            const isLockedFuture = (!isCompleted && !isCurrentSeq);
-
-            const cost = this.getNextUpgradeCost(id);
-            const starsNeeded = this.getNextUpgradeStars(id);
-            const stillNeeded = Math.max(0, cost - balance);
-            const canAfford = (balance >= cost && stars >= starsNeeded);
-
-            const installedOpt = installed ? (def.options.find(o => o.id === installed.optionId) || def.options[0]) : null;
-            const conditionText = installedOpt
-                ? `✅ Kalıcı Kuruldu: ${installedOpt.name} (${installedOpt.style})`
-                : (isCurrentSeq ? `🎯 Aktif Sıra #${def.seqOrder}: ${def.defaultDesc}` : `🔒 Sıra #${def.seqOrder} Kilitli (Önce Sıra #${this.renovationDefs[activeSeqId]?.seqOrder || 1} tamamlanmalı)`);
-
-            const cardImgUrl = installedOpt
-                ? `assets/designs/${id}_${installedOpt.id}.jpg`
-                : `assets/designs/${id}_old.jpg`;
-
-            const statusClass = isCompleted ? 'badge-max' : (isCurrentSeq ? (canAfford ? 'badge-ready' : 'badge-saving') : 'badge-saving');
-            const statusLabel = isCompleted
-                ? `✅ KURULDU (SEÇİM BİTTİ)`
-                : (isCurrentSeq
-                    ? (canAfford ? `🟢 SIRA #${def.seqOrder} HAZIR ($${cost})` : `🎯 SIRA #${def.seqOrder} (-$${stillNeeded})`)
-                    : `🔒 SIRA #${def.seqOrder} KİLİTLİ`);
-
-            cardsHtml += `
-                <div class="hotel-visual-area-card ${isCompleted ? 'area-upgraded' : ''} ${isCurrentSeq ? 'area-target' : ''}" style="${isLockedFuture ? 'opacity:0.72;' : ''}">
-                    <div class="hotel-area-img-box" style="background-image: url('${cardImgUrl}')"
-                         onclick="hotel3D.walkToArea('${id}')">
-                        <div class="hotel-area-top-badges">
-                            <span class="hotel-area-cat">${def.area}</span>
-                            <span class="hotel-area-status ${statusClass}">${statusLabel}</span>
-                        </div>
-                        <div class="hotel-area-bottom-overlay">
-                            <h4>${def.seqOrder}. ${def.name}</h4>
-                        </div>
-                    </div>
-
-                    <div class="hotel-area-body">
-                        <div class="area-cond-line">
-                            <small>Durum:</small>
-                            <b>${conditionText}</b>
-                        </div>
-
-                        <div class="area-cost-metrics">
-                            <div class="area-metric">
-                                <span>${isCompleted ? 'Kurulum' : 'Maliyet'}</span>
-                                <b class="text-gold">${isCompleted ? 'TAMAMLANDI' : '$' + cost}</b>
-                            </div>
-                            <div class="area-metric">
-                                <span>Mevcut Kasa</span>
-                                <b>$${balance}</b>
-                            </div>
-                            <div class="area-metric">
-                                <span>Seçim Hakkı</span>
-                                <b class="${isCompleted ? 'text-green' : (isCurrentSeq && canAfford ? 'text-green' : 'text-warn')}">
-                                    ${isCompleted ? '🔒 SABİTLENDİ' : (isCurrentSeq ? '🔓 3 TASARIM' : '🔒 SIRADA')}
-                                </b>
-                            </div>
-                        </div>
-
-                        <div class="area-card-actions">
-                            <button class="area-walk-btn" onclick="hotel3D.walkToArea('${id}')">
-                                📍 Sahnede Gör
-                            </button>
-                            ${isCompleted ? `
-                                <button class="area-reno-btn locked" disabled style="opacity:0.75; cursor:default;">
-                                    ✅ Kuruldu (Sabit)
-                                </button>
-                            ` : (isCurrentSeq ? `
-                                <button class="area-reno-btn ${canAfford ? 'unlocked' : 'locked'}" onclick="hotel3D.goToAndOpenRenovation('${id}')">
-                                    🔨 3 Tasarımdan Seç ($${cost})
-                                </button>
-                            ` : `
-                                <button class="area-reno-btn locked" disabled style="opacity:0.65; cursor:not-allowed;">
-                                    🔒 Sıra #${def.seqOrder} Bekliyor
-                                </button>
-                            `)}
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        grid.innerHTML = cardsHtml;
-    }
-
-    walkToArea(id) {
-        const def = this.renovationDefs[id];
-        if (!def) return;
         this.isMapMode = false;
-        this.currentRoom = def.room || 'lobby';
-        this.selectedAreaId = id;
+        this.currentRoom = roomKey;
+        const rm = this.rooms[roomKey];
+
+        const activeTask = this.getAreaActiveTask(roomKey);
+        if (activeTask) {
+            this.selectedAreaId = activeTask.id;
+        }
+
+        this.isRenovationDockOpen = false;
+        this.previewingRenovation = null;
+        this.panX = 0;
+        this.panY = 0;
+        this.zoom = 1.0;
+
         this.playSound('door');
 
-        const activeSeqId = this.getCurrentSequentialAreaId();
-        if (!this.isAreaCompleted(id) && id === activeSeqId) {
-            this.focusCameraOnPin(def.pinX, def.pinY);
-            this.openBottomDesignDock(id, true);
-        } else {
-            this.closeBottomDesignDock();
-            this.renderStage();
-            this.updateProximityPanel();
-        }
-        const stageEl = document.getElementById('ghSceneStage');
-        if (stageEl && stageEl.scrollIntoView) {
-            stageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+        document.querySelectorAll('.room-jump-btn').forEach(b => b.classList.remove('active'));
+        const btn = document.querySelector(`.room-jump-btn[onclick*="${roomKey}"]`);
+        if (btn) btn.classList.add('active');
+
+        this.closeBottomDesignDock();
+        this.renderStage();
+        this.updateProximityPanel();
+        this.showBanner(`📍 ${rm.name} sahnesine geçildi.`);
     }
 
     // ----------------------------------------------------
-    // PROJECT PLAN & SEQUENTIAL BUDGET OVERVIEW MODAL
-    // ----------------------------------------------------
-    openProjectPlanModal() {
-        let modal = document.getElementById('projectPlanModal');
-        if (!modal) return;
-
-        const totalItems = this.sequentialOrder.length;
-        let completedCount = 0;
-        this.sequentialOrder.forEach(id => {
-            if (this.isAreaCompleted(id)) completedCount++;
-        });
-        const progressPct = Math.round((completedCount / totalItems) * 100);
-        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
-        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
-        const activeSeqId = this.getCurrentSequentialAreaId();
-
-        let listHtml = '';
-        this.sequentialOrder.forEach((id) => {
-            const def = this.renovationDefs[id];
-            const installed = this.getInstalledOption(id);
-            const isCompleted = Boolean(installed);
-            const isCurrentSeq = (id === activeSeqId);
-
-            const cost = this.getNextUpgradeCost(id);
-            const starsNeeded = this.getNextUpgradeStars(id);
-            const canAfford = (balance >= cost && stars >= starsNeeded);
-            const defCoins = Math.max(0, cost - balance);
-
-            let statusClass = 'waiting';
-            let statusText = `🔒 SIRA #${def.seqOrder} BEKLİYOR`;
-            let currentCondition = def.defaultDesc;
-
-            if (installed) {
-                const opt = def.options.find(o => o.id === installed.optionId) || def.options[0];
-                currentCondition = `✅ Kalıcı Kuruldu: ${opt.name} (${opt.style})`;
-                statusClass = 'done';
-                statusText = `✅ KURULDU — SEÇİM TAMAMLANDI`;
-            } else if (isCurrentSeq) {
-                statusClass = canAfford ? 'ready' : 'waiting';
-                statusText = canAfford ? `🟢 AKTİF SIRA #${def.seqOrder} — BÜTÇE HAZIR!` : `🎯 AKTİF SIRA #${def.seqOrder} ($${defCoins} Eksik)`;
-            }
-
-            listHtml += `
-                <div class="proj-area-row ${isCompleted ? 'done-row' : ''} ${isCurrentSeq ? 'target-row' : ''}">
-                    <div class="proj-area-info">
-                        <div class="proj-row-header">
-                            <span class="proj-stage">SIRA ${def.seqOrder}/11 · ${def.area}</span>
-                            <span class="proj-badge ${statusClass}">${statusText}</span>
-                        </div>
-                        <h4>${def.seqOrder}. ${def.name}</h4>
-                        <div class="proj-condition-line">
-                            <small>Durum: <b>${currentCondition}</b></small>
-                        </div>
-                        <div class="proj-fin-calc-line">
-                            <span>${isCompleted ? 'Maliyet: <b>ÖDENDİ</b>' : `Kurulum Maliyeti: <b>$${cost}</b>`}</span> &nbsp;•&nbsp;
-                            <span>Kasa: <b>$${balance}</b></span> &nbsp;•&nbsp;
-                            <span class="${isCompleted || canAfford ? 'text-green' : 'text-warn'}">${isCompleted ? '🔒 Sabitlendi' : (isCurrentSeq ? (canAfford ? '🔓 3 Tasarım Açık!' : `Eksik: -$${defCoins}`) : '🔒 Sıra Bekliyor')}</span>
-                        </div>
-                    </div>
-                    <div class="proj-row-actions">
-                        ${isCompleted ? `
-                            <button class="proj-go-btn" onclick="document.getElementById('projectPlanModal').style.display='none'; hotel3D.walkToArea('${id}')">
-                                📍 Sahnede Gör
-                            </button>
-                        ` : (isCurrentSeq ? `
-                            <button class="proj-go-btn" onclick="document.getElementById('projectPlanModal').style.display='none'; hotel3D.goToAndOpenRenovation('${id}')">
-                                🔨 3 Tasarımdan Seç ➔
-                            </button>
-                        ` : `
-                            <button class="proj-go-btn" disabled style="opacity:0.55; cursor:not-allowed;">
-                                🔒 Sıra #${def.seqOrder} Kilitli
-                            </button>
-                        `)}
-                    </div>
-                </div>
-            `;
-        });
-
-        modal.innerHTML = `
-            <div class="proj-modal-card">
-                <div class="proj-header">
-                    <div class="proj-title-box">
-                        <span class="proj-crest">✦ AURELIA PALACE SIRALI MOBİLYA &amp; MALİYET DEFTERİ</span>
-                        <h3>Sıralı Otel Kurulum Planı (Sıra 1 ➔ Sıra 11)</h3>
-                    </div>
-                    <button class="reno-close-btn" onclick="document.getElementById('projectPlanModal').style.display='none'">&times;</button>
-                </div>
-
-                <div class="proj-summary-strip">
-                    <div class="proj-sum-item">
-                        <label>Sıralı Kurulum İlerlemesi</label>
-                        <b>%${progressPct} (${completedCount}/${totalItems} Mobilya)</b>
-                    </div>
-                    <div class="proj-sum-item">
-                        <label>Mevcut Kasa</label>
-                        <b>💰 $${balance} | ⭐ ${stars}</b>
-                    </div>
-                    <div class="proj-sum-item">
-                        <label>Pasif Otel Geliri</label>
-                        <b class="positive">+$${this.state.incomePerMin}/dk</b>
-                    </div>
-                </div>
-
-                <div class="proj-progress-track">
-                    <div class="proj-progress-bar" style="width: ${progressPct}%;"></div>
-                </div>
-
-                <div class="proj-list-scroll">
-                    ${listHtml}
-                </div>
-
-                <div class="proj-footer-bar" style="margin-top: 10px; display: flex; justify-content: space-between;">
-                    <button class="ledger-btn" style="flex: 1;" onclick="document.getElementById('projectPlanModal').style.display='none'; window.GameEconomy && window.GameEconomy.openLedgerModal();">
-                        💼 Finans ve Kasa Defterini Aç
-                    </button>
-                </div>
-            </div>
-        `;
-        modal.style.display = 'flex';
-    }
-
-    // ----------------------------------------------------
-    // PASSIVE INCOME & HUD UPDATES
+    // 13. PASSIVE INCOME & HUD
     // ----------------------------------------------------
     updateEconomy() {
         const now = Date.now();
@@ -1870,241 +2468,124 @@ class Hotel3DSimulator {
             tag.innerText = '🗺️ Aurelia Palace — Otel Haritası';
             return;
         }
-        const rm = this.rooms[this.currentRoom] || this.rooms.lobby;
+        const rm = this.rooms[this.currentRoom] || this.rooms.restaurant;
         tag.innerText = `📍 ${rm.name}`;
     }
 
-    updateProximityPanel() {
-        const proxPanel = document.getElementById('renovationProximityPanel');
-        if (!proxPanel) return;
+    showBanner(msg) {
+        let el = document.getElementById('hudNotification');
+        if (!el) return;
+        el.innerText = msg;
+        el.style.display = 'block';
+        clearTimeout(this.bannerTimer);
+        this.bannerTimer = setTimeout(() => {
+            el.style.display = 'none';
+        }, 3200);
+    }
 
-        const activeSeqId = this.getCurrentSequentialAreaId();
-        const id = this.selectedAreaId || activeSeqId || 'reception_desk';
-        const def = this.renovationDefs[id];
-        if (!def) {
-            proxPanel.style.display = 'none';
-            return;
-        }
+    // ----------------------------------------------------
+    // 14. AREA SHOWCASE GALLERY CARDS (#hotelAreasVisualGrid)
+    // ----------------------------------------------------
+    renderHotelAreaCards() {
+        const grid = document.getElementById('hotelAreasVisualGrid');
+        if (!grid) return;
 
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
-        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
-        const installed = this.getInstalledOption(id);
-        const isCompleted = Boolean(installed);
-        const isCurrentSeq = (id === activeSeqId);
-        const cost = this.getNextUpgradeCost(id);
-        const starsNeeded = this.getNextUpgradeStars(id);
-        const canAfford = (balance >= cost && stars >= starsNeeded);
 
-        const installedOpt = installed ? (def.options.find(o => o.id === installed.optionId) || def.options[0]) : null;
+        let cardsHtml = '';
+        Object.keys(this.rooms).forEach((roomKey) => {
+            const rm = this.rooms[roomKey];
+            const tasks = rm.tasks || [];
+            const completedCount = this.getAreaCompletedTasks(roomKey).length;
+            const activeTask = this.getAreaActiveTask(roomKey);
+            const level = this.getAreaLevel(roomKey);
+            const progress = this.getAreaProgress(roomKey);
 
-        // 1. If this item is ALREADY COMPLETED: show permanently locked confirmation card (NO "Tasarımı Değiştir" button!)
-        if (isCompleted && installedOpt) {
-            const installedThumb = `assets/designs/${id}_${installedOpt.id}.jpg`;
-            const nextDef = activeSeqId ? this.renovationDefs[activeSeqId] : null;
-            proxPanel.innerHTML = `
-                <div class="prox-card-inner" style="border-color: rgba(16, 185, 129, 0.55);">
-                    <div class="prox-top-row">
-                        <span class="prox-area-badge">${def.area}</span>
-                        <span class="prox-status-badge status-completed">✅ KALICI OLARAK KURULDU (SEÇİM BİTTİ)</span>
-                    </div>
-                    <h3 class="prox-title">${def.seqOrder}. ${def.name.toUpperCase()}</h3>
-                    <div style="display:flex; gap:12px; align-items:center; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.35); border-radius:12px; padding:10px; margin:8px 0;">
-                        <div style="width:104px; height:64px; border-radius:8px; background-image:url('${installedThumb}'); background-size:cover; background-position:center; flex-shrink:0; border:1.5px solid #ffd700;"></div>
-                        <div style="flex:1; min-width:0;">
-                            <div style="font-size:0.74rem; color:#6ee7b7; font-weight:700;">SABİTLENEN MOBİLYA TASARIMI:</div>
-                            <div style="font-size:0.9rem; color:#fff; font-weight:800;">${installedOpt.icon} ${installedOpt.name}</div>
-                            <div style="font-size:0.74rem; color:#cbd5e1;">Renk &amp; Stil: ${installedOpt.style} · +$${installedOpt.incomeBoost}/dk Gelir</div>
+            let statusLabel = `SEVİYE ${level} (${progress}%)`;
+            let statusClass = 'badge-saving';
+
+            if (completedCount >= tasks.length) {
+                statusLabel = '✅ TAMAMLANDI';
+                statusClass = 'badge-max';
+            } else if (activeTask && balance >= activeTask.baseCost) {
+                statusLabel = '🟢 GÖREV HAZIR!';
+                statusClass = 'badge-ready';
+            }
+
+            cardsHtml += `
+                <div class="hotel-visual-area-card ${completedCount >= tasks.length ? 'area-upgraded' : ''}"
+                     onclick="hotel3D.jumpTo('${roomKey}')">
+                    <div class="hotel-area-img-box" style="background-image: url('${rm.bgImg}')">
+                        <div class="hotel-area-top-badges">
+                            <span class="hotel-area-cat">${rm.floorLabel}</span>
+                            <span class="hotel-area-status ${statusClass}">${statusLabel}</span>
+                        </div>
+                        <div class="hotel-area-bottom-overlay">
+                            <h4>${rm.shortName}</h4>
                         </div>
                     </div>
-                    ${nextDef ? `
-                        <div class="prox-actions-row">
-                            <button class="prox-btn-view-designs pulse" onclick="hotel3D.goToAndOpenRenovation('${nextDef.id}')">
-                                ➡️ Sıradaki Göreve Geç: Sıra #${nextDef.seqOrder} ${nextDef.name} ($${nextDef.baseCost})
+                    <div class="hotel-area-body">
+                        <div class="area-cond-line">
+                            <small>Sıradaki Adım:</small>
+                            <b>${activeTask ? `${activeTask.order}. ${activeTask.name} ($${activeTask.baseCost})` : 'Tüm Görevler Tamamlandı!'}</b>
+                        </div>
+                        <div class="area-card-actions">
+                            <button class="area-walk-btn" onclick="hotel3D.jumpTo('${roomKey}')">
+                                📍 Mekana Git &amp; Restore Et ➔
                             </button>
                         </div>
-                    ` : `
-                        <div style="text-align:center; color:#fde68a; font-weight:700; font-size:0.84rem; padding:4px 0;">
-                            👑 Oteldeki tüm 11 mobilya kalıcı olarak kuruldu!
-                        </div>
-                    `}
-                </div>
-            `;
-            proxPanel.style.display = 'block';
-            return;
-        }
-
-        // 2. If this item is a FUTURE LOCKED sequential item (not its turn yet):
-        if (!isCurrentSeq && activeSeqId) {
-            const activeDef = this.renovationDefs[activeSeqId];
-            proxPanel.innerHTML = `
-                <div class="prox-card-inner" style="border-color: rgba(100, 116, 139, 0.55);">
-                    <div class="prox-top-row">
-                        <span class="prox-area-badge">${def.area}</span>
-                        <span class="prox-status-badge status-saving">🔒 SIRA #${def.seqOrder} KİLİTLİ</span>
-                    </div>
-                    <h3 class="prox-title">${def.seqOrder}. ${def.name.toUpperCase()} ($${cost})</h3>
-                    <p style="font-size:0.82rem; color:#cbd5e1; margin:6px 0 10px;">
-                        Oteldeki mobilyalar sırayla kurulur. Bu mobilyayı yenilemek için önce <b>Sıra #${activeDef.seqOrder}: ${activeDef.name}</b> görevini tamamlamalısınız.
-                    </p>
-                    <div class="prox-actions-row">
-                        <button class="prox-btn-view-designs pulse" onclick="hotel3D.goToAndOpenRenovation('${activeDef.id}')">
-                            🎯 Aktif Göreve Git: Sıra #${activeDef.seqOrder} ${activeDef.name} ($${activeDef.baseCost})
-                        </button>
-                    </div>
-                </div>
-            `;
-            proxPanel.style.display = 'block';
-            return;
-        }
-
-        // 3. Current active sequential item when dock is CLOSED:
-        if (!this.isRenovationDockOpen) {
-            const stillNeeded = Math.max(0, cost - balance);
-            const remainingAfter = Math.max(0, balance - cost);
-            proxPanel.innerHTML = `
-                <div class="prox-card-inner">
-                    <div class="prox-top-row">
-                        <span class="prox-area-badge">🎯 AKTİF GÖREV · ${def.area}</span>
-                        <span class="prox-status-badge ${canAfford ? 'status-ready' : 'status-saving'}">${canAfford ? '🟢 BÜTÇE HAZIR' : '⏳ BİRİKTİRİLİYOR'}</span>
-                    </div>
-                    <h3 class="prox-title">SIRA #${def.seqOrder}: ${def.name.toUpperCase()}</h3>
-                    <div class="prox-condition-row">
-                        <span class="prox-cond-label">Mevcut Durum:</span>
-                        <b class="prox-cond-val">${def.defaultDesc}</b>
-                    </div>
-                    <div class="prox-fin-grid">
-                        <div class="prox-fin-box">
-                            <label>Kurulum Maliyeti</label>
-                            <b class="prox-cost">$${cost}</b>
-                        </div>
-                        <div class="prox-fin-box">
-                            <label>Mevcut Bakiye</label>
-                            <b class="prox-bal">$${balance}</b>
-                        </div>
-                        <div class="prox-fin-box highlight">
-                            <label>${canAfford ? 'Kalan Bakiye' : 'Gereken Para'}</label>
-                            <b class="${canAfford ? 'text-green' : 'text-warn'}">${canAfford ? '+$' + remainingAfter : '-$' + stillNeeded}</b>
-                        </div>
-                    </div>
-                    <div class="prox-actions-row">
-                        <button class="prox-btn-view-designs pulse" onclick="hotel3D.selectFurnitureOnStage('${def.id}')">
-                            🔨 3 Farklı Mobilya Tasarımını Gör &amp; Seç
-                        </button>
-                    </div>
-                </div>
-            `;
-            proxPanel.style.display = 'block';
-            return;
-        }
-
-        // 4. Current active sequential item when dock IS OPEN:
-        const stillNeeded = Math.max(0, cost - balance);
-        const chosenOpt = def.options[this.selectedOptionIndex] || def.options[0];
-
-        let inlineOptionsHtml = '';
-        def.options.forEach((opt, idx) => {
-            const isSelected = (idx === this.selectedOptionIndex);
-            const thumbSrc = `assets/designs/${id}_${opt.id}.jpg`;
-
-            inlineOptionsHtml += `
-                <div class="gh-dock-option-card ${isSelected ? 'active' : ''}"
-                     onclick="hotel3D.selectBottomDockOption('${id}', ${idx})">
-                    <div class="gh-dock-thumb" style="background-image: url('${thumbSrc}');">
-                        <span class="gh-dock-opt-num">${idx + 1}. ${opt.style}</span>
-                        ${isSelected ? '<span class="gh-dock-check-tag">✓ SEÇİLİ</span>' : '<span class="gh-dock-lock-tag">👁️ Seç</span>'}
-                    </div>
-                    <div class="gh-dock-opt-meta">
-                        <strong>${opt.icon} ${opt.name}</strong>
-                        <small>+$${opt.incomeBoost}/dk · +${opt.repBoost} Prestij</small>
                     </div>
                 </div>
             `;
         });
 
-        proxPanel.innerHTML = `
-            <div class="prox-card-inner">
-                <div class="prox-top-row">
-                    <span class="prox-area-badge">🔨 SIRA #${def.seqOrder}/11 · MOBİLYA SEÇİMİ AÇIK</span>
-                    <button class="gh-dock-detail-btn" onclick="hotel3D.closeBottomDesignDock()" style="background: rgba(239,68,68,0.22); border-color: rgba(239,68,68,0.65); color: #fecaca; padding: 3px 10px; font-size: 0.75rem;">✕ Kapat</button>
-                </div>
-                <h3 class="prox-title">${def.name.toUpperCase()} — 3 TASARIMDAN SEÇİP ONAYLAYIN</h3>
+        grid.innerHTML = cardsHtml;
+    }
 
-                <div class="gh-dock-options-grid" style="margin: 10px 0;">
-                    ${inlineOptionsHtml}
-                </div>
+    openProjectPlanModal() {
+        let modal = document.getElementById('projectPlanModal');
+        if (!modal) return;
 
-                <div class="prox-actions-row">
-                    ${canAfford ? `
-                        <button class="prox-btn-view-designs pulse" onclick="hotel3D.executePurchase('${def.id}', '${chosenOpt.id}')">
-                            ✓ Seçimi Onayla &amp; Kalıcı Kur ($${cost})
-                        </button>
-                    ` : `
-                        <button class="prox-btn-locked" onclick="hotel3D.closeBottomDesignDock(); window.switchMainPage && window.switchMainPage('pageBoard');">
-                            🧩 Masada Sipariş Tamamla ($${stillNeeded} eksik · Maliyet: $${cost})
-                        </button>
-                    `}
-                    <button class="prox-btn-set-target" onclick="hotel3D.closeBottomDesignDock()">
-                        ✕ Vazgeç
+        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+
+        let rowsHtml = '';
+        Object.keys(this.rooms).forEach(roomKey => {
+            const rm = this.rooms[roomKey];
+            const tasks = rm.tasks || [];
+            const completedTasks = this.getAreaCompletedTasks(roomKey);
+            const activeTask = this.getAreaActiveTask(roomKey);
+            const level = this.getAreaLevel(roomKey);
+            const progress = this.getAreaProgress(roomKey);
+
+            rowsHtml += `
+                <div class="proj-area-row" style="margin-bottom:12px; background:#161924; border:1px solid rgba(255,215,0,0.2); border-radius:12px; padding:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <h4 style="margin:0; color:#fff; font-size:13px;">${rm.shortName}</h4>
+                        <span style="font-size:10px; font-weight:800; color:#ffd700; background:rgba(255,215,0,0.15); padding:2px 8px; border-radius:6px;">SEVİYE ${level} (%${progress})</span>
+                    </div>
+                    <p style="margin:0 0 8px; font-size:11px; color:#cbd5e1;">${activeTask ? `Sıradaki: <b>${activeTask.name}</b> (Maliyet: $${activeTask.baseCost})` : '✅ Tüm görevler tamamlandı'}</p>
+                    <button class="proj-go-btn" onclick="document.getElementById('projectPlanModal').style.display='none'; hotel3D.jumpTo('${roomKey}')">
+                        📍 Mekana Git &amp; Görevi Gör
                     </button>
+                </div>
+            `;
+        });
+
+        modal.innerHTML = `
+            <div class="proj-modal-card">
+                <div class="proj-header">
+                    <div>
+                        <span class="proj-crest">✦ AURELIA PALACE RESTORASYON PLANI</span>
+                        <h3>Tüm Otel Alanları &amp; Seviyeleri</h3>
+                    </div>
+                    <button class="reno-close-btn" onclick="document.getElementById('projectPlanModal').style.display='none'">&times;</button>
+                </div>
+                <div class="proj-list-scroll">
+                    ${rowsHtml}
                 </div>
             </div>
         `;
-        proxPanel.style.display = 'block';
-    }
-
-    setTargetRenovation(id) {
-        const activeSeqId = this.getCurrentSequentialAreaId();
-        const target = activeSeqId || id;
-        if (window.GameEconomy) {
-            window.GameEconomy.setTargetRenovation(target);
-        }
-        const name = this.renovationDefs[target] ? this.renovationDefs[target].name : target;
-        this.showBanner(`🎯 Aktif Sıralı Görev: ${name}`);
-        this.updateProximityPanel();
-        this.renderHotelAreaCards();
-    }
-
-    showBanner(msg) {
-        const banner = document.getElementById('hudNotification');
-        if (!banner) return;
-        banner.innerText = msg;
-        banner.style.display = 'block';
-        clearTimeout(this.bannerTimer);
-        this.bannerTimer = setTimeout(() => {
-            banner.style.display = 'none';
-        }, 3400);
-    }
-
-    jumpTo(roomKey, e) {
-        if (e) e.stopPropagation();
-        if (!this.rooms[roomKey]) return;
-
-        this.isMapMode = false;
-        this.currentRoom = roomKey;
-        const rm = this.rooms[roomKey];
-        const activeSeqId = this.getCurrentSequentialAreaId();
-        if (activeSeqId && rm.areas.includes(activeSeqId)) {
-            this.selectedAreaId = activeSeqId;
-        } else {
-            this.selectedAreaId = rm.areas[0] || this.selectedAreaId;
-        }
-
-        this.isRenovationDockOpen = false;
-        this.previewingRenovation = null;
-        this.panX = 0;
-        this.panY = 0;
-        this.zoom = 1.0;
-
-        this.playSound('door');
-
-        document.querySelectorAll('.room-jump-btn').forEach(b => b.classList.remove('active'));
-        const btn = document.querySelector(`.room-jump-btn[onclick*="${roomKey}"]`);
-        if (btn) btn.classList.add('active');
-
-        this.closeBottomDesignDock();
-        this.renderStage();
-        this.updateProximityPanel();
-        this.showBanner(`📍 ${rm.name} sahnesine geçildi.`);
+        modal.style.display = 'flex';
     }
 
     onResize() {

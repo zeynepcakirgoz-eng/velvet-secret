@@ -16,147 +16,404 @@ class GameEconomyManager {
             4: 'Seviye 4: Kraliyet Lüksü (MAX)'
         };
 
-        this.sequentialOrder = [
-            'reception_desk',
-            'lobby_chandelier',
-            'lobby_carpet',
-            'restaurant_tables',
-            'restaurant_bar',
-            'room101_bed',
-            'room101_decor',
-            'swimming_pool',
-            'spa_jacuzzi',
-            'garden_courtyard',
-            'penthouse_suite'
-        ];
-
-        // All 11 hotel renovation furniture items (each placed ONCE in strict sequence!)
-        this.renovationCosts = {
-            reception_desk: {
-                id: 'reception_desk',
-                seqOrder: 1,
-                name: 'Mermer Resepsiyon Bankosu',
-                area: '1. Büyük Lobi & Resepsiyon',
-                cost: 1500,
-                stars: 1,
-                jumpRoom: 'lobby',
-                sceneImg: 'assets/scene_lobby_reception.jpg',
-                defaultDesc: 'Eski, yıpranmış ahşap resepsiyon bankosu'
+        // Gossip Harbour Multi-Task Hotel Area Restoration Structure
+        this.hotelAreas = {
+            restaurant: {
+                id: 'restaurant',
+                name: 'Riviera Gurme Restoran & Teras',
+                shortName: '🍷 Riviera Restoran',
+                room: 'restaurant',
+                bgImg: 'assets/scene_restaurant_pool.jpg',
+                description: 'Monako yat limanı manzaralı açık hava lüks gurme restoranı.',
+                tasks: [
+                    {
+                        id: 'restaurant_tables',
+                        order: 1,
+                        name: 'Riviera Yemek Masalarını Değiştir',
+                        shortDesc: 'Örtüsüz eski masaları kaldırıp şık yemek masaları yerleştirin.',
+                        cost: 1200,
+                        stars: 1,
+                        incomeBoost: 35,
+                        repBoost: 50,
+                        hotspot: { x: 48, y: 64 },
+                        stageBox: [0.20, 0.46, 0.60, 0.44],
+                        defaultDesc: 'Örtüsüz eski ahşap masalar ve sade sandalyeler'
+                    },
+                    {
+                        id: 'restaurant_bar',
+                        order: 2,
+                        name: 'Oniks Şampanya & Kokteyl Barı',
+                        shortDesc: 'Işıksız eski tezgâh yerine göz alıcı bir şampanya barı kurun.',
+                        cost: 1800,
+                        stars: 2,
+                        incomeBoost: 50,
+                        repBoost: 75,
+                        hotspot: { x: 78, y: 45 },
+                        stageBox: [0.55, 0.28, 0.42, 0.45],
+                        defaultDesc: 'Boş raflı, ışıksız eski içecek tezgâhı'
+                    },
+                    {
+                        id: 'restaurant_lighting',
+                        order: 3,
+                        name: 'Teras Avizeleri & Sıcak Aydınlatma',
+                        shortDesc: 'Akşam yemekleri için terası romantik sıcak ışıklarla donatın.',
+                        cost: 1500,
+                        stars: 1,
+                        incomeBoost: 40,
+                        repBoost: 60,
+                        hotspot: { x: 30, y: 28 },
+                        stageBox: [0.15, 0.10, 0.35, 0.35],
+                        defaultDesc: 'Sönük eski fenerler ve yetersiz ışıklandırma'
+                    },
+                    {
+                        id: 'restaurant_terrace',
+                        order: 4,
+                        name: 'Mermer Teras Zemini & Gala Dekoru',
+                        shortDesc: 'Yat limanı manzaralı terası lüks çiçek aranjmanları ve mermer zeminle tamamlayın.',
+                        cost: 2200,
+                        stars: 2,
+                        incomeBoost: 60,
+                        repBoost: 90,
+                        hotspot: { x: 20, y: 56 },
+                        stageBox: [0.05, 0.38, 0.35, 0.45],
+                        defaultDesc: 'Yıpranmış taş zemin ve sade teras'
+                    }
+                ]
             },
-            lobby_chandelier: {
-                id: 'lobby_chandelier',
-                seqOrder: 2,
-                name: 'Büyük Lobi Kristal Avizesi',
-                area: '2. Lobi Tavanı',
-                cost: 2200,
-                stars: 2,
-                jumpRoom: 'lobby',
-                sceneImg: 'assets/scene_lobby_reception.jpg',
-                defaultDesc: 'Sönük eski demir tavan lambası'
+            lobby: {
+                id: 'lobby',
+                name: 'Aurelia Palace Büyük Lobi & Resepsiyon',
+                shortName: '🏛️ Büyük Lobi',
+                room: 'lobby',
+                bgImg: 'assets/scene_lobby_reception.jpg',
+                description: 'Kraliyet karşılamasının ve otel ihtişamının kalbi.',
+                tasks: [
+                    {
+                        id: 'reception_desk',
+                        order: 1,
+                        name: 'Mermer Resepsiyon Bankosu',
+                        shortDesc: 'Yıpranmış eski ahşap bankoyu İtalyan mermeriyle yenileyin.',
+                        cost: 1500,
+                        stars: 1,
+                        incomeBoost: 30,
+                        repBoost: 45,
+                        hotspot: { x: 50, y: 56 },
+                        stageBox: [0.33, 0.49, 0.33, 0.27],
+                        defaultDesc: 'Eski, yıpranmış ahşap resepsiyon bankosu'
+                    },
+                    {
+                        id: 'lobby_chandelier',
+                        order: 2,
+                        name: 'Büyük Lobi Kristal Avizesi',
+                        shortDesc: 'Lobi tavanına görkemli elmas kesim Bohemya avizesi asın.',
+                        cost: 2200,
+                        stars: 2,
+                        incomeBoost: 45,
+                        repBoost: 70,
+                        hotspot: { x: 50, y: 22 },
+                        stageBox: [0.37, 0.00, 0.26, 0.41],
+                        defaultDesc: 'Sönük eski demir tavan lambası'
+                    },
+                    {
+                        id: 'lobby_carpet',
+                        order: 3,
+                        name: 'Lobi Kraliyet Halısı & Koltukları',
+                        shortDesc: 'Misafir karşılama alanına lüks ipek halı ve kadife koltuklar döşeyin.',
+                        cost: 1200,
+                        stars: 1,
+                        incomeBoost: 35,
+                        repBoost: 55,
+                        hotspot: { x: 50, y: 78 },
+                        stageBox: [0.22, 0.62, 0.56, 0.36],
+                        defaultDesc: 'Soluk koridor halısı ve eski koltuklar'
+                    },
+                    {
+                        id: 'lobby_columns',
+                        order: 4,
+                        name: 'Saray Karşılama Sütunları & Giriş Kemeri',
+                        shortDesc: 'Girişi altın varaklı neoklasik sütunlarla taçlandırın.',
+                        cost: 1700,
+                        stars: 1,
+                        incomeBoost: 40,
+                        repBoost: 65,
+                        hotspot: { x: 82, y: 50 },
+                        stageBox: [0.72, 0.25, 0.24, 0.55],
+                        defaultDesc: 'Sade sıvalı giriş kapısı'
+                    }
+                ]
             },
-            lobby_carpet: {
-                id: 'lobby_carpet',
-                seqOrder: 3,
-                name: 'Lobi Kraliyet Halısı & Koltukları',
-                area: '3. Lobi & Lounge',
-                cost: 950,
-                stars: 1,
-                jumpRoom: 'lobby',
-                sceneImg: 'assets/scene_lobby_reception.jpg',
-                defaultDesc: 'Soluk koridor halısı ve eski koltuklar'
+            room101: {
+                id: 'room101',
+                name: 'Deluxe Deniz Manzaralı Suit (Oda 101)',
+                shortName: '🛏️ Suit 101',
+                room: 'room101',
+                bgImg: 'assets/scene_presidential_suite.jpg',
+                description: 'Panoramik Akdeniz manzaralı VIP konuk suiti.',
+                tasks: [
+                    {
+                        id: 'room101_bed',
+                        order: 1,
+                        name: 'Deluxe Suit Kraliyet Yatağı',
+                        shortDesc: 'Dört direkli altın varaklı ipek kral yatağı kurun.',
+                        cost: 1600,
+                        stars: 1,
+                        incomeBoost: 40,
+                        repBoost: 60,
+                        hotspot: { x: 50, y: 55 },
+                        stageBox: [0.18, 0.38, 0.64, 0.48],
+                        defaultDesc: 'Standart eski karyola ve sade başlık'
+                    },
+                    {
+                        id: 'room101_decor',
+                        order: 2,
+                        name: 'Panoramik Deniz Balkonu & Şezlonglar',
+                        shortDesc: 'Geniş cam balkon terasına lüks şezlong ve şampanya sehpası koyun.',
+                        cost: 1400,
+                        stars: 1,
+                        incomeBoost: 35,
+                        repBoost: 50,
+                        hotspot: { x: 82, y: 52 },
+                        stageBox: [0.65, 0.30, 0.32, 0.45],
+                        defaultDesc: 'Boş pencere önü ve eski sehpa'
+                    },
+                    {
+                        id: 'room101_lounge',
+                        order: 3,
+                        name: 'Mermer Şömine & Gece Aydınlatması',
+                        shortDesc: 'Suite sıcak mermer şömine ve abajurlar ekleyin.',
+                        cost: 1800,
+                        stars: 2,
+                        incomeBoost: 45,
+                        repBoost: 70,
+                        hotspot: { x: 22, y: 55 },
+                        stageBox: [0.08, 0.40, 0.30, 0.42],
+                        defaultDesc: 'Boş oda köşesi'
+                    }
+                ]
             },
-            restaurant_tables: {
-                id: 'restaurant_tables',
-                seqOrder: 4,
-                name: 'Riviera Restoran Yemek Masaları',
-                area: '4. Restoran & Teras',
-                cost: 1200,
-                stars: 1,
-                jumpRoom: 'restaurant',
-                sceneImg: 'assets/scene_restaurant_pool.jpg',
-                defaultDesc: 'Örtüsüz ahşap masalar ve sade sandalyeler'
+            pool: {
+                id: 'pool',
+                name: 'Aurelia Sonsuzluk Havuzu & Güneş Terası',
+                shortName: '🏊 Sonsuzluk Havuzu',
+                room: 'pool',
+                bgImg: 'assets/scene_infinity_pool.jpg',
+                description: 'Monako körfezini tepeden gören altın mozaikli sonsuzluk havuzu.',
+                tasks: [
+                    {
+                        id: 'swimming_pool',
+                        order: 1,
+                        name: 'Sonsuzluk Havuzu & Mozaik Zemin',
+                        shortDesc: 'Işıltılı altın mozaik kenarlı sonsuzluk havuzunu inşa edin.',
+                        cost: 3500,
+                        stars: 2,
+                        incomeBoost: 75,
+                        repBoost: 110,
+                        hotspot: { x: 48, y: 64 },
+                        stageBox: [0.12, 0.42, 0.76, 0.52],
+                        defaultDesc: 'Bakımsız havuz ve boş teras'
+                    },
+                    {
+                        id: 'pool_cabanas',
+                        order: 2,
+                        name: 'VIP Güneşlenme Locaları & Şemsiyeler',
+                        shortDesc: 'Havuz kenarına beyaz ipek tüllü lüks gölgelik localar yerleştirin.',
+                        cost: 2000,
+                        stars: 1,
+                        incomeBoost: 50,
+                        repBoost: 75,
+                        hotspot: { x: 80, y: 46 },
+                        stageBox: [0.65, 0.30, 0.32, 0.45],
+                        defaultDesc: 'Eski plastik şezlonglar'
+                    },
+                    {
+                        id: 'pool_lounge',
+                        order: 3,
+                        name: 'Havuz Başı Ateş Çukuru & Su Barı',
+                        shortDesc: 'Akşam partileri için gömme ateş çukuru ve kokteyl barı ekleyin.',
+                        cost: 2400,
+                        stars: 2,
+                        incomeBoost: 60,
+                        repBoost: 90,
+                        hotspot: { x: 20, y: 52 },
+                        stageBox: [0.08, 0.36, 0.32, 0.45],
+                        defaultDesc: 'Boş beton teras kenarı'
+                    }
+                ]
             },
-            restaurant_bar: {
-                id: 'restaurant_bar',
-                seqOrder: 5,
-                name: 'Şampanya & Kokteyl Barı',
-                area: '5. Restoran & Bar',
-                cost: 1800,
-                stars: 2,
-                jumpRoom: 'restaurant',
-                sceneImg: 'assets/scene_restaurant_pool.jpg',
-                defaultDesc: 'Boş raflı, ışıksız eski içecek tezgâhı'
+            spa: {
+                id: 'spa',
+                name: 'Aurelia Zen Termal Spa & Jakuzi',
+                shortName: '♨️ Zen Spa',
+                room: 'spa',
+                bgImg: 'assets/scene_spa_wellness.jpg',
+                description: 'Doğal sıcak mineralli kaynak suyu ve masaj pavyonu.',
+                tasks: [
+                    {
+                        id: 'spa_jacuzzi',
+                        order: 1,
+                        name: 'Aurelia Termal Jakuzi Havuzu',
+                        shortDesc: 'İtalyan mermeri ve altın mozaikli sıcak termal jakuzi kurun.',
+                        cost: 2800,
+                        stars: 2,
+                        incomeBoost: 55,
+                        repBoost: 85,
+                        hotspot: { x: 56, y: 68 },
+                        stageBox: [0.30, 0.54, 0.62, 0.42],
+                        defaultDesc: 'Henüz termal jakuzi kurulumu yapılmamış'
+                    },
+                    {
+                        id: 'spa_beds',
+                        order: 2,
+                        name: 'Aromaterapi Dinlenme Yatakları',
+                        shortDesc: 'Isıtmalı seramik yataklar ve aromatik tütsü köşesi hazırlayın.',
+                        cost: 1800,
+                        stars: 1,
+                        incomeBoost: 40,
+                        repBoost: 60,
+                        hotspot: { x: 22, y: 55 },
+                        stageBox: [0.10, 0.42, 0.35, 0.40],
+                        defaultDesc: 'Boş dinlenme köşesi'
+                    },
+                    {
+                        id: 'spa_waterfall',
+                        order: 3,
+                        name: 'Zen Şelalesi & Himalaya Tuz Duvarı',
+                        shortDesc: 'Huzur veren su çağıltısı ve pembe tuz duvarıyla ortamı zenginleştirin.',
+                        cost: 2200,
+                        stars: 2,
+                        incomeBoost: 50,
+                        repBoost: 75,
+                        hotspot: { x: 80, y: 40 },
+                        stageBox: [0.68, 0.22, 0.28, 0.50],
+                        defaultDesc: 'Sade taş duvar'
+                    }
+                ]
             },
-            room101_bed: {
-                id: 'room101_bed',
-                seqOrder: 6,
-                name: 'Deluxe Suit Kraliyet Yatağı (Oda 101)',
-                area: '6. Misafir Suiti 101',
-                cost: 1600,
-                stars: 1,
-                jumpRoom: 'room101',
-                sceneImg: 'assets/scene_presidential_suite.jpg',
-                defaultDesc: 'Standart eski karyola ve sade başlık'
+            garden: {
+                id: 'garden',
+                name: 'Akdeniz Botanik Bahçesi & Çeşme',
+                shortName: '🌹 Botanik Bahçe',
+                room: 'garden',
+                bgImg: 'assets/scene_garden_terrace.jpg',
+                description: 'Nadir güller, mermer saray çeşmesi ve gölgeli pergolalar.',
+                tasks: [
+                    {
+                        id: 'garden_courtyard',
+                        order: 1,
+                        name: '3 Katlı Mermer Saray Çeşmesi',
+                        shortDesc: 'Avlunun merkezine 3 katlı fıskiyeli beyaz mermer çeşme kurun.',
+                        cost: 2000,
+                        stars: 1,
+                        incomeBoost: 45,
+                        repBoost: 70,
+                        hotspot: { x: 50, y: 58 },
+                        stageBox: [0.31, 0.33, 0.38, 0.62],
+                        defaultDesc: 'Kurumuş çalılar ve çalışmayan taş çeşme'
+                    },
+                    {
+                        id: 'garden_pergola',
+                        order: 2,
+                        name: 'Kraliyet Gül Pergolası & Yürüyüş Yolu',
+                        shortDesc: 'Sarmaşık güllerle kaplı kemerli gölgelik pergola ve taş yol döşeyin.',
+                        cost: 1600,
+                        stars: 1,
+                        incomeBoost: 35,
+                        repBoost: 55,
+                        hotspot: { x: 80, y: 48 },
+                        stageBox: [0.65, 0.30, 0.32, 0.50],
+                        defaultDesc: 'Bakımsız toprak patika'
+                    },
+                    {
+                        id: 'garden_pavilion',
+                        order: 3,
+                        name: 'Akdeniz Çay Pavyonu & Fenerler',
+                        shortDesc: 'Bahçeye dinlendirici bir çay köşesi ve pirinç fenerler ekleyin.',
+                        cost: 2100,
+                        stars: 2,
+                        incomeBoost: 48,
+                        repBoost: 72,
+                        hotspot: { x: 20, y: 50 },
+                        stageBox: [0.08, 0.32, 0.32, 0.48],
+                        defaultDesc: 'Boş çim alan'
+                    }
+                ]
             },
-            room101_decor: {
-                id: 'room101_decor',
-                seqOrder: 7,
-                name: 'Suit 101 Panoramik Deniz Terası',
-                area: '7. Misafir Suiti 101',
-                cost: 1400,
-                stars: 1,
-                jumpRoom: 'room101',
-                sceneImg: 'assets/scene_presidential_suite.jpg',
-                defaultDesc: 'Boş pencere önü ve eski sehpa'
-            },
-            swimming_pool: {
-                id: 'swimming_pool',
-                seqOrder: 8,
-                name: 'Sonsuzluk Havuzu & Güneşlenme Locaları',
-                area: '8. Havuz & Teras',
-                cost: 3500,
-                stars: 2,
-                jumpRoom: 'pool',
-                sceneImg: 'assets/scene_infinity_pool.jpg',
-                defaultDesc: 'Bakımsız havuz ve boş teras'
-            },
-            spa_jacuzzi: {
-                id: 'spa_jacuzzi',
-                seqOrder: 9,
-                name: 'Aurelia Zen Spa & Termal Jakuzi',
-                area: '9. Spa & Wellness',
-                cost: 2800,
-                stars: 2,
-                jumpRoom: 'spa',
-                sceneImg: 'assets/scene_spa_wellness.jpg',
-                defaultDesc: 'Henüz termal jakuzi kurulumu yapılmamış'
-            },
-            garden_courtyard: {
-                id: 'garden_courtyard',
-                seqOrder: 10,
-                name: 'Akdeniz Botanik Bahçesi & Mermer Çeşme',
-                area: '10. Bahçe & Avlu',
-                cost: 2000,
-                stars: 1,
-                jumpRoom: 'garden',
-                sceneImg: 'assets/scene_garden_terrace.jpg',
-                defaultDesc: 'Kurumuş çalılar ve çalışmayan taş çeşme'
-            },
-            penthouse_suite: {
-                id: 'penthouse_suite',
-                seqOrder: 11,
-                name: 'Başkanlık Penthouse & Kuyruklu Piyano',
-                area: '11. 2. Kat Penthouse',
-                cost: 5000,
-                stars: 3,
-                jumpRoom: 'penthouse',
-                sceneImg: 'assets/scene_penthouse_piano.jpg',
-                defaultDesc: 'Üstü örtülü eşyalar, boş teras katı'
+            penthouse: {
+                id: 'penthouse',
+                name: '2. Kat Başkanlık Penthouse & Piyano Salonu',
+                shortName: '👑 2. Kat Penthouse',
+                room: 'penthouse',
+                bgImg: 'assets/scene_penthouse_piano.jpg',
+                description: 'Çatı katı suitinde konser piyanosu ve şömine salonu.',
+                tasks: [
+                    {
+                        id: 'penthouse_suite',
+                        order: 1,
+                        name: 'Kuyruklu Konser Piyanosu',
+                        shortDesc: 'Salona altın telli kraliyet kuyruklu konser piyanosu kurun.',
+                        cost: 5000,
+                        stars: 3,
+                        incomeBoost: 120,
+                        repBoost: 180,
+                        hotspot: { x: 36, y: 56 },
+                        stageBox: [0.20, 0.32, 0.32, 0.54],
+                        defaultDesc: 'Üstü örtülü eşyalar, boş teras katı'
+                    },
+                    {
+                        id: 'penthouse_fireplace',
+                        order: 2,
+                        name: 'Mermer Şömine & Dairesel Kadife Salon',
+                        shortDesc: 'Şöminenin önüne dairesel lüks kadife oturma grubu yerleştirin.',
+                        cost: 3200,
+                        stars: 2,
+                        incomeBoost: 70,
+                        repBoost: 105,
+                        hotspot: { x: 68, y: 58 },
+                        stageBox: [0.52, 0.36, 0.44, 0.50],
+                        defaultDesc: 'Kullanılmayan soğuk şömine'
+                    },
+                    {
+                        id: 'penthouse_terrace',
+                        order: 3,
+                        name: 'Monako Körfezi Özel Manzara Terası',
+                        shortDesc: 'Penthouse balkonuna özel yat limanı manzaralı VIP teras barı kurun.',
+                        cost: 3800,
+                        stars: 2,
+                        incomeBoost: 85,
+                        repBoost: 125,
+                        hotspot: { x: 82, y: 40 },
+                        stageBox: [0.70, 0.20, 0.28, 0.45],
+                        defaultDesc: 'Boş teras korkuluğu'
+                    }
+                ]
             }
         };
 
+        // Flat lookup of all tasks across all areas
+        this.renovationCosts = {};
+        this.sequentialOrder = [];
+        Object.keys(this.hotelAreas).forEach(areaKey => {
+            const area = this.hotelAreas[areaKey];
+            area.tasks.forEach(t => {
+                this.sequentialOrder.push(t.id);
+                this.renovationCosts[t.id] = {
+                    id: t.id,
+                    areaId: areaKey,
+                    seqOrder: t.order,
+                    name: t.name,
+                    area: area.name,
+                    cost: t.cost,
+                    stars: t.stars,
+                    jumpRoom: areaKey,
+                    sceneImg: area.bgImg,
+                    defaultDesc: t.defaultDesc
+                };
+            });
+        });
+
         this.load();
         this.initHotelOperationsLoop();
+    }
     }
 
     load() {
@@ -231,38 +488,79 @@ class GameEconomyManager {
         return this.data.stars;
     }
 
-    isAreaCompleted(id) {
-        if (window.hotel3D && typeof window.hotel3D.isAreaCompleted === 'function') {
-            return window.hotel3D.isAreaCompleted(id);
-        }
-        return Boolean(this.data.renovations && this.data.renovations[id]);
+    // ----------------------------------------------------
+    // GOSSIP HARBOR AREA-BASED PROGRESSION HELPERS
+    // ----------------------------------------------------
+    getArea(areaId) {
+        return this.hotelAreas[areaId] || null;
     }
 
-    getAreaLevel(id) {
-        return this.isAreaCompleted(id) ? 2 : 1;
+    getAreaTasks(areaId) {
+        const area = this.hotelAreas[areaId];
+        return area ? area.tasks : [];
     }
 
-    getCurrentSequentialAreaId() {
-        if (window.hotel3D && typeof window.hotel3D.getCurrentSequentialAreaId === 'function') {
-            return window.hotel3D.getCurrentSequentialAreaId();
+    isTaskCompleted(taskId) {
+        if (window.hotel3D && typeof window.hotel3D.isTaskCompleted === 'function') {
+            return window.hotel3D.isTaskCompleted(taskId);
         }
-        return this.sequentialOrder.find(id => !this.isAreaCompleted(id)) || null;
+        return Boolean(this.data.renovations && this.data.renovations[taskId] && this.data.renovations[taskId].completed);
+    }
+
+    isAreaCompleted(taskId) {
+        return this.isTaskCompleted(taskId);
+    }
+
+    getAreaCompletedTasks(areaId) {
+        const tasks = this.getAreaTasks(areaId);
+        return tasks.filter(t => this.isTaskCompleted(t.id));
+    }
+
+    getAreaActiveTask(areaId) {
+        const tasks = this.getAreaTasks(areaId);
+        return tasks.find(t => !this.isTaskCompleted(t.id)) || null;
+    }
+
+    getAreaLevel(areaId) {
+        const area = this.hotelAreas[areaId];
+        if (!area) return 1;
+        const done = this.getAreaCompletedTasks(areaId).length;
+        return Math.min(area.tasks.length + 1, done + 1);
+    }
+
+    getAreaProgressPercent(areaId) {
+        const tasks = this.getAreaTasks(areaId);
+        if (!tasks.length) return 0;
+        const done = this.getAreaCompletedTasks(areaId).length;
+        return Math.round((done / tasks.length) * 100);
+    }
+
+    getCurrentSequentialAreaId(areaId) {
+        if (areaId) {
+            const task = this.getAreaActiveTask(areaId);
+            return task ? task.id : null;
+        }
+        if (window.hotel3D && window.hotel3D.currentArea) {
+            const t = this.getAreaActiveTask(window.hotel3D.currentArea);
+            if (t) return t.id;
+        }
+        return this.sequentialOrder.find(id => !this.isTaskCompleted(id)) || null;
     }
 
     getNextUpgradeCost(id) {
-        if (this.isAreaCompleted(id)) return 0;
+        if (this.isTaskCompleted(id)) return 0;
         const item = this.renovationCosts[id];
         return item ? item.cost : 1200;
     }
 
     getNextUpgradeStars(id) {
-        if (this.isAreaCompleted(id)) return 0;
+        if (this.isTaskCompleted(id)) return 0;
         const item = this.renovationCosts[id];
         return item ? item.stars : 1;
     }
 
-    getTargetRenovation() {
-        return this.getCurrentSequentialAreaId() || 'penthouse_suite';
+    getTargetRenovation(areaId) {
+        return this.getCurrentSequentialAreaId(areaId) || 'restaurant_tables';
     }
 
     setTargetRenovation(id) {
@@ -336,6 +634,13 @@ class GameEconomyManager {
         this.data.balance -= costCash;
         this.data.stars -= costStars;
         this.data.totalRenovationSpent += costCash;
+
+        if (!this.data.renovations) this.data.renovations = {};
+        this.data.renovations[areaId] = {
+            optionId: optionId,
+            completed: true,
+            timestamp: Date.now()
+        };
 
         const tx = {
             id: 'tx_' + Date.now() + '_' + Math.floor(Math.random() * 1000),

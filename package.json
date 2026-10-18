@@ -1,8 +1,8 @@
 {
   "name": "velvet-secrets",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "private": true,
-  "description": "Velvet Secrets (v2.6.0) - Gossip Harbor Duzeninde 11 Sirali Mobilya Kurulumu, Net Mekan Sahnesi ve Kalici Tasarim Secimi",
+  "description": "Velvet Secrets (v2.7.0) - Gossip Harbour Referansli Alan Bazli Bagimsiz Restorasyon Sistemi, 3 Tasarim Secimi ve Canli Donusum",
   "scripts": {
     "sync:android": "npx cap sync android",
     "open:android": "npx cap open android"

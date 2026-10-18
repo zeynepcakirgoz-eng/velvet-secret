@@ -149,14 +149,14 @@
         <!-- Hızlı Oda & Harita Seçim Çubuğu -->
         <div class="quick-room-strip">
           <button class="room-jump-btn" onclick="hotel3D.toggleMapMode(true)">🗺️ Otel Haritası</button>
-          <button class="room-jump-btn active" onclick="jumpToRoom('lobby')">🏛️ Lobi &amp; Resepsiyon</button>
-          <button class="room-jump-btn" onclick="jumpToRoom('restaurant')">🍷 Riviera Restoran</button>
+          <button class="room-jump-btn active" onclick="jumpToRoom('restaurant')">🍷 Riviera Restoran</button>
+          <button class="room-jump-btn" onclick="jumpToRoom('lobby')">🏛️ Lobi &amp; Resepsiyon</button>
           <button class="room-jump-btn" onclick="jumpToRoom('room101')">🛏️ Suit 101</button>
           <button class="room-jump-btn" onclick="jumpToRoom('pool')">🏊 Sonsuzluk Havuzu</button>
           <button class="room-jump-btn" onclick="jumpToRoom('spa')">♨️ Zen Spa</button>
           <button class="room-jump-btn" onclick="jumpToRoom('garden')">🌹 Botanik Bahçe</button>
           <button class="room-jump-btn" onclick="jumpToRoom('penthouse')">👑 2. Kat Penthouse</button>
-          <button class="project-plan-btn" onclick="hotel3D.openProjectPlanModal()">📋 SIRALI MALİYETLER (11 Mobilya)</button>
+          <button class="project-plan-btn" onclick="hotel3D.openProjectPlanModal()">📋 Restorasyon Planı</button>
           <button class="ledger-btn" onclick="window.GameEconomy && window.GameEconomy.openLedgerModal()">💼 KASA DEFTERİ</button>
         </div>
 
@@ -188,7 +188,7 @@
 
         <!-- Üst Bilgi Rozeti (Mevcut Oda & Harita Geçiş Butonları) -->
         <div class="viewport-hud-top">
-          <div id="hudLocationTag" class="location-pill">📍 Aurelia Palace Büyük Lobi &amp; Resepsiyon</div>
+          <div id="hudLocationTag" class="location-pill">📍 Riviera Restoran &amp; Teras Bar</div>
           <div class="gh-stage-controls">
             <button id="ghToggleMapBtn" class="gh-ctrl-pill" onclick="hotel3D.toggleMapMode()">🗺️ Harita</button>
             <button class="gh-ctrl-pill" onclick="hotel3D.resetCameraView()" title="Görünümü Ortala">🔍 Ortala</button>
@@ -209,14 +209,14 @@
       <!-- Seçili Eşya / Alan Bütçe ve Durum Özeti Konsolu -->
       <div id="renovationProximityPanel" class="renovation-proximity-panel" style="display: none;"></div>
 
-      <!-- GERÇEKÇİ OTEL ALANLARI VE 11 SIRALI RESTORASYON GALERİSİ -->
+      <!-- GERÇEKÇİ OTEL ALANLARI VE GOSSIP HARBOUR RESTORASYON GALERİSİ -->
       <div class="hotel-areas-gallery-section">
         <div class="gallery-sec-head">
           <div>
-            <h3>✦ AURELIA PALACE — 11 SIRALI MOBİLYA RESTORASYONU</h3>
-            <p>Her mobilyayı Gossip Harbor düzeninde sırayla kurun; 3 farklı lüks tasarım ve renkten birini seçerek kalıcı olarak mekana yerleştirin!</p>
+            <h3>✦ AURELIA PALACE — ALAN BAZLI GOSSIP HARBOUR RESTORASYONU</h3>
+            <p>Her otel alanını bağımsız görev zincirleriyle Gossip Harbour düzeninde restore edin; 3 farklı lüks tasarımdan beğendiğinizi kalıcı olarak yerleştirin!</p>
           </div>
-          <button class="project-plan-btn" onclick="hotel3D.openProjectPlanModal()">📋 Sıralı Maliyet Tablosu</button>
+          <button class="project-plan-btn" onclick="hotel3D.openProjectPlanModal()">📋 Restorasyon Görevleri</button>
         </div>
         <div id="hotelAreasVisualGrid" class="hotel-areas-visual-grid"></div>
       </div>
@@ -226,7 +226,7 @@
         <img src="assets/avatar_isabella.jpg" alt="Isabella" class="callout-avatar">
         <div class="callout-content">
           <strong>Isabella Laurent (Otel Varisi)</strong>
-          <p id="hotelDialogueText">"Otelimizin her köşesini bizzat gezerek inceleyebilirsin! Birleştirme masasındaki sıralı sipariş ve görevleri tamamlayarak kazandığın altınlarla 11 mobilyayı sırayla yenile. 3 farklı tasarımdan beğendiğini kalıcı olarak yerleştir!"</p>
+          <p id="hotelDialogueText">"Otelimizin her alanını bağımsız olarak yenileyebilirsin! Birleştirme masasındaki siparişleri tamamlayarak kazandığın altınlarla Riviera Restoran'dan başlayarak tüm odaları restore et. 3 farklı tasarımdan zevkine uygun olanı kalıcı olarak seç!"</p>
         </div>
       </div>
     </section>

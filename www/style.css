@@ -4307,3 +4307,436 @@ button:active {
   font-weight: 800;
   cursor: pointer;
 }
+
+/* ======================================================== */
+/* GOSSIP HARBOR AREA RENOVATION HUB & PROGRESSION SYSTEM   */
+/* ======================================================== */
+.gh-area-hub-wrapper {
+  background: linear-gradient(180deg, #131726 0%, #0d101a 100%);
+  border: 1.5px solid rgba(223, 191, 131, 0.45);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  margin-top: 14px;
+}
+
+.gh-hub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.gh-hub-title-box .gh-hub-crest {
+  font-size: 9.5px;
+  font-weight: 900;
+  color: var(--gold-bright);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.gh-hub-title-box h3 {
+  margin: 3px 0 2px;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  color: #fff;
+}
+
+.gh-hub-title-box p {
+  margin: 0;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.gh-hub-lvl-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background: rgba(255, 215, 0, 0.12);
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  border-radius: 10px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.gh-hub-lvl-num {
+  font-size: 11px;
+  font-weight: 900;
+  color: #ffd700;
+}
+
+.gh-hub-lvl-pct {
+  font-size: 9.5px;
+  color: #e2e8f0;
+}
+
+.gh-hub-progress-track {
+  width: 100%;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.gh-hub-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #2ecc71);
+  border-radius: 6px;
+  transition: width 0.35s ease;
+}
+
+/* Active Gossip Harbour Task Card */
+.gh-gossip-task-card {
+  background: #181d2e;
+  border: 1.5px solid rgba(255, 215, 0, 0.4);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.gh-gossip-task-card.card-ready {
+  border-color: #2ecc71;
+  box-shadow: 0 0 22px rgba(46, 204, 113, 0.35);
+}
+
+.gh-gt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.gh-gt-tag {
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.gh-gt-tag.tag-ready {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.5);
+}
+
+.gh-gt-tag.tag-saving {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.gh-gt-step {
+  font-size: 10px;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.gh-gt-body {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.gh-gt-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  position: relative;
+  border: 1.5px solid var(--gold);
+}
+
+.gh-gt-thumb-badge {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  background: rgba(10, 12, 20, 0.9);
+  color: #ffd700;
+  font-size: 9px;
+  font-weight: 900;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+
+.gh-gt-info h4 {
+  margin: 0 0 3px;
+  font-size: 13.5px;
+  color: #fff;
+  font-family: Georgia, serif;
+}
+
+.gh-gt-info p {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.gh-gt-reward-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.rw-pill {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+
+.rw-pill.income {
+  background: rgba(46, 204, 113, 0.18);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.4);
+}
+
+.rw-pill.rep {
+  background: rgba(56, 189, 248, 0.18);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+/* 4 Metrics Grid: Cost, Balance, Still Needed, Status */
+.gh-gt-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  background: #111422;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.gt-metric-box {
+  text-align: center;
+}
+
+.gt-metric-box label {
+  display: block;
+  font-size: 9px;
+  color: #94a3b8;
+  margin-bottom: 2px;
+}
+
+.gt-metric-box b {
+  font-size: 12px;
+  color: #fff;
+}
+
+.gt-metric-box .text-danger {
+  color: #f87171;
+}
+
+.gh-gt-action-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.gh-gt-btn-renovate {
+  flex: 1;
+  background: linear-gradient(135deg, #2ecc71, #1e824c);
+  color: #fff;
+  border: 1.5px solid #a8ffcb;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(46, 204, 113, 0.6);
+  text-transform: uppercase;
+}
+
+.gh-gt-btn-earn {
+  flex: 1;
+  background: linear-gradient(135deg, #ffd700, #ca8a04);
+  color: #1a1403;
+  border: 1.5px solid #fff3b0;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.5);
+  text-transform: uppercase;
+}
+
+/* Area Tasks Section & Accordion */
+.gh-area-tasks-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+}
+
+.gh-tasks-sec-title {
+  margin: 0 0 8px;
+  font-size: 11.5px;
+  color: var(--gold-bright);
+}
+
+.gh-area-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gh-area-task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #141826;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 8px 10px;
+  gap: 8px;
+}
+
+.gh-area-task-item.task-row-active {
+  border-color: rgba(255, 215, 0, 0.5);
+  background: #192033;
+}
+
+.gh-area-task-item.task-row-completed {
+  border-color: rgba(46, 204, 113, 0.35);
+  opacity: 0.9;
+}
+
+.gh-area-task-item.task-row-locked {
+  opacity: 0.6;
+}
+
+.task-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.task-order-pill {
+  font-size: 8.5px;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.task-order-pill.badge-done {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.task-order-pill.badge-ready {
+  background: rgba(46, 204, 113, 0.25);
+  color: #2ecc71;
+}
+
+.task-order-pill.badge-saving {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.task-order-pill.badge-locked {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+}
+
+.task-item-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.task-item-text strong {
+  display: block;
+  font-size: 11px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-item-text small {
+  display: block;
+  font-size: 9px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-action-btn {
+  border: 0;
+  border-radius: 7px;
+  padding: 5px 9px;
+  font-size: 9.5px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.task-action-btn.btn-green {
+  background: #2ecc71;
+  color: #fff;
+}
+
+.task-action-btn.btn-gold {
+  background: #23283b;
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+}
+
+.task-check-mark {
+  color: #2ecc71;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.task-locked-icon {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.opt-desc-snippet {
+  margin: 3px 0 4px;
+  font-size: 9px;
+  color: #cbd5e1;
+  line-height: 1.25;
+}
+
+.gh-area-completed-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(46, 204, 113, 0.12);
+  border: 1.5px solid rgba(46, 204, 113, 0.45);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.completed-icon {
+  font-size: 28px;
+}
+
+.completed-text h4 {
+  margin: 0 0 2px;
+  color: #2ecc71;
+  font-size: 13px;
+}
+
+.completed-text p {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 10.5px;
+}

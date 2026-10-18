@@ -2,6 +2,37 @@
 
 Bu dosya, **Velvet Secrets (Aurelia Palace Hotel)** Android oyununun tüm versiyon güncellemelerini ve eklenen özellikleri Türkçe olarak detaylandırır.
 
+## 🌟 Sürüm `v2.7.0` (18 Ekim 2026) — *Gossip Harbour Referanslı Alan Bazlı Bağımsız Restorasyon Sistemi, 3 Tasarım Seçimi ve Canlı Dönüşüm*
+
+Kullanıcının ayrıntılı analizi ve *Gossip Harbour: Merge & Story* referans mimarisi doğrultusunda, otel yenileme sistemi baştan sona yeniden tasarlandı. Önceki tek zincirli (1-11 global kilit) yapı tamamen kaldırılarak, her otel alanının kendi bağımsız görev zincirine sahip olduğu profesyonel restorasyon motoru devreye alındı:
+
+### 1. 🏨 Gossip Harbour Tarzı Bağımsız Alan İlerlemesi (Independent Area Progression)
+- **7 Bağımsız Otel Alanı:** `Riviera Gurme Restoran`, `Aurelia Büyük Lobi & Resepsiyon`, `Deluxe Ocean Suit 101`, `Monako Sonsuzluk Havuzu`, `Aurelia Zen Termal Spa`, `Akdeniz Botanik Bahçesi` ve `2. Kat Penthouse Lounge`.
+- Hiçbir otel alanı yapay olarak bir diğerine kilitli değildir; oyuncu dilediği alana giderek o alanın restorasyon görevlerine odaklanabilir.
+- Varsayılan başlangıç alanı referans mimari doğrultusunda **Riviera Gurme Restoran** olarak ayarlandı.
+
+### 2. 📋 Net Görev Kartı ve 4 Temel Metrik (Full Gossip Harbour Task Transparency)
+Her yenileme görevinde oyuncunun bütçesi ve hedefi şeffaf bir biçimde sergilenir:
+- **Ne Yenilenecek:** Görevin adı, açıklaması ve kazandıracağı görsel/prestij dönüşüm.
+- **Kesin Maliyet:** Gerekli altın miktarı.
+- **Mevcut Bakiye:** Oyuncunun kasasındaki güncel para.
+- **Kalan İhtiyaç:** Bütçe yetersizse eksik kalan tutar; bütçe yetiyorsa yeşil "Restorasyona Hazır!" onayı.
+- **Durum:** *Tamamlandı*, *Aktif*, veya *Sıradaki Kilitli Görev*.
+- Para yetersiz olduğunda tek tıkla birleştirme tahtasına yönlendiren ve eksik tutarı gösteren dinamik aksiyon butonu.
+
+### 3. 🎨 3 Farklı Tasarım Seçeneği ve Canlı Sahne Önizlemesi (3 Distinct Design Choices)
+- Görevin bütçesi karşılandığında Gossip Harbour alt tasarım seçici çubuğu açılır.
+- 3 farklı estetik tarz (Seçenek A: Modern Zarafet, Seçenek B: Kadife Lüks, Seçenek C: Klasik Premium).
+- Kartlara tıklandığında sahne üzerinde **canlı anlık önizleme** yapılır.
+- "Bu Tasarımı Onayla ve Kur" butonuna basıldığında seçim mekana **kalıcı olarak sabitlenir**, alt çubuk otomatik olarak kapanır.
+
+### 4. 💎 Otoriter Ekonomi ve Kalıcı Mekan Dönüşümü
+- Altın düşümü tek seferde ve tam tutarında otoriter `GameEconomy.purchaseRenovation` ile gerçekleştirilir.
+- Mekan seviyesi artar (Örn: Seviye 1'den Seviye 2'ye), alan ilerleme çubuğu güncellenir ve kutlama konfeti efekti eşliğinde sıradaki görev açılır.
+- Yerleştirilen mobilya sahnede kalıcı katman (`stage_{taskId}_{optId}.png`) olarak sergilenir.
+
+---
+
 ## 🏆 Sürüm `v2.6.0` (18 Ekim 2026) — *Gossip Harbor Mimarisinde 11 Sıralı Mobilya Kurulumu, Net Mekan Sahnesi, Kalıcı Tasarım Sabitlenmesi ve Tek Seferlik Seçim Düzeni*
 
 Bu sürümde, kullanıcının talebi ve *Gossip Harbor* oyununun orijinal dinamikleri doğrultusunda 7 temel kuralın tümü kod tabanında tek tek kontrol edilmiş ve eksiksiz olarak hayata geçirilmiştir:
