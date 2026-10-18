@@ -249,11 +249,30 @@
         const s = JSON.parse(raw);
         if (s && Array.isArray(s.board) && s.board.length === 25) {
           state = { ...initialState(), ...s };
+          if (window.GameEconomy) {
+            state.prestige = window.GameEconomy.getBalance();
+            state.stars = window.GameEconomy.getStars();
+          }
           return;
         }
       }
     } catch (e) {}
     state = initialState();
+    if (window.GameEconomy) {
+      state.prestige = window.GameEconomy.getBalance();
+      state.stars = window.GameEconomy.getStars();
+    }
+  }
+
+  // Reactive listener to GameEconomy
+  if (window.GameEconomy) {
+    window.GameEconomy.subscribe((econ) => {
+      if (typeof state !== 'undefined' && state) {
+        state.prestige = econ.getBalance();
+        state.stars = econ.getStars();
+        renderStats();
+      }
+    });
   }
 
   function save() {
@@ -423,27 +442,34 @@
       }
     }
 
-    state.prestige += order.rewardCoins;
-    state.stars += order.rewardStars;
+    if (window.GameEconomy) {
+      window.GameEconomy.completeCustomerOrder(orderIdx, order.rewardCoins, order.rewardStars, order.customer);
+      state.prestige = window.GameEconomy.getBalance();
+      state.stars = window.GameEconomy.getStars();
+    } else {
+      state.prestige += order.rewardCoins;
+      state.stars += order.rewardStars;
+    }
     state.ordersCompleted++;
 
     if (window.hotel3D) {
-      window.hotel3D.state.coins += order.rewardCoins;
-      window.hotel3D.state.stars += order.rewardStars;
+      window.hotel3D.state.coins = state.prestige;
+      window.hotel3D.state.stars = state.stars;
       window.hotel3D.saveState();
       window.hotel3D.checkAffordableNotifications();
+      if (window.hotel3D.updateProximityPanel) window.hotel3D.updateProximityPanel();
     }
 
     sfx.coin();
     if (clientX && clientY) {
       showFloatingText(`⭐ +${order.rewardStars} Yıldız!`, clientX, clientY);
-      showFloatingText(`◆ +${order.rewardCoins}`, clientX, clientY - 30);
+      showFloatingText(`◆ +$${order.rewardCoins}`, clientX, clientY - 30);
     }
 
     addXP(35);
     state.orders[orderIdx] = generateRandomOrder();
 
-    notify(`Sipariş teslim edildi! ${order.customer} çok memnun kaldı. +${order.rewardCoins} Prestij ve +${order.rewardStars} Yıldız kazandın!`);
+    notify(`Sipariş teslim edildi! ${order.customer} çok memnun kaldı. +$${order.rewardCoins} Prestij ve +⭐${order.rewardStars} Yıldız kazandın!`);
     renderAll();
   }
 
@@ -968,8 +994,12 @@
 
   function renderStats() {
     tick();
+    if (window.GameEconomy) {
+      state.prestige = window.GameEconomy.getBalance();
+      state.stars = window.GameEconomy.getStars();
+    }
     if ($('energy')) $('energy').textContent = state.energy;
-    if ($('coins')) $('coins').textContent = state.prestige;
+    if ($('coins')) $('coins').textContent = `$${state.prestige}`;
     if ($('gems')) $('gems').textContent = state.gems;
     if ($('stars')) $('stars').textContent = state.stars;
 
@@ -1010,9 +1040,12 @@
           if (window.initHotel3D) window.initHotel3D();
           if (window.hotel3D) {
             window.hotel3D.onResize();
-            window.hotel3D.state.coins = Math.max(window.hotel3D.state.coins, state.prestige);
-            window.hotel3D.state.stars = Math.max(window.hotel3D.state.stars, state.stars);
-            window.hotel3D.saveState();
+            if (window.GameEconomy) {
+              window.hotel3D.state.coins = window.GameEconomy.getBalance();
+              window.hotel3D.state.stars = window.GameEconomy.getStars();
+            }
+            window.hotel3D.updateHUD();
+            if (window.hotel3D.updateProximityPanel) window.hotel3D.updateProximityPanel();
           }
         }
 
@@ -1031,6 +1064,16 @@
 
     const addEnergyBtn = $('addEnergyBtn');
     if (addEnergyBtn) addEnergyBtn.onclick = () => openAdModal();
+
+    // Click on Prestige wallet pill to view authoritative Financial Ledger
+    const coinsBox = document.querySelector('.currency-strip .curr-box:nth-child(2)');
+    if (coinsBox) {
+      coinsBox.style.cursor = 'pointer';
+      coinsBox.title = 'Kasa Defteri ve Finans Raporunu Aç';
+      coinsBox.onclick = () => {
+        if (window.GameEconomy) window.GameEconomy.openLedgerModal();
+      };
+    }
 
     const upgrade1 = $('upgradeArea1Btn');
     if (upgrade1) upgrade1.onclick = (e) => upgradeArea1(e.clientX, e.clientY);

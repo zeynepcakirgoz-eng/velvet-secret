@@ -507,6 +507,20 @@ class Hotel3DSimulator {
                 ]
             }
         };
+
+        // Harmonize with authoritative GameEconomy definitions
+        if (window.GameEconomy && window.GameEconomy.renovationCosts) {
+            Object.keys(this.renovationDefs).forEach(k => {
+                const econDef = window.GameEconomy.renovationCosts[k];
+                if (econDef) {
+                    this.renovationDefs[k].cost = econDef.cost;
+                    this.renovationDefs[k].stars = econDef.stars;
+                    this.renovationDefs[k].defaultDesc = econDef.defaultDesc;
+                    this.renovationDefs[k].name = econDef.name;
+                    this.renovationDefs[k].area = econDef.area;
+                }
+            });
+        }
     }
 
     // ----------------------------------------------------
@@ -515,13 +529,13 @@ class Hotel3DSimulator {
     loadSaveData() {
         const saved = localStorage.getItem('velvet_hotel_3d_state_v2');
         const defaultState = {
-            coins: 1000,
-            stars: 15,
+            coins: 750,
+            stars: 6,
             prestige: 50,
             reputation: 250,
             hotelStars: 1,
             uncollectedIncome: 0,
-            incomePerMin: 35,
+            incomePerMin: 45,
             lastIncomeTick: Date.now(),
             currentStage: 1,
             // Maps renovationId -> { optionId: 'opt_b', level: 1 } or null
@@ -542,7 +556,6 @@ class Hotel3DSimulator {
                 try {
                     const parsed = JSON.parse(legacy);
                     this.state = Object.assign(defaultState, parsed);
-                    // Migrate legacy binary 1s to 'opt_b'
                     if (parsed.renovations) {
                         this.state.renovations = {};
                         Object.keys(parsed.renovations).forEach(k => {
@@ -557,6 +570,18 @@ class Hotel3DSimulator {
             } else {
                 this.state = defaultState;
             }
+        }
+
+        // Authoritative synchronization with window.GameEconomy
+        if (window.GameEconomy) {
+            this.state.coins = window.GameEconomy.getBalance();
+            this.state.stars = window.GameEconomy.getStars();
+            window.GameEconomy.subscribe((econ) => {
+                this.state.coins = econ.getBalance();
+                this.state.stars = econ.getStars();
+                this.updateHUD();
+                this.updateProximityPanel();
+            });
         }
 
         // Calculate total income from installed renovations
@@ -1777,6 +1802,8 @@ class Hotel3DSimulator {
         this.playSound('door');
 
         setTimeout(() => {
+            this.updateInteractions(0);
+            this.updateProximityPanel();
             this.openRenovationModal(id);
         }, 300);
     }
@@ -1789,6 +1816,21 @@ class Hotel3DSimulator {
         if (!def) return;
 
         const installed = this.getInstalledOption(id);
+        const isCompleted = (installed && !installed.isPreview);
+        const currentBalance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+        const currentStars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
+        const cost = def.cost || 1200;
+        const stars = def.stars || 3;
+        const canAfford = window.GameEconomy ? window.GameEconomy.canAfford(cost, stars) : (currentBalance >= cost);
+
+        // Strict Requirement: Design options unlock ONLY when player can afford the renovation!
+        if (!canAfford && !isCompleted) {
+            this.playSound('step');
+            const defCoins = Math.max(0, cost - currentBalance);
+            this.showBanner(`🔒 Tasarımlar Kilitli! Bütçeniz henüz yeterli değil ($${defCoins} eksik).`);
+            return;
+        }
+
         const modal = document.getElementById('renoModal');
         const modalContent = document.getElementById('renoModalContent');
         if (!modal || !modalContent) return;
@@ -1844,8 +1886,13 @@ class Hotel3DSimulator {
         const isCurrentInstalled = (installed && (installed === opt.id || installed.optionId === opt.id));
         const isPreviewing = (this.previewingRenovation && this.previewingRenovation.optionId === opt.id);
 
-        const deficitCoins = Math.max(0, opt.costCoins - this.state.coins);
-        const deficitStars = Math.max(0, opt.costStars - this.state.stars);
+        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
+        const cost = def.cost || opt.costCoins;
+        const starsNeeded = def.stars || opt.costStars;
+
+        const deficitCoins = Math.max(0, cost - balance);
+        const deficitStars = Math.max(0, starsNeeded - stars);
         const canAfford = (deficitCoins === 0 && deficitStars === 0);
 
         let optionsTabsHtml = '';
@@ -1887,8 +1934,8 @@ class Hotel3DSimulator {
                         <h4>${opt.name}</h4>
                     </div>
                     <div class="design-price-tag">
-                        <span>💰 ${opt.costCoins}</span>
-                        <span class="star-pill">⭐ ${opt.costStars}</span>
+                        <span>💰 $${cost}</span>
+                        <span class="star-pill">⭐ ${starsNeeded}</span>
                     </div>
                 </div>
 
@@ -1898,7 +1945,7 @@ class Hotel3DSimulator {
                 <div class="design-stats-strip">
                     <div class="stat-pill">
                         <label>Pasif Otel Geliri</label>
-                        <b class="positive">+₺${opt.incomeBoost}/dk</b>
+                        <b class="positive">+$${opt.incomeBoost}/dk</b>
                     </div>
                     <div class="stat-pill">
                         <label>Otel Prestiji</label>
@@ -1910,19 +1957,19 @@ class Hotel3DSimulator {
                 <div class="budget-breakdown-card">
                     <div class="budget-row">
                         <span>Mevcut Kasanız:</span>
-                        <b>💰 ₺${this.state.coins} &nbsp;|&nbsp; ⭐ ${this.state.stars} Yıldız</b>
+                        <b>💰 $${balance} &nbsp;|&nbsp; ⭐ ${stars} Yıldız</b>
                     </div>
                     ${!canAfford ? `
                         <div class="budget-deficit-box">
                             <span class="deficit-title">⚠️ Bütçe Durumu: Yetersiz Bakiye</span>
                             <div class="deficit-pills">
-                                ${deficitCoins > 0 ? `<span class="def-tag coin">₺${deficitCoins} eksik</span>` : ''}
+                                ${deficitCoins > 0 ? `<span class="def-tag coin">$${deficitCoins} eksik</span>` : ''}
                                 ${deficitStars > 0 ? `<span class="def-tag star">${deficitStars} ⭐ eksik</span>` : ''}
                             </div>
                         </div>
                     ` : `
                         <div class="budget-sufficient-box">
-                            <span>✅ Bütçeniz bu lüks tasarımı uygulamak için yeterli!</span>
+                            <span>✅ Bütçeniz bu lüks tasarımı uygulamak için yeterli! Kalan para: +$${balance - cost}</span>
                         </div>
                     `}
                 </div>
@@ -1938,7 +1985,7 @@ class Hotel3DSimulator {
                 <button class="purchase-confirm-btn ${isCurrentInstalled ? 'btn-installed' : (canAfford ? 'btn-ready' : 'btn-disabled')}"
                     ${(!canAfford || isCurrentInstalled) ? 'disabled' : ''}
                     onclick="hotel3D.executePurchase('${id}', '${opt.id}')">
-                    ${isCurrentInstalled ? '🌟 Bu Tasarım Kurulu' : (canAfford ? '🛠️ Satın Al & Uygula' : '❌ Yetersiz Bakiye')}
+                    ${isCurrentInstalled ? '🌟 Bu Tasarım Kurulu' : (canAfford ? `🛠️ Satın Al & Uygula ($${cost})` : '❌ Yetersiz Bakiye')}
                 </button>
             </div>
         `;
@@ -1950,14 +1997,24 @@ class Hotel3DSimulator {
         const opt = def.options.find(o => o.id === optionId);
         if (!opt) return;
 
-        if (this.state.coins < opt.costCoins || this.state.stars < opt.costStars) {
-            this.showBanner('Yetersiz bakiye! Masadan sipariş tamamlayın.');
-            return;
-        }
+        const costCoins = def.cost || opt.costCoins;
+        const costStars = def.stars || opt.costStars;
 
-        // Deduct exactly once
-        this.state.coins -= opt.costCoins;
-        this.state.stars -= opt.costStars;
+        if (window.GameEconomy) {
+            const res = window.GameEconomy.purchaseRenovation(id, optionId, costCoins, costStars, `${def.name} - ${opt.name}`);
+            if (!res.success) {
+                this.showBanner('Yetersiz bakiye! Masadan sipariş tamamlayın veya otel gelirini toplayın.');
+                return;
+            }
+            this.state.coins = res.remainingBalance;
+        } else {
+            if (this.state.coins < costCoins || this.state.stars < costStars) {
+                this.showBanner('Yetersiz bakiye! Masadan sipariş tamamlayın.');
+                return;
+            }
+            this.state.coins -= costCoins;
+            this.state.stars -= costStars;
+        }
 
         // Save selected design
         this.state.renovations[id] = { optionId: optionId, level: 1 };
@@ -1971,7 +2028,8 @@ class Hotel3DSimulator {
         this.rebuildAllRenovations();
 
         this.cancelPreviewAndClose();
-        this.showBanner(`🎉 ${opt.name} Başarıyla Uygulandı! (+₺${opt.incomeBoost}/dk)`);
+        this.updateProximityPanel();
+        this.showBanner(`🎉 ${opt.name} Başarıyla Uygulandı! (+$${opt.incomeBoost}/dk)`);
     }
 
     // ----------------------------------------------------
@@ -1984,38 +2042,62 @@ class Hotel3DSimulator {
         const totalAreas = Object.keys(this.renovationDefs).length;
         const completedCount = Object.keys(this.state.renovations).filter(k => this.state.renovations[k]).length;
         const progressPct = Math.round((completedCount / totalAreas) * 100);
+        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
+        const targetId = window.GameEconomy ? window.GameEconomy.getTargetRenovation() : 'restaurant_tables';
 
         let listHtml = '';
         Object.keys(this.renovationDefs).forEach((id, idx) => {
             const def = this.renovationDefs[id];
             const installed = this.getInstalledOption(id);
             const isDone = (installed && !installed.isPreview);
+            const isTarget = (id === targetId);
 
-            const minCoins = Math.min(...def.options.map(o => o.costCoins));
-            const minStars = Math.min(...def.options.map(o => o.costStars));
-            const canAfford = (this.state.coins >= minCoins && this.state.stars >= minStars);
+            const cost = def.cost || 1200;
+            const starsNeeded = def.stars || 3;
+            const canAfford = (balance >= cost && stars >= starsNeeded);
+            const defCoins = Math.max(0, cost - balance);
 
-            let statusTag = '';
+            let statusClass = 'waiting';
+            let statusText = `⏳ $${defCoins} Eksik (BİRİKTİRİLİYOR)`;
+            let currentCondition = def.defaultDesc || 'Eski ve Yıpranmış Durumda';
+
             if (isDone) {
                 const opt = def.options.find(o => o.id === installed.optionId) || def.options[0];
-                statusTag = `<span class="proj-badge done">✅ Tamamlandı (${opt.style})</span>`;
+                statusClass = 'done';
+                statusText = `✅ TAMAMLANDI (${opt.style})`;
+                currentCondition = `Yenilendi: ${opt.name}`;
             } else if (canAfford) {
-                statusTag = `<span class="proj-badge ready">🟢 BÜTÇE HAZIR (₺${minCoins})</span>`;
-            } else {
-                const defCoins = Math.max(0, minCoins - this.state.coins);
-                statusTag = `<span class="proj-badge waiting">⏳ ₺${defCoins} Eksik</span>`;
+                statusClass = 'ready';
+                statusText = `🟢 BÜTÇE HAZIR! ($${cost})`;
             }
 
             listHtml += `
-                <div class="proj-area-row ${isDone ? 'done-row' : ''}">
+                <div class="proj-area-row ${isDone ? 'done-row' : ''} ${isTarget ? 'target-row' : ''}">
                     <div class="proj-area-info">
-                        <span class="proj-stage">ALAN ${idx + 1} · ${def.area}</span>
+                        <div class="proj-row-header">
+                            <span class="proj-stage">ALAN ${idx + 1} · ${def.area}</span>
+                            <span class="proj-badge ${statusClass}">${statusText}</span>
+                        </div>
                         <h4>${def.name}</h4>
-                        <div class="proj-status-bar">${statusTag}</div>
+                        <div class="proj-condition-line">
+                            <small>Mevcut Durum: <b>${currentCondition}</b></small>
+                        </div>
+                        <div class="proj-fin-calc-line">
+                            <span>Maliyet: <b>$${cost}</b></span> &nbsp;•&nbsp; 
+                            <span>Kasa: <b>$${balance}</b></span> &nbsp;•&nbsp; 
+                            <span class="${canAfford ? 'text-green' : 'text-warn'}">${canAfford ? '🟢 Bütçe Yeterli' : `Eksik: -$${defCoins}`}</span>
+                        </div>
                     </div>
-                    <button class="proj-go-btn" onclick="hotel3D.goToAndOpenRenovation('${id}')">
-                        ${isDone ? 'Tasarım Değiştir' : (canAfford ? '🛠️ Hemen Yap' : 'İncele ➔')}
-                    </button>
+                    <div class="proj-row-actions">
+                        <button class="proj-target-btn ${isTarget ? 'active-target' : ''}" 
+                            onclick="hotel3D.setTargetRenovation('${id}'); hotel3D.openProjectPlanModal();">
+                            ${isTarget ? '🎯 Hedef' : '🎯 Hedef Yap'}
+                        </button>
+                        <button class="proj-go-btn" onclick="document.getElementById('projectPlanModal').style.display='none'; hotel3D.goToAndOpenRenovation('${id}')">
+                            ${isDone ? '🎨 Tasarım Değiştir' : (canAfford ? '🛠️ Tasarla & Yap ➔' : '📍 Otele Git & İncele ➔')}
+                        </button>
+                    </div>
                 </div>
             `;
         });
@@ -2024,8 +2106,8 @@ class Hotel3DSimulator {
             <div class="proj-modal-card">
                 <div class="proj-header">
                     <div class="proj-title-box">
-                        <span class="proj-crest">✦ AURELIA PALACE PROJE DEFTERİ</span>
-                        <h3>Restorasyon ve Bütçe Planı</h3>
+                        <span class="proj-crest">✦ AURELIA PALACE PROJE VE MALİYET DEFTERİ</span>
+                        <h3>Tüm Restorasyon Maliyetleri Genel Bakış</h3>
                     </div>
                     <button class="reno-close-btn" onclick="document.getElementById('projectPlanModal').style.display='none'">&times;</button>
                 </div>
@@ -2036,12 +2118,12 @@ class Hotel3DSimulator {
                         <b>%${progressPct} (${completedCount}/${totalAreas})</b>
                     </div>
                     <div class="proj-sum-item">
-                        <label>Toplam Gelir</label>
-                        <b class="positive">+₺${this.state.incomePerMin}/dk</b>
+                        <label>Mevcut Kasa</label>
+                        <b>💰 $${balance} | ⭐ ${stars}</b>
                     </div>
                     <div class="proj-sum-item">
-                        <label>Mevcut Bakiye</label>
-                        <b>💰 ₺${this.state.coins} | ⭐ ${this.state.stars}</b>
+                        <label>Pasif Gelir</label>
+                        <b class="positive">+$${this.state.incomePerMin}/dk</b>
                     </div>
                 </div>
 
@@ -2052,8 +2134,16 @@ class Hotel3DSimulator {
                 <div class="proj-list-scroll">
                     ${listHtml}
                 </div>
+
+                <div class="proj-footer-bar" style="margin-top: 10px; display: flex; justify-content: space-between;">
+                    <button class="ledger-btn" style="flex: 1;" onclick="document.getElementById('projectPlanModal').style.display='none'; window.GameEconomy && window.GameEconomy.openLedgerModal();">
+                        💼 Finans ve Kasa Defterini Aç
+                    </button>
+                </div>
             </div>
         `;
+        modal.style.display = 'flex';
+    }
         modal.style.display = 'flex';
     }
 
@@ -2114,27 +2204,33 @@ class Hotel3DSimulator {
         }
 
         const amt = this.state.uncollectedIncome;
-        this.state.coins += amt;
         this.state.uncollectedIncome = 0;
         this.playSound('cash');
-        this.saveState();
+        if (window.GameEconomy) {
+            window.GameEconomy.addHotelIncome(amt, 'Otel Kasası Toplanan Pasif Gelir');
+        } else {
+            this.state.coins += amt;
+            this.saveState();
+        }
         this.checkAffordableNotifications();
-        this.showBanner(`💰 +₺${amt} Otel Geliri Kasaya Eklendi!`);
+        this.showBanner(`💰 +$${amt} Otel Geliri Kasaya Eklendi!`);
     }
 
     updateHUD() {
+        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
         const coinEl = document.getElementById('hudCoins');
         const starEl = document.getElementById('hudStars');
         const rateEl = document.getElementById('hudRate');
         const uncollectedEl = document.getElementById('hudUncollected');
         const hotelStarsEl = document.getElementById('hudHotelStars');
 
-        if (coinEl) coinEl.innerText = this.state.coins;
-        if (starEl) starEl.innerText = this.state.stars;
-        if (rateEl) rateEl.innerText = `+₺${this.state.incomePerMin}/dk`;
-        if (uncollectedEl) uncollectedEl.innerText = `₺${this.state.uncollectedIncome}`;
+        if (coinEl) coinEl.innerText = `$${balance}`;
+        if (starEl) starEl.innerText = stars;
+        if (rateEl) rateEl.innerText = `+$${this.state.incomePerMin}/dk`;
+        if (uncollectedEl) uncollectedEl.innerText = `$${this.state.uncollectedIncome}`;
         if (hotelStarsEl) {
-            hotelStarsEl.innerHTML = '⭐'.repeat(this.state.hotelStars);
+            hotelStarsEl.innerHTML = '⭐'.repeat(Math.max(1, this.state.hotelStars));
         }
     }
 
@@ -2448,7 +2544,9 @@ class Hotel3DSimulator {
                 const label = def ? def.name : nearestBeacon.name;
                 const installed = this.getInstalledOption(nearestBeacon.id);
                 const isDone = (installed && !installed.isPreview);
-                const canAfford = nearestBeacon.canAfford;
+                const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+                const cost = def ? (def.cost || 1200) : 1200;
+                const canAfford = (balance >= cost);
 
                 prompt.innerHTML = `
                     <div class="prompt-icon">${isDone ? '✨' : (canAfford ? '🟢' : '🛠️')}</div>
@@ -2462,6 +2560,115 @@ class Hotel3DSimulator {
                 prompt.style.display = 'none';
             }
         }
+
+        // Live Proximity Information Card (Prompt Requirement 2)
+        this.updateProximityPanel();
+    }
+
+    updateProximityPanel() {
+        const proxPanel = document.getElementById('renovationProximityPanel');
+        if (!proxPanel) return;
+
+        if (!this.activeBeacon) {
+            proxPanel.style.display = 'none';
+            return;
+        }
+
+        const def = this.renovationDefs[this.activeBeacon.id];
+        if (!def) {
+            proxPanel.style.display = 'none';
+            return;
+        }
+
+        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
+        const installed = this.getInstalledOption(this.activeBeacon.id);
+        const isCompleted = (installed && !installed.isPreview);
+        const cost = def.cost || 1200;
+        const starsNeeded = def.stars || 3;
+        const canAfford = (balance >= cost && stars >= starsNeeded);
+
+        let statusClass = 'status-saving';
+        let statusText = 'SAVING MONEY';
+        let currentCondition = def.defaultDesc || 'Eski ve Yıpranmış Durumda';
+
+        if (isCompleted) {
+            statusClass = 'status-completed';
+            statusText = 'COMPLETED';
+            const opt = def.options.find(o => o.id === installed.optionId) || def.options[0];
+            currentCondition = `Yenilendi: ${opt.name} (${opt.style})`;
+        } else if (canAfford) {
+            statusClass = 'status-ready';
+            statusText = 'READY TO RENOVATE';
+        }
+
+        const stillNeeded = Math.max(0, cost - balance);
+        const remainingAfter = Math.max(0, balance - cost);
+
+        proxPanel.innerHTML = `
+            <div class="prox-card-inner">
+                <div class="prox-top-row">
+                    <span class="prox-area-badge">${def.area}</span>
+                    <span class="prox-status-badge ${statusClass}">${statusText}</span>
+                </div>
+                <h3 class="prox-title">${def.name.toUpperCase()}</h3>
+                <div class="prox-condition-row">
+                    <span class="prox-cond-label">Mevcut Durum:</span>
+                    <b class="prox-cond-val">${currentCondition}</b>
+                </div>
+                
+                <div class="prox-fin-grid">
+                    <div class="prox-fin-box">
+                        <label>Yenileme Maliyeti</label>
+                        <b class="prox-cost">$${cost}</b>
+                    </div>
+                    <div class="prox-fin-box">
+                        <label>Mevcut Bakiye</label>
+                        <b class="prox-bal">$${balance}</b>
+                    </div>
+                    <div class="prox-fin-box highlight">
+                        <label>${canAfford || isCompleted ? 'Kalan Bakiye' : 'Gereken Para'}</label>
+                        <b class="${canAfford || isCompleted ? 'text-green' : 'text-warn'}">${canAfford || isCompleted ? '+$' + remainingAfter : '-$' + stillNeeded}</b>
+                    </div>
+                </div>
+                
+                <div class="prox-actions-row">
+                    ${isCompleted ? `
+                        <button class="prox-btn-view-designs" onclick="hotel3D.openRenovationModal('${def.id}')">
+                            🎨 Tasarımı Değiştir
+                        </button>
+                    ` : canAfford ? `
+                        <button class="prox-btn-view-designs pulse" onclick="hotel3D.openRenovationModal('${def.id}')">
+                            ✨ Tasarımları İncele (View Designs)
+                        </button>
+                    ` : `
+                        <button class="prox-btn-locked" disabled>
+                            🔒 Tasarımlar Kilitli ($${stillNeeded} daha gerekli)
+                        </button>
+                    `}
+                    <button class="prox-btn-set-target" onclick="hotel3D.setTargetRenovation('${def.id}')">
+                        🎯 Hedef Yap
+                    </button>
+                </div>
+            </div>
+        `;
+        proxPanel.style.display = 'block';
+    }
+
+    setTargetRenovation(id) {
+        if (window.GameEconomy) {
+            window.GameEconomy.setTargetRenovation(id);
+        }
+        const name = this.renovationDefs[id] ? this.renovationDefs[id].name : id;
+        this.showBanner(`🎯 Yeni Hedef Belirlendi: ${name}`);
+        this.updateProximityPanel();
+    }
+
+    openFinancialLedgerModal() {
+        if (window.GameEconomy) {
+            window.GameEconomy.openLedgerModal();
+        }
+    }
     }
 
     triggerActiveBeacon() {

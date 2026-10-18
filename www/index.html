@@ -25,6 +25,7 @@
         <span id="levelBadge" class="level-badge">LV.1</span>
       </div>
       <div class="vip-crest">✦ VIP SOSYETE</div>
+      <button class="hero-ledger-pill" onclick="window.GameEconomy && window.GameEconomy.openLedgerModal()">💼 Kasa Defteri</button>
     </div>
   </header>
 
@@ -137,18 +138,19 @@
           <button class="room-jump-btn" onclick="jumpToRoom('restaurant')">🍷 Riviera Restoran</button>
           <button class="room-jump-btn" onclick="jumpToRoom('pool')">🏊 Sonsuzluk Havuzu</button>
           <button class="room-jump-btn" onclick="jumpToRoom('penthouse')">👑 2. Kat Penthouse</button>
-          <button class="project-plan-btn" onclick="hotel3D.openProjectPlanModal()">📋 PROJE PLAN &amp; BÜTÇE</button>
+          <button class="project-plan-btn" onclick="hotel3D.openProjectPlanModal()">📋 PROJE &amp; MALİYETLER</button>
+          <button class="ledger-btn" onclick="window.GameEconomy && window.GameEconomy.openLedgerModal()">💼 KASA DEFTERİ</button>
         </div>
 
         <!-- Canlı Ekonomi ve Kasa Çubuğu -->
         <div class="hotel-economy-strip">
           <div class="econ-item">
             <span class="econ-label">Otel Geliri</span>
-            <b id="hudRate" class="econ-val">+₺35/dk</b>
+            <b id="hudRate" class="econ-val">+$45/dk</b>
           </div>
           <div class="econ-item">
             <span class="econ-label">Biriken Kasa</span>
-            <b id="hudUncollected" class="econ-val cash">₺0</b>
+            <b id="hudUncollected" class="econ-val cash">$0</b>
           </div>
           <button id="collectIncomeBtn" class="collect-cash-btn" onclick="hotel3D.collectIncome()">
             <span>💰 GELİRİ TOPLA</span>
@@ -161,6 +163,12 @@
         
         <!-- Otomatik Bütçe Yetti Bildirimi (Smart Affordability Alert) -->
         <div id="budgetAlertToast" class="budget-alert-toast" style="display: none;"></div>
+
+        <!-- Canlı Gelir Toast Bildirimi -->
+        <div id="incomeToast" class="income-toast" style="display: none;"></div>
+
+        <!-- İnteraktif Yakınlık Kartı (Proximity Information Panel) -->
+        <div id="renovationProximityPanel" class="renovation-proximity-panel" style="display: none;"></div>
 
         <!-- Üst Bilgi Rozeti (Mevcut Konum) -->
         <div class="viewport-hud-top">
@@ -375,7 +383,11 @@
 <!-- ================= PROJE VE BÜTÇE PLANI MODALI ================= -->
 <div id="projectPlanModal" class="modal-overlay" style="display: none;"></div>
 
+<!-- ================= FİNANS VE KASA DEFTERİ MODALI ================= -->
+<div id="financialLedgerModal" class="modal-overlay" style="display: none;"></div>
+
 <script src="js/three.min.js"></script>
+<script src="js/economy.js"></script>
 <script src="js/hotel3d.js"></script>
 <script src="game.js"></script>
 </body>
