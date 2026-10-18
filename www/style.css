@@ -3645,5 +3645,632 @@ button:active {
   }
 }
 
+/* ================= GOSSIP HARBOR 2.5D PHOTOREALISTIC STAGE & BOTTOM 3-DESIGN DOCK ================= */
+.gh-interactive-stage {
+  position: relative;
+  height: 480px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid rgba(223, 191, 131, 0.55);
+  background: #0b0e17;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.75);
+  user-select: none;
+  touch-action: none;
+}
+
+.gh-stage-controls {
+  display: flex;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.gh-ctrl-pill {
+  background: rgba(14, 18, 28, 0.88);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 6px 11px;
+  border-radius: 18px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.gh-scene-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.gh-scene-stage:active {
+  cursor: grabbing;
+}
+
+.gh-room-canvas {
+  position: absolute;
+  left: -12%;
+  top: -8%;
+  width: 124%;
+  height: 116%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.32s cubic-bezier(0.22, 0.9, 0.32, 1), filter 0.35s ease;
+  will-change: transform;
+}
+
+.gh-ambient-sunbeams {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 18%, rgba(255, 220, 130, 0.18), transparent 62%);
+  pointer-events: none;
+}
+
+.gh-room-vignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 65px rgba(6, 8, 14, 0.65);
+  pointer-events: none;
+}
+
+/* On-Scene Furniture Nodes & Gossip Harbor Hammer/Star Pins */
+.gh-furniture-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 12;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.gh-furniture-node:hover,
+.gh-furniture-node.is-selected {
+  transform: translate(-50%, -50%) scale(1.06);
+  z-index: 18;
+}
+
+.gh-pin-anchor {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.gh-pin-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8);
+  animation: bounce 2s infinite;
+}
+
+.gh-pin-bubble.pin-ready {
+  background: linear-gradient(135deg, #2ecc71, #199f53);
+  color: #fff;
+  border: 1.5px solid #a8ffcb;
+  box-shadow: 0 0 16px rgba(46, 204, 113, 0.75);
+}
+
+.gh-pin-bubble.pin-saving {
+  background: linear-gradient(135deg, #ffd700, #c59b27);
+  color: #141004;
+  border: 1.5px solid #fff3b0;
+}
+
+.gh-pin-bubble.pin-max {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: #fff;
+  border: 1.5px solid #a6e9ff;
+}
+
+.gh-furniture-visual-patch {
+  width: 100%;
+  height: 86px;
+  border-radius: 13px;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid rgba(255, 215, 0, 0.72);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative;
+}
+
+.gh-furniture-node.is-unrenovated .gh-furniture-visual-patch {
+  filter: grayscale(0.45) brightness(0.82) contrast(0.95);
+  border-style: dashed;
+  border-color: rgba(255, 195, 85, 0.65);
+}
+
+.gh-furniture-node.is-selected .gh-furniture-visual-patch,
+.gh-furniture-node.is-previewing .gh-furniture-visual-patch {
+  border-color: #2ecc71;
+  box-shadow: 0 0 22px rgba(46, 204, 113, 0.75), 0 8px 24px rgba(0, 0, 0, 0.85);
+}
+
+.gh-patch-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 7px;
+}
+
+.gh-patch-lv {
+  background: rgba(10, 12, 20, 0.86);
+  color: var(--gold-bright);
+  font-size: 8.5px;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.45);
+}
+
+.gh-patch-sparkle {
+  color: #ffd700;
+  font-size: 13px;
+  text-shadow: 0 0 8px #ffd700;
+}
+
+.gh-patch-cobweb {
+  font-size: 12px;
+}
+
+.gh-patch-bottom-label {
+  background: linear-gradient(0deg, rgba(8, 10, 18, 0.95) 25%, rgba(8, 10, 18, 0.55) 85%, transparent);
+  padding: 5px 7px 4px;
+  text-align: left;
+}
+
+.gh-patch-bottom-label strong {
+  display: block;
+  font-size: 10px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gh-patch-bottom-label small {
+  display: block;
+  font-size: 8.5px;
+  color: var(--gold-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Connected Room Doorway Navigation Pins */
+.gh-door-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 14;
+  background: rgba(14, 18, 28, 0.88);
+  border: 1.5px solid var(--gold);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(5px);
+  white-space: nowrap;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.gh-door-pin:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: rgba(34, 42, 64, 0.95);
+}
+
+/* Walkable Isabella & Guest Character Tokens in the Room Scene */
+.gh-isabella-token,
+.gh-guest-token {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 22;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: left 0.62s cubic-bezier(0.25, 0.9, 0.35, 1), top 0.62s cubic-bezier(0.25, 0.9, 0.35, 1);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.gh-isabella-token.walking .gh-char-avatar-ring {
+  animation: bounce 0.32s infinite;
+}
+
+.gh-char-speech-bubble {
+  max-width: 195px;
+  background: rgba(14, 17, 26, 0.94);
+  border: 1px solid var(--gold);
+  color: #fff;
+  font-size: 9.5px;
+  line-height: 1.3;
+  padding: 5px 9px;
+  border-radius: 11px;
+  margin-bottom: 5px;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8);
+}
+
+.gh-char-avatar-ring {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2.5px solid var(--gold-bright);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.85), 0 0 14px rgba(255, 215, 0, 0.45);
+  overflow: hidden;
+  background: #141824;
+}
+
+.gh-char-avatar-ring.guest {
+  width: 46px;
+  height: 46px;
+  border-color: #00f0ff;
+}
+
+.gh-char-avatar-ring img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gh-char-chat-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 12px;
+}
+
+.gh-char-name-tag {
+  margin-top: 3px;
+  background: rgba(10, 12, 20, 0.9);
+  color: #e2e8f0;
+  font-size: 8.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+}
+
+.gh-char-name-tag.gold {
+  color: var(--gold-bright);
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.gh-char-floor-shadow {
+  width: 38px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  margin-top: 2px;
+  filter: blur(2px);
+}
+
+/* Isometric Resort Overview Map Mode */
+.gh-isometric-map-canvas {
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.gh-map-header-banner {
+  position: absolute;
+  top: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(12, 15, 24, 0.9);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 14px;
+  z-index: 15;
+  white-space: nowrap;
+}
+
+.gh-map-paths {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gh-map-room-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 118px;
+  background: rgba(15, 19, 30, 0.94);
+  border: 1.5px solid rgba(223, 191, 131, 0.55);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 12;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.gh-map-room-node:hover,
+.gh-map-room-node.current-room {
+  transform: translate(-50%, -50%) scale(1.08);
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.65);
+}
+
+.gh-map-room-node.has-ready {
+  border-color: #2ecc71;
+}
+
+.gh-map-thumb {
+  height: 52px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.gh-map-lv-pill {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(10, 12, 20, 0.88);
+  color: var(--gold-bright);
+  font-size: 8px;
+  font-weight: 900;
+  padding: 2px 5px;
+  border-radius: 5px;
+}
+
+.gh-map-ready-hammer {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: #2ecc71;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 900;
+  padding: 2px 5px;
+  border-radius: 5px;
+}
+
+.gh-map-node-body {
+  padding: 5px 7px;
+  text-align: center;
+}
+
+.gh-map-node-body strong {
+  display: block;
+  font-size: 9.5px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gh-map-node-body small {
+  display: block;
+  font-size: 8px;
+  color: var(--gold);
+}
+
+/* Gossip Harbor Signature Bottom 3-Design Selector Dock */
+.gh-bottom-design-dock {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 45;
+  background: rgba(14, 17, 27, 0.96);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid var(--gold-bright);
+  border-radius: 16px;
+  padding: 10px 12px;
+  box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.9);
+  animation: fadeIn 0.22s ease-out;
+}
+
+.gh-dock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.gh-dock-lvl-badge {
+  font-size: 8.5px;
+  font-weight: 900;
+  color: var(--gold-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.gh-dock-title-wrap h4 {
+  margin: 1px 0 0;
+  font-family: Georgia, serif;
+  font-size: 13px;
+  color: #fff;
+}
+
+.gh-dock-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gh-dock-detail-btn {
+  background: #23283b;
+  border: 1px solid rgba(223, 191, 131, 0.45);
+  color: var(--gold-bright);
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.gh-dock-close-btn {
+  background: #252a3d;
+  border: 0;
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.gh-dock-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.gh-dock-option-card {
+  background: #1a1f2e;
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  border-radius: 11px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.gh-dock-option-card.active {
+  border-color: #2ecc71;
+  box-shadow: 0 0 14px rgba(46, 204, 113, 0.55);
+  transform: translateY(-2px);
+}
+
+.gh-dock-thumb {
+  height: 54px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.gh-dock-opt-num {
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  background: rgba(10, 12, 20, 0.88);
+  color: var(--gold-bright);
+  font-size: 7.5px;
+  font-weight: 900;
+  padding: 1.5px 5px;
+  border-radius: 4px;
+}
+
+.gh-dock-check-tag,
+.gh-dock-lock-tag {
+  position: absolute;
+  bottom: 3px;
+  right: 4px;
+  background: rgba(46, 204, 113, 0.92);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.gh-dock-lock-tag {
+  background: rgba(18, 22, 34, 0.9);
+  color: #fbbf24;
+}
+
+.gh-dock-opt-meta {
+  padding: 5px 6px;
+}
+
+.gh-dock-opt-meta strong {
+  display: block;
+  font-size: 9.5px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gh-dock-opt-meta small {
+  display: block;
+  font-size: 8px;
+  color: #70e000;
+  margin-top: 1px;
+}
+
+.gh-dock-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gh-dock-budget-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 10px;
+  color: #cbd5e1;
+}
+
+.gh-dock-action-btns {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.gh-dock-confirm-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.gh-dock-confirm-btn.ready {
+  background: linear-gradient(135deg, #2ecc71, #199f53);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(46, 204, 113, 0.55);
+}
+
+.gh-dock-confirm-btn.locked {
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  color: #fff;
+}
+
+.gh-dock-target-btn {
+  background: #23283b;
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+
 
 

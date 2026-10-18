@@ -135,22 +135,23 @@
       </div>
     </section>
 
-    <!-- ========== SAYFA 2: 3D GERÇEKÇİ GEZİLEBİLİR OTEL SİMÜLATÖRÜ ========== -->
+    <!-- ========== SAYFA 2: GOSSIP HARBOR TARZI İNTERAKTİF OTEL & RESTORASYON DÜNYASI ========== -->
     <section id="pageHotel" class="game-page">
       <div class="hotel-page-header">
         <div class="hotel-title-flex">
           <div>
-            <h2>🏨 AURELIA PALACE — 3D OTEL &amp; RESTORASYON</h2>
-            <p>Otel içinde serbestçe yürüyün, odaları gezin ve 11 alanı 3 farklı tasarımla Seviye 4'e yükseltin!</p>
+            <h2>🏨 AURELIA PALACE — OTEL RESTORASYONU</h2>
+            <p>Sahneyi parmağınızla kaydırarak gezin, eşyaların üzerindeki 🔨 balonlarına dokunun ve alt çubuktaki 3 lüks tasarımdan birini seçerek odayı dönüştürün!</p>
           </div>
           <div class="hotel-rating-badge" id="hudHotelStars">⭐⭐⭐</div>
         </div>
 
-        <!-- Hızlı Işınlanma / Oda Seçim Çubuğu -->
+        <!-- Hızlı Oda & Harita Seçim Çubuğu -->
         <div class="quick-room-strip">
+          <button class="room-jump-btn" onclick="hotel3D.toggleMapMode(true)">🗺️ Otel Haritası</button>
           <button class="room-jump-btn active" onclick="jumpToRoom('lobby')">🏛️ Lobi &amp; Resepsiyon</button>
-          <button class="room-jump-btn" onclick="jumpToRoom('room101')">🛏️ Suit 101</button>
           <button class="room-jump-btn" onclick="jumpToRoom('restaurant')">🍷 Riviera Restoran</button>
+          <button class="room-jump-btn" onclick="jumpToRoom('room101')">🛏️ Suit 101</button>
           <button class="room-jump-btn" onclick="jumpToRoom('pool')">🏊 Sonsuzluk Havuzu</button>
           <button class="room-jump-btn" onclick="jumpToRoom('spa')">♨️ Zen Spa</button>
           <button class="room-jump-btn" onclick="jumpToRoom('garden')">🌹 Botanik Bahçe</button>
@@ -176,8 +177,8 @@
         </div>
       </div>
 
-      <!-- 3D GERÇEKÇİ OTEL GÖRÜNÜMÜ & OYUN ALANI -->
-      <div class="hotel-3d-viewport" id="hotel3DContainer">
+      <!-- GOSSIP HARBOR TARZI PANORAMİK & İZOMETRİK İNTERAKTİF OTEL SAHNESİ -->
+      <div class="hotel-3d-viewport gh-interactive-stage" id="hotel3DContainer">
         
         <!-- Otomatik Bütçe Yetti Bildirimi (Smart Affordability Alert) -->
         <div id="budgetAlertToast" class="budget-alert-toast" style="display: none;"></div>
@@ -185,51 +186,27 @@
         <!-- Canlı Gelir Toast Bildirimi -->
         <div id="incomeToast" class="income-toast" style="display: none;"></div>
 
-        <!-- Üst Bilgi Rozeti (Mevcut Konum & Radar) -->
+        <!-- Üst Bilgi Rozeti (Mevcut Oda & Harita Geçiş Butonları) -->
         <div class="viewport-hud-top">
           <div id="hudLocationTag" class="location-pill">📍 Aurelia Palace Büyük Lobi &amp; Resepsiyon</div>
-          <!-- Sağ Üst: Radar / Minimap -->
-          <div class="radar-box">
-            <canvas id="radarCanvas" width="90" height="90"></canvas>
-            <span class="radar-label">RADAR</span>
+          <div class="gh-stage-controls">
+            <button id="ghToggleMapBtn" class="gh-ctrl-pill" onclick="hotel3D.toggleMapMode()">🗺️ Harita</button>
+            <button class="gh-ctrl-pill" onclick="hotel3D.resetCameraView()" title="Görünümü Ortala">🔍 Ortala</button>
           </div>
         </div>
 
-        <!-- Etkileşim Bildirimi ([E] RESTORASYON) -->
-        <div id="actionPrompt" class="action-prompt" style="display: none;" onclick="hotel3D.triggerActiveBeacon()"></div>
+        <!-- İnteraktif Sahne Katmanı (JS tarafından Gossip Harbor Odası veya İzometrik Harita olarak doldurulur) -->
+        <div id="ghSceneStage" class="gh-scene-stage"></div>
 
-        <!-- Mobil Kontroller: Sanal Joystick & Bakış Alanı -->
-        <div class="mobile-controls-layer">
-          <div id="mobileJoystickZone" class="mobile-joystick-zone">
-            <div id="joystickKnob" class="joystick-knob"></div>
-            <span class="joy-label">YÜRÜ</span>
-          </div>
-
-          <div id="mobileLookZone" class="mobile-look-zone">
-            <div class="look-crosshair">✦</div>
-            <span class="look-guide-text">Bakmak için ekranda parmağınızı kaydırın 👁️</span>
-          </div>
-
-          <button id="mobileActionBtn" class="mobile-action-btn" onclick="hotel3D.triggerActiveBeacon()">
-            <span>🛠️</span>
-            <small>İNCELE</small>
-          </button>
-        </div>
-
-        <!-- Masaüstü Kontrol Rehberi -->
-        <div class="desktop-hint-bar">
-          <span>⌨️ <b>WASD / Oklar:</b> Yürü</span>
-          <span>🖱️ <b>Fare / Dokun:</b> Bak</span>
-          <span>🛠️ <b>[E]:</b> Restorasyon</span>
-          <span>⚡ <b>Shift:</b> Koş</span>
-        </div>
+        <!-- Gossip Harbor Tarzı Alt 3-Tasarım Seçici Dock (Eşyaya tıklandığında sahnenin altında açılır) -->
+        <div id="ghBottomDesignDock" class="gh-bottom-design-dock" style="display: none;"></div>
 
         <!-- Bildirim Toast -->
         <div id="hudNotification" class="hud-notification" style="display: none;"></div>
 
       </div>
 
-      <!-- İnteraktif Yakınlık Kartı (3D Ekranı Kapatmayan Alt Konsol) -->
+      <!-- Seçili Eşya / Alan Bütçe ve Durum Özeti Konsolu -->
       <div id="renovationProximityPanel" class="renovation-proximity-panel" style="display: none;"></div>
 
       <!-- GERÇEKÇİ OTEL ALANLARI VE 4-SEVİYELİ RESTORASYON GALERİSİ -->
@@ -237,7 +214,7 @@
         <div class="gallery-sec-head">
           <div>
             <h3>✦ AURELIA PALACE — 11 OTEL ALANI &amp; 4-SEVİYELİ RESTORASYON</h3>
-            <p>Her alanın kendine özel foto-gerçekçi mimarisini inceleyin, 3D odasına yürüyün veya 3 farklı tasarımla Seviye 1'den Seviye 4'e yükseltin!</p>
+            <p>Her alanın kendine özel foto-gerçekçi mimarisini inceleyin, sahnede o eşyaya odaklanın veya 3 farklı tasarımla Seviye 1'den Seviye 4'e yükseltin!</p>
           </div>
           <button class="project-plan-btn" onclick="hotel3D.openProjectPlanModal()">📋 Tüm Maliyet Tablosu</button>
         </div>

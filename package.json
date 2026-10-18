@@ -1,8 +1,8 @@
 {
   "name": "velvet-secrets",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "private": true,
-  "description": "Velvet Secrets (v2.4.0) - Lüks Birleştirme (Merge), İnteraktif Hikâye ve 3D Gezilebilir Otel Restorasyon Simülatörü (Android Telefon & Tablet)",
+  "description": "Velvet Secrets (v2.5.0) - Gossip Harbor Tarzı 2.5D Foto-Gerçekçi & İzometrik Otel Restorasyonu, Alt 3-Tasarım Seçici, Lüks Merge ve Hikâye Oyunu",
   "scripts": {
     "sync:android": "npx cap sync android",
     "open:android": "npx cap open android"
