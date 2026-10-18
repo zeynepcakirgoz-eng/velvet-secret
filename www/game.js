@@ -431,6 +431,7 @@
       window.hotel3D.state.coins += order.rewardCoins;
       window.hotel3D.state.stars += order.rewardStars;
       window.hotel3D.saveState();
+      window.hotel3D.checkAffordableNotifications();
     }
 
     sfx.coin();

@@ -137,6 +137,7 @@
           <button class="room-jump-btn" onclick="jumpToRoom('restaurant')">🍷 Riviera Restoran</button>
           <button class="room-jump-btn" onclick="jumpToRoom('pool')">🏊 Sonsuzluk Havuzu</button>
           <button class="room-jump-btn" onclick="jumpToRoom('penthouse')">👑 2. Kat Penthouse</button>
+          <button class="project-plan-btn" onclick="hotel3D.openProjectPlanModal()">📋 PROJE PLAN &amp; BÜTÇE</button>
         </div>
 
         <!-- Canlı Ekonomi ve Kasa Çubuğu -->
@@ -158,6 +159,9 @@
       <!-- 3D GERÇEKÇİ OTEL GÖRÜNÜMÜ & OYUN ALANI -->
       <div class="hotel-3d-viewport" id="hotel3DContainer">
         
+        <!-- Otomatik Bütçe Yetti Bildirimi (Smart Affordability Alert) -->
+        <div id="budgetAlertToast" class="budget-alert-toast" style="display: none;"></div>
+
         <!-- Üst Bilgi Rozeti (Mevcut Konum) -->
         <div class="viewport-hud-top">
           <div id="hudLocationTag" class="location-pill">📍 Aurelia Palace Büyük Lobi &amp; Resepsiyon</div>
@@ -367,6 +371,9 @@
 <div id="renoModal" class="modal-overlay" style="display: none;">
   <div id="renoModalContent" class="reno-modal-card"></div>
 </div>
+
+<!-- ================= PROJE VE BÜTÇE PLANI MODALI ================= -->
+<div id="projectPlanModal" class="modal-overlay" style="display: none;"></div>
 
 <script src="js/three.min.js"></script>
 <script src="js/hotel3d.js"></script>

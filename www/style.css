@@ -1048,141 +1048,527 @@ button:active {
   text-transform: uppercase;
 }
 
+.project-plan-btn {
+  white-space: nowrap;
+  background: linear-gradient(135deg, #b8860b, #d4af37);
+  border: 1px solid #ffd700;
+  color: #111;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+}
+
+/* SMART AFFORDABILITY ALERT TOAST */
+.budget-alert-toast {
+  position: absolute;
+  top: 60px;
+  left: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, rgba(16, 22, 34, 0.98), rgba(24, 36, 52, 0.98));
+  border: 1.5px solid #2ecc71;
+  box-shadow: 0 0 25px rgba(46, 204, 113, 0.45);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 25;
+  animation: slideDownToast 0.35s ease;
+}
+
+@keyframes slideDownToast {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-sparkle {
+  display: block;
+  font-size: 10px;
+  font-weight: 900;
+  color: #2ecc71;
+  letter-spacing: 1px;
+}
+
+.alert-content p {
+  font-size: 11px;
+  color: #eee;
+  margin: 2px 0 0;
+  line-height: 1.3;
+}
+
+.alert-action-btn {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  border: 0;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 7px 11px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+/* 3-DESIGN SELECTION RENOVATION MODAL */
+.reno-modal-card {
+  background: #141724;
+  border: 1.5px solid var(--gold);
+  border-radius: 20px;
+  padding: 16px;
+  width: 92%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 45px rgba(0, 0, 0, 0.95);
+  position: relative;
+  animation: popIn 0.25s ease;
+}
+
+.reno-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.header-left .reno-badge {
+  background: rgba(223, 191, 131, 0.15);
+  color: var(--gold);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.header-left .reno-title {
+  font-family: Georgia, serif;
+  font-size: 17px;
+  color: var(--gold-bright);
+  margin: 0;
+}
+
 .reno-close-btn {
   background: transparent;
   border: 0;
   color: var(--muted);
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
   padding: 0;
 }
 
-.reno-preview-container {
-  position: relative;
-  width: 100%;
-  height: 140px;
-  border-radius: 12px;
-  overflow: hidden;
+/* 3 Design Tabs */
+.design-tabs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
   margin-bottom: 12px;
 }
 
-.reno-preview-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.design-tab-btn {
+  background: #1b1e2e;
+  border: 1.5px solid rgba(223, 191, 131, 0.2);
+  border-radius: 12px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: var(--muted);
+  position: relative;
+  transition: all 0.2s;
+}
+
+.design-tab-btn.active {
+  background: #252b42;
+  border-color: var(--gold-bright);
+  color: var(--cream);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.35);
+}
+
+.design-tab-btn .tab-icon {
+  font-size: 18px;
+  margin-bottom: 2px;
+}
+
+.design-tab-btn .tab-text b {
   display: block;
+  font-size: 10px;
+  color: var(--gold);
 }
 
-.reno-status-badge {
+.design-tab-btn .tab-text small {
+  font-size: 8px;
+  opacity: 0.8;
+}
+
+.design-tab-btn .installed-tag {
   position: absolute;
-  bottom: 8px;
-  left: 8px;
-  background: rgba(46, 204, 113, 0.9);
+  top: -5px;
+  right: -3px;
+  background: #2ecc71;
   color: #fff;
-  font-size: 9px;
+  font-size: 7px;
   font-weight: 800;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 1px 4px;
+  border-radius: 4px;
 }
 
-.reno-title {
-  font-family: Georgia, serif;
-  font-size: 16px;
-  color: var(--gold-bright);
-  margin: 0 0 6px;
-}
-
-.reno-desc {
-  font-size: 11px;
-  color: #ccc;
-  line-height: 1.45;
-  margin: 0 0 12px;
-}
-
-.reno-rewards-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  background: #0f111a;
-  border-radius: 10px;
-  padding: 8px;
+/* Selected Design Detail */
+.design-detail-card {
+  background: #10121b;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
   margin-bottom: 14px;
 }
 
-.reno-stat {
+.design-head-row {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
 }
 
-.stat-lbl {
+.opt-badge {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.design-title-box h4 {
+  font-family: Georgia, serif;
+  font-size: 14px;
+  color: var(--cream);
+  margin: 2px 0 0;
+}
+
+.design-price-tag {
+  display: flex;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.design-price-tag span {
+  background: rgba(255, 215, 0, 0.15);
+  color: var(--gold-bright);
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.design-price-tag .star-pill {
+  background: rgba(255, 183, 3, 0.2);
+  color: #ffb703;
+  border-color: rgba(255, 183, 3, 0.4);
+}
+
+.design-desc {
+  font-size: 11px;
+  color: #bbb;
+  line-height: 1.4;
+  margin: 0 0 10px;
+}
+
+.design-stats-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: #171a26;
+  border-radius: 10px;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.stat-pill label {
+  display: block;
   font-size: 9px;
   color: var(--muted);
 }
 
-.stat-val.positive {
+.stat-pill b.positive {
   font-size: 13px;
-  font-weight: 800;
   color: #2ecc71;
 }
 
-.stat-val.rep {
+.stat-pill b.rep {
   font-size: 13px;
-  font-weight: 800;
   color: #3498db;
 }
 
-.reno-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Budget Breakdown & Deficit Box */
+.budget-breakdown-card {
+  background: #141722;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px;
 }
 
-.reno-cost-tags {
+.budget-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.budget-row b {
+  color: var(--gold-bright);
+}
+
+.budget-deficit-box {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.deficit-title {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  color: #e74c3c;
+  margin-bottom: 4px;
+}
+
+.deficit-pills {
   display: flex;
   gap: 6px;
 }
 
-.cost-tag {
-  font-size: 12px;
+.def-tag {
+  font-size: 9px;
   font-weight: 800;
-  padding: 4px 8px;
-  border-radius: 8px;
-}
-.cost-tag.coin {
-  background: rgba(255, 215, 0, 0.15);
-  color: var(--gold-bright);
-  border: 1px solid var(--gold);
-}
-.cost-tag.star {
-  background: rgba(255, 183, 3, 0.2);
-  color: #ffb703;
-  border: 1px solid #ffb703;
+  padding: 3px 6px;
+  border-radius: 4px;
 }
 
-.reno-action-btn {
+.def-tag.coin {
+  background: rgba(231, 76, 60, 0.2);
+  color: #ff6b6b;
+  border: 1px solid rgba(231, 76, 60, 0.4);
+}
+
+.def-tag.star {
+  background: rgba(243, 156, 18, 0.2);
+  color: #f39c12;
+  border: 1px solid rgba(243, 156, 18, 0.4);
+}
+
+.budget-sufficient-box {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #2ecc71;
+}
+
+/* Actions Footer: Preview & Purchase */
+.reno-actions-footer {
+  display: flex;
+  gap: 8px;
+}
+
+.preview-3d-btn {
+  flex: 1;
+  background: #1e2336;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.preview-3d-btn.active-preview {
+  background: var(--gold);
+  color: #111;
+  box-shadow: 0 0 14px rgba(223, 191, 131, 0.5);
+}
+
+.purchase-confirm-btn {
+  flex: 1.5;
   border: 0;
-  padding: 9px 16px;
+  padding: 10px;
   border-radius: 10px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
-.reno-action-btn.btn-active {
+.purchase-confirm-btn.btn-ready {
   background: linear-gradient(135deg, #ffd700, #cc9900);
   color: #111;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.5);
 }
 
-.reno-action-btn.btn-disabled {
+.purchase-confirm-btn.btn-disabled {
   background: #232735;
   color: #777;
   cursor: not-allowed;
 }
 
-.reno-action-btn.btn-done {
+.purchase-confirm-btn.btn-installed {
   background: #1b382b;
   color: #2ecc71;
   cursor: default;
+}
+
+/* ================= PROJECT PLAN & BUDGET MODAL ================= */
+.proj-modal-card {
+  background: #121520;
+  border: 1.5px solid var(--gold);
+  border-radius: 20px;
+  padding: 16px;
+  width: 94%;
+  max-width: 480px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 45px rgba(0, 0, 0, 0.95);
+  animation: popIn 0.25s ease;
+}
+
+.proj-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.proj-crest {
+  font-size: 9px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+.proj-title-box h3 {
+  font-family: Georgia, serif;
+  font-size: 16px;
+  color: var(--cream);
+  margin: 2px 0 0;
+}
+
+.proj-summary-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  background: #181c2b;
+  border-radius: 10px;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.proj-sum-item label {
+  display: block;
+  font-size: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.proj-sum-item b {
+  font-size: 11px;
+  color: var(--gold-bright);
+}
+
+.proj-sum-item b.positive {
+  color: #2ecc71;
+}
+
+.proj-progress-track {
+  width: 100%;
+  height: 6px;
+  background: #222638;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.proj-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #ff8c00);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+  transition: width 0.3s ease;
+}
+
+.proj-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.proj-area-row {
+  background: #171b28;
+  border: 1px solid rgba(223, 191, 131, 0.15);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.proj-area-row.done-row {
+  border-color: rgba(46, 204, 113, 0.3);
+  background: rgba(46, 204, 113, 0.05);
+}
+
+.proj-stage {
+  font-size: 8px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+.proj-area-info h4 {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  color: var(--cream);
+  margin: 2px 0 4px;
+}
+
+.proj-badge {
+  font-size: 8px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.proj-badge.done {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.proj-badge.ready {
+  background: rgba(255, 215, 0, 0.2);
+  color: var(--gold-bright);
+}
+
+.proj-badge.waiting {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+}
+
+.proj-go-btn {
+  background: #252b3e;
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 7px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
 }
 
 .story-character-callout {
