@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#111319">
+<title>Velvet Secrets</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <div class="eyebrow">A WORLD OF DESIRE &amp; SECRETS</div>
+    <div class="logo">VELVET<br><span>SECRETS</span></div>
+    <div class="tagline">GÜÇ · TUTKU · SIRLAR</div>
+    <div class="hero-foot"><div><small>BÖLÜM 01</small><strong>Gecenin Ardındaki Sır</strong></div><span class="chapter">✦ BÖLÜM 1</span></div>
+  </header>
+  <section class="resources">
+    <div><b>⚡ <span id="energy">500</span><small>/500</small></b><label>ENERJİ · <span id="timer">01:00</span></label></div>
+    <div><b>◆ <span id="coins">1200</span></b><label>PRESTİJ</label></div>
+    <div><b>💎 <span id="gems">10</span></b><label>MÜCEVHER</label></div>
+  </section>
+  <main>
+    <section class="story card">
+      <div class="portrait">🥂</div>
+      <div><div class="kicker">AURELIA OTELİ</div><h2 id="storyTitle">Bir davet, bin sır…</h2><p id="storyText">Açılış gecesinde Isabella Laurent, masada unutulmuş mühürlü bir mektup buldu. Bu gece herkesin sakladığı bir şey var.</p></div>
+    </section>
+    <div class="heading"><h2>Birleştirme Masası</h2><span>5 × 5</span></div>
+    <div id="board" class="board" aria-label="Birleştirme tahtası"></div>
+    <p class="help">Bir objeye, ardından aynı tür ve seviyedeki objeye dokun. İki obje birleşerek daha değerli bir ürüne dönüşür. Her birleşim 1 enerji harcar.</p>
+    <div class="buttons"><button id="order" class="primary">✦ Sipariş tamamla</button><button id="refresh">↻ Tahtayı yenile · 10 ⚡</button></div>
+    <p id="notice" class="notice" role="status">Hoş geldin. İlk koleksiyonunu oluşturmaya başla.</p>
+    <div class="heading"><h2>Günün Görevleri</h2><span>Cömert ödüller</span></div>
+    <div id="tasks" class="tasks"></div>
+    <div class="heading"><h2>Sosyetenin Fısıltıları</h2><span>Hikâye seçimi</span></div>
+    <p class="help">Isabella gizli bir ilişkiye dair ipucu buldu. Nasıl davranmalı?</p>
+    <div class="choices">
+      <button data-choice="love">♡ Mektubu Adrian'a gizlice göster — aşk ve güven.</button>
+      <button data-choice="gossip">♢ Davetteki dedikoduyu araştır — itibar ve güç.</button>
+      <button data-choice="investigate">⌕ Önce daha fazla bilgi ara — temkinli ilerle.</button>
+    </div>
+    <div id="log" class="log">Henüz bir seçim yapmadın. Her karar hikâyenin yönünü değiştirecek.</div>
+    <div class="heading"><h2>Aurelia Oteli</h2><span id="hotelLevel">Seviye 1</span></div>
+    <div class="hotel">
+      <div class="hotel-art">🏨<span>✦</span></div>
+      <div class="hotel-info"><strong id="hotelTitle">Lobi — ilk adım</strong><p id="hotelText">Prestij biriktirerek otelin yeni bölümlerini aç.</p><button id="renovate">Lobiyi yenile · 300 ◆</button></div>
+    </div>
+  </main>
+  <footer>VELVET SECRETS · DEMO 1.0<br><span>Gücün, tutkun ve sırların olduğu dünya.</span></footer>
+</div>
+<script src="game.js"></script>
+</body>
+</html>

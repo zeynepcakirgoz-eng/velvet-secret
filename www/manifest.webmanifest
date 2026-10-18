@@ -1,0 +1,9 @@
+{
+  "name": "Velvet Secrets",
+  "short_name": "Velvet Secrets",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#101218",
+  "theme_color": "#111319",
+  "description": "Lüks, aşk ve sırlarla dolu bir birleştirme hikâyesi."
+}

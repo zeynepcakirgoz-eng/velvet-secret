@@ -1,0 +1,66 @@
+name: Build Velvet Secrets APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "Velvet_Secrets_Android_Source.zip"
+      - ".github/workflows/android-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: ""
+
+      - name: Check source archive exists
+        run: test -f Velvet_Secrets_Android_Source.zip
+
+      - name: Extract project source
+        run: |
+          mkdir -p appsrc
+          unzip -q Velvet_Secrets_Android_Source.zip -d appsrc
+          test -f appsrc/package.json
+          test -f appsrc/www/index.html
+
+      - name: Install JavaScript dependencies
+        working-directory: appsrc
+        run: npm install
+
+      - name: Add Android platform
+        working-directory: appsrc
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        working-directory: appsrc
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: appsrc/android
+        run: ./gradlew --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: velvet-secrets-debug-apk
+          path: appsrc/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
