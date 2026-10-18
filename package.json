@@ -1,8 +1,8 @@
 {
   "name": "velvet-secrets",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "private": true,
-  "description": "Velvet Secrets (v2.7.0) - Gossip Harbour Referansli Alan Bazli Bagimsiz Restorasyon Sistemi, 3 Tasarim Secimi ve Canli Donusum",
+  "description": "Velvet Secrets (v2.8.0) - Piksel Hassasiyetinde Mekan Ici Mobilya Konumlandirmasi, Cozunurluk ve Bozulma Duzeltmesi, 23 Bagimsiz Gorevde Butuncul Tasarim Katmanlari ve Akici UI",
   "scripts": {
     "sync:android": "npx cap sync android",
     "open:android": "npx cap open android"

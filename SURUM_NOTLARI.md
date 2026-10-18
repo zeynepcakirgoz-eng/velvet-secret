@@ -2,6 +2,29 @@
 
 Bu dosya, **Velvet Secrets (Aurelia Palace Hotel)** Android oyununun tüm versiyon güncellemelerini ve eklenen özellikleri Türkçe olarak detaylandırır.
 
+## 🌟 Sürüm `v2.8.0` (18 Ekim 2026) — *Piksel Hassasiyetinde Mekan İçi Mobilya Konumlandırması, Çözünürlük ve Bozulma Düzeltmesi, 23 Bağımsız Görevde Bütüncül Tasarım Katmanları ve Akıcı UI*
+
+Kullanıcının ayrıntılı geri bildirimi doğrultusunda mekan içi restorasyon motoru, mobilya koordinasyon sistemi ve sahne ölçeklemesi baştan sona optimize edildi:
+
+### 1. 🎯 Mekan İçi Olması Gereken Noktalarda Mobilya Konumlandırması
+- Oteldeki her mobilya (`restaurant_tables`, `restaurant_bar`, `restaurant_lighting`, `restaurant_terrace`, `reception_desk`, `lobby_chandelier`, `lobby_carpet`, `lobby_columns`, `room101_bed`, `room101_decor`, `room101_lounge` vb. toplam 23 görev), oda manzarasının gerçek perspektif ve mimari derinliğine göre tam olması gereken piksel koordinatlarına (`stageBox`) oturtuldu.
+- Masalar zemin perspektifine, avizeler ve sarkıtlar tavana, şömineler ve barlar salon duvarlarına, balkon oturma grupları panoramik deniz manzarası önüne milimetrik olarak yerleşir.
+
+### 2. 🖼️ Sıfır Bozulma ve Kristal Netliğinde Çözünürlük Koruması
+- `.gh-room-canvas` üzerindeki yapay ofsetler (-12% kayma vb.) ve `object-fit` esnemeleri kaldırıldı.
+- 1376x768 kristal çözünürlükteki oda sahneleri ile katman png'leri 1:1 piksel ölçeğinde örtüşür. Hiçbir mobilya basık, uzamış veya çarpık gözükmez.
+- 92 adet özgün foto-gerçekçi mobilya ve tasarım görseli (23 görev × 4 varyant) mimari derinlik ve 3D gölgeleriyle dikişsiz alfa geçişiyle odaya entegre olur.
+
+### 3. 🎨 Bütüncül 3 Tasarım Seçeneği ve Katmanlı Birikim (Cumulative Quest Progression)
+- Kullanıcı hangi tasarımı seçerse sahnede anında o tasarım ve renk tonu belirir (A: Modern Zarafet - Beyaz Carrara Mermeri & 24K Altın, B: Kraliyet Kadife - Bordo Kadife & Siyah Nero, C: Klasik Premium - Akdeniz Turkuaz Mozaik & Maun).
+- Bir mobilya kurulduktan sonra sonraki görevlerde mekana diğer mobilyalar eklenerek devam eder; daha önce seçilmiş ve kurulmuş mobilyalar asla kaybolmaz, katman katman birikerek odayı zenginleştirir.
+
+### 4. ✨ Zenginleştirilmiş UI İnteraktivitesi ve Kutlama Efektleri
+- 3'lü tasarım seçicide kartlara tıklandığında sahnede anında canlı ve yumuşak önizleme.
+- Onaylandığında mekana kalıcı sabitleme, konfeti patlaması (`burstConfetti`) ve sıradaki görevin aktifleşmesi.
+
+---
+
 ## 🌟 Sürüm `v2.7.0` (18 Ekim 2026) — *Gossip Harbour Referanslı Alan Bazlı Bağımsız Restorasyon Sistemi, 3 Tasarım Seçimi ve Canlı Dönüşüm*
 
 Kullanıcının ayrıntılı analizi ve *Gossip Harbour: Merge & Story* referans mimarisi doğrultusunda, otel yenileme sistemi baştan sona yeniden tasarlandı. Önceki tek zincirli (1-11 global kilit) yapı tamamen kaldırılarak, her otel alanının kendi bağımsız görev zincirine sahip olduğu profesyonel restorasyon motoru devreye alındı:

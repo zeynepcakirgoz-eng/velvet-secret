@@ -3700,12 +3700,13 @@ button:active {
 }
 
 .gh-room-canvas {
-  position: absolute;
-  left: -12%;
-  top: -8%;
-  width: 124%;
-  height: 116%;
-  background-size: cover;
+  position: relative;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-size: 100% 100%;
   background-position: center;
   transition: transform 0.32s cubic-bezier(0.22, 0.9, 0.32, 1), filter 0.35s ease;
   will-change: transform;
@@ -3807,6 +3808,31 @@ button:active {
 @keyframes pulsePreview {
   0%, 100% { filter: drop-shadow(0 0 12px rgba(46, 204, 113, 0.65)); }
   50% { filter: drop-shadow(0 0 24px rgba(46, 204, 113, 0.95)) brightness(1.05); }
+}
+
+.gh-celebration-confetti {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 50;
+  animation: flyConfetti 1.25s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+
+@keyframes flyConfetti {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(var(--tx), var(--ty)) rotate(280deg) scale(1.3);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--tx) * 1.3), calc(var(--ty) + 70px)) rotate(540deg) scale(0.4);
+  }
 }
 
 .gh-stage-pin-btn {
