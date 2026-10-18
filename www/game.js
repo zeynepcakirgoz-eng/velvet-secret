@@ -5,7 +5,7 @@
   const MAX_ENERGY = 500;
   const ENERGY_INTERVAL = 60000;
 
-  // Web Audio Synthesizer (High quality chime, pop, fanfare)
+  // Web Audio Synthesizer (Realistic Game Sounds)
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {
@@ -26,7 +26,7 @@
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(450, ctx.currentTime);
+        osc.frequency.setValueAtTime(460, ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.08);
         gain.gain.setValueAtTime(0.2, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
@@ -93,18 +93,18 @@
     }
   };
 
-  // 3 Item Chains (6 levels each)
+  // 3 Luxury Merge Item Chains (6 levels each)
   const itemChains = [
-    // 0: Kozmetik
+    // 0: Kozmetik & Bakım
     [
       { name: 'Nemlendirici', icon: '🧴' },
       { name: 'Mat Ruj', icon: '💄' },
       { name: 'Kırmızı Oje', icon: '💅' },
       { name: 'Lüks Parfüm', icon: '✨' },
       { name: 'Altın Ayna', icon: '🪞' },
-      { name: 'Elmas Kozmetik Seti', icon: '💖' }
+      { name: 'Elmas Kozmetik', icon: '💖' }
     ],
-    // 1: Mücevher
+    // 1: Mücevher & Aksesuar
     [
       { name: 'Gümüş Yüzük', icon: '💍' },
       { name: 'İnci Kolye', icon: '📿' },
@@ -130,92 +130,41 @@
     return chain[lvlIdx];
   }
 
-  // Gossip Harbor Characters Pool
+  // 4 Main Characters from Concept Art with Real Photo Avatars
   const customerPool = [
-    { name: 'Adrian Vale', role: 'Gizemli Milyarder', avatar: '🤵', quotes: ['Bu akşamki gizli davet için arıyordum.', 'Isabella, bu otelin sırları derin...'] },
-    { name: 'Olivia Sterling', role: 'Magazin Muhabiri', avatar: '🕵️‍♀️', quotes: ['Sosyete bu haberi konuşacak!', 'Körfez fısıltıları asla susmaz.'] },
-    { name: 'Isabella Laurent', role: 'Otel Sahibi', avatar: '👑', quotes: ['Aurelia Oteli eski görkemine kavuşacak.', 'Babamın mirasını kimseye bırakmam.'] },
-    { name: 'Harrison Vance', role: 'Aile Avukatı', avatar: '🎩', quotes: ['Vasiyetnamenin şartları yerine gelmeli.', 'Resmi kayıtlar tamamlanıyor.'] },
-    { name: 'Madame Vivienne', role: 'Antika Koleksiyoneri', avatar: '💎', quotes: ['Zarafet asla tesadüf değildir sevgilim.', 'Lüks, detaylarda gizlidir.'] }
-  ];
-
-  // Renovation Storyline Tasks (Cost in ⭐ Stars)
-  const defaultRenovations = [
     {
-      id: 'floor',
-      name: 'Lobi Mermerlerini Temizle & Parlat',
-      cost: 1,
-      done: false,
-      desc: 'Yılların tozunu temizle, İtalyan mermerlerini pırıl pırıl parlat.',
-      dialogueChar: 'Isabella Laurent',
-      dialogueAvatar: '👑',
-      dialogueText: '"Zemindeki mermerler pırıl pırıl oldu! Zemin temizlenirken altında mühürlü eski bir plaka fark ettim..."',
-      roomVisual: '✨🏨'
+      name: 'Adrian Vale',
+      role: 'Gizemli Milyarder',
+      avatarImg: 'assets/avatar_adrian.jpg',
+      quotes: ['Bu akşamki gizli davet için bunu arıyordum.', 'Isabella, bu otelin sırları düşündüğünden derin...']
     },
     {
-      id: 'desk',
-      name: 'Altın Varaklı Resepsiyon Bankosu',
-      cost: 1,
-      done: false,
-      desc: 'Konukları büyüleyecek gösterişli altın bankoyu kur.',
-      dialogueChar: 'Adrian Vale',
-      dialogueAvatar: '🤵',
-      dialogueText: '"Bu banko babanın dönemindeki ihtişamı yansıtıyor. Eski konuk kayıt defterleri buraya saklanmış olabilir."',
-      roomVisual: '🛎️🏨'
+      name: 'Isabella Laurent',
+      role: 'Otel Varisi',
+      avatarImg: 'assets/avatar_isabella.jpg',
+      quotes: ['Aurelia Oteli eski görkemine kavuşacak!', 'Babamın mirasını kimseye bırakmam.']
     },
     {
-      id: 'chandelier',
-      name: 'Kristal Aurelia Avizesi',
-      cost: 2,
-      done: false,
-      desc: 'Tavana körfezin en görkemli Bohemya kristal avizesini as.',
-      dialogueChar: 'Isabella Laurent',
-      dialogueAvatar: '👑',
-      dialogueText: '"Tavandaki avizenin ışıkları tüm körfezden görünüyor! Otelimiz yeniden hayat buluyor."',
-      roomVisual: '💎🏨'
+      name: 'Leon Marchand',
+      role: 'Otelin Sahibi',
+      avatarImg: 'assets/avatar_leon.jpg',
+      quotes: ['Her şeyin kontrolü benim elimde Isabella.', 'Bu otelde hiçbir şey göründüğü gibi değildir.']
     },
     {
-      id: 'sofas',
-      name: 'Bordo Kadife VIP Köşesi',
-      cost: 2,
-      done: false,
-      desc: 'Şöminenin etrafına konforlu kadife koltukları yerleştir.',
-      dialogueChar: 'Olivia Sterling',
-      dialogueAvatar: '🕵️‍♀️',
-      dialogueText: '"Sosyete fısıltıları başladı bile. Bu koltuklarda kim bilir hangi entrikalar konuşulacak..."',
-      roomVisual: '🛋️🏨'
-    },
-    {
-      id: 'safe',
-      name: 'Mühürlü Duvar Kasasını Açığa Çıkar',
-      cost: 3,
-      done: false,
-      desc: 'Resepsiyonun arkasındaki gizli duvar kasasının şifresini çöz.',
-      dialogueChar: 'Harrison Vance',
-      dialogueAvatar: '🎩',
-      dialogueText: '"Kasanın içinden eski bir vasiyetname çıktı... Isabella, bu otel sandığından çok daha büyük sırlar saklıyor!"',
-      roomVisual: '🗝️🏨'
-    },
-    {
-      id: 'terrace',
-      name: 'Panoramik Teras Barı & Işıklar',
-      cost: 3,
-      done: false,
-      desc: 'Körfez manzaralı lüks teras barını ve ışıklandırmayı tamamla.',
-      dialogueChar: 'Isabella Laurent',
-      dialogueAvatar: '👑',
-      dialogueText: '"Aurelia Terası açıldı! Yıldızların ve körfezin ışıkları altında yeni bir çağ başlıyor."',
-      roomVisual: '🌅🏨'
+      name: 'Serena Black',
+      role: 'Sosyetenin Gözdesi',
+      avatarImg: 'assets/avatar_serena.jpg',
+      quotes: ['Sosyete bu geceyi konuşacak!', 'Bana yardım et, senin tarafında olayım tatlım.']
     }
   ];
 
   const tasks = [
     { id: 'merge', name: 'Kusursuz Birleşim', desc: 'Masanızdaki objeleri birleştirin', goal: 4, reward: 50, metric: 'merges' },
     { id: 'orders', name: 'Sipariş Teslimatı', desc: 'Müşteri siparişlerini teslim edin', goal: 2, reward: 80, metric: 'ordersCompleted' },
-    { id: 'stars', name: 'Otel Yenileme', desc: 'Bir yenileme görevi tamamlayın', goal: 1, reward: 100, metric: 'renovationsDone' }
+    { id: 'hotel', name: 'Otel Restorasyonu', desc: 'Otelde bir bölümü yenileyin', goal: 1, reward: 100, metric: 'hotelUpgrades' }
   ];
 
-  // Safe storage helper
+  // Storage helper
   const memoryStore = {};
   const safeStorage = {
     getItem(k) {
@@ -232,26 +181,24 @@
     const cust = customerPool[Math.floor(Math.random() * customerPool.length)];
     const quote = cust.quotes[Math.floor(Math.random() * cust.quotes.length)];
 
-    // 1 or 2 items
-    const itemCount = Math.random() > 0.6 ? 2 : 1;
+    const itemCount = Math.random() > 0.65 ? 2 : 1;
     const reqItems = [];
 
     for (let k = 0; k < itemCount; k++) {
       const type = Math.floor(Math.random() * itemChains.length);
-      // levels 1 to 4 for orders
       const level = Math.min(4, 1 + Math.floor(Math.random() * 3));
       reqItems.push({ type, level });
     }
 
     const totalLvl = reqItems.reduce((acc, item) => acc + item.level, 0);
-    const rewardCoins = 80 + totalLvl * 50;
+    const rewardCoins = 80 + totalLvl * 60;
     const rewardStars = totalLvl >= 3 ? 2 : 1;
 
     return {
       id: id || Date.now() + Math.random(),
       customer: cust.name,
       role: cust.role,
-      avatar: cust.avatar,
+      avatarImg: cust.avatarImg,
       quote: quote,
       items: reqItems,
       rewardCoins,
@@ -277,7 +224,7 @@
       energy: 500,
       energyUpdated: Date.now(),
       prestige: 1200,
-      gems: 15,
+      gems: 25,
       stars: 2,
       playerLevel: 1,
       xp: 0,
@@ -285,22 +232,19 @@
       selected: null,
       merges: 0,
       ordersCompleted: 0,
-      renovationsDone: 0,
+      hotelUpgrades: 0,
+      area1Progress: 35,
+      area2Progress: 20,
       claimedTasks: [],
+      storyChoiceMade: null,
       orders: initialOrders,
-      renovations: JSON.parse(JSON.stringify(defaultRenovations)),
-      activeDialogue: {
-        character: 'Isabella Laurent',
-        avatar: '👑',
-        text: '"Aurelia Oteli eski görkemine kavuşacak. Masadaki siparişleri hazırlayıp Yıldız (⭐) toplayarak lobiyi yenilemeye başlayalım!"'
-      },
-      notice: 'Hoş geldin! Üstteki siparişleri tamamla, Yıldızları (⭐) topla ve oteli yenile.'
+      notice: 'Hoş geldin! Üstteki karakter siparişlerini tamamla, Yıldızları (⭐) topla ve oteli yenile!'
     };
   }
 
   function load() {
     try {
-      const raw = safeStorage.getItem('velvetSecretsGossipV3');
+      const raw = safeStorage.getItem('velvetSecretsGossipV4');
       if (raw) {
         const s = JSON.parse(raw);
         if (s && Array.isArray(s.board) && s.board.length === 25) {
@@ -314,7 +258,7 @@
 
   function save() {
     try {
-      safeStorage.setItem('velvetSecretsGossipV3', JSON.stringify(state));
+      safeStorage.setItem('velvetSecretsGossipV4', JSON.stringify(state));
     } catch (e) {}
   }
 
@@ -381,7 +325,7 @@
   function spend(n) {
     tick();
     if (state.energy < n) {
-      notify('Enerjin bitti! Reklam izleyerek veya şans çarkını çevirerek anında enerji kazanabilirsin.');
+      notify('Enerjin bitti! "+" butonuna basarak reklam izleyebilir veya çarkı çevirebilirsin.');
       return false;
     }
     state.energy -= n;
@@ -391,8 +335,7 @@
     return true;
   }
 
-  /* ================= GOSSIP HARBOR ORDERS LOGIC ================= */
-  // Check if player has the items on the board
+  /* ================= GOSSIP HARBOR ORDER TRAY ================= */
   function checkOrderFulfillment(order) {
     const boardCopy = state.board.map((x) => (x ? { ...x } : null));
     const itemsStatus = [];
@@ -409,7 +352,7 @@
 
       if (foundIdx !== -1) {
         itemsStatus.push({ ...req, ready: true });
-        boardCopy[foundIdx] = null; // simulate consumed
+        boardCopy[foundIdx] = null;
       } else {
         itemsStatus.push({ ...req, ready: false });
         allReady = false;
@@ -434,33 +377,31 @@
       itemsStatus.forEach((it) => {
         const meta = getItemMeta(it.type, it.level);
         itemsHtml += `
-          <div class="req-item-pill ${it.ready ? 'ready' : ''}">
-            <span class="req-item-emoji">${meta.icon}</span>
-            <span class="req-item-lv">LV.${it.level}</span>
-            ${it.ready ? '<span class="req-status-check">✓</span>' : ''}
+          <div class="req-pill ${it.ready ? 'ready' : ''}">
+            <span class="req-emoji">${meta.icon}</span>
+            <span class="req-level">LV.${it.level}</span>
+            ${it.ready ? '<span class="req-check-badge">✓</span>' : ''}
           </div>
         `;
       });
 
       card.innerHTML = `
-        <div class="order-customer">
-          <span class="order-avatar">${ord.avatar}</span>
-          <div>
-            <div class="order-c-name">${ord.customer}</div>
-          </div>
+        <div class="order-customer-head">
+          <img src="${ord.avatarImg}" alt="${ord.customer}" class="order-photo-avatar">
+          <span class="order-name-text">${ord.customer}</span>
         </div>
-        <div class="order-quote">"${ord.quote}"</div>
-        <div class="order-items">${itemsHtml}</div>
-        <div class="order-rewards">
+        <div class="order-speech-bubble">"${ord.quote}"</div>
+        <div class="order-req-items">${itemsHtml}</div>
+        <div class="order-rewards-bar">
           <span>◆ +${ord.rewardCoins}</span>
-          <span class="reward-stars">⭐ +${ord.rewardStars}</span>
+          <span class="stars-num">⭐ +${ord.rewardStars}</span>
         </div>
-        <button class="serve-btn ${allReady ? 'can-serve' : ''}" ${!allReady ? 'disabled' : ''}>
+        <button class="serve-action-btn ${allReady ? 'can-serve' : ''}" ${!allReady ? 'disabled' : ''}>
           ${allReady ? 'TESLİM ET' : 'HAZIRLA'}
         </button>
       `;
 
-      const serveBtn = card.querySelector('.serve-btn');
+      const serveBtn = card.querySelector('.serve-action-btn');
       if (serveBtn && allReady) {
         serveBtn.onclick = (e) => {
           e.preventDefault();
@@ -473,7 +414,6 @@
   }
 
   function serveOrder(orderIdx, order, clientX, clientY) {
-    // Actually remove the items from board
     for (const req of order.items) {
       for (let i = 0; i < state.board.length; i++) {
         if (state.board[i] && state.board[i].type === req.type && state.board[i].level === req.level) {
@@ -493,116 +433,159 @@
       showFloatingText(`◆ +${order.rewardCoins}`, clientX, clientY - 30);
     }
 
-    addXP(30);
-
-    // Replace order with fresh one
+    addXP(35);
     state.orders[orderIdx] = generateRandomOrder();
 
-    // Update active dialogue
-    state.activeDialogue = {
-      character: order.customer,
-      avatar: order.avatar,
-      text: `"${order.customer}: Teşekkürler Isabella! Bu tam da ihtiyacım olan şeydi. Otelin için yıldızlarını (⭐) iyi kullan!"`
-    };
-
-    notify(`Sipariş tamamlandı! +${order.rewardCoins} Prestij ve +${order.rewardStars} Yenileme Yıldızı kazandın!`);
+    notify(`Sipariş teslim edildi! ${order.customer} çok memnun kaldı. +${order.rewardCoins} Prestij ve +${order.rewardStars} Yıldız kazandın!`);
     renderAll();
   }
 
-  /* ================= HOTEL RENOVATIONS (GOSSIP HARBOR STYLE) ================= */
-  function renderHotelStudio() {
-    const list = $('renovationList');
-    if (!list) return;
-    list.innerHTML = '';
+  /* ================= HOTEL RENOVATION (PAGE 2) ================= */
+  function renderHotelPage() {
+    if ($('area1Progress')) $('area1Progress').textContent = `%${state.area1Progress}`;
+    if ($('area2Progress')) $('area2Progress').textContent = `%${state.area2Progress}`;
 
-    let availableCount = 0;
-    let completedCount = 0;
-
-    state.renovations.forEach((renov) => {
-      if (renov.done) {
-        completedCount++;
-      } else if (state.stars >= renov.cost) {
-        availableCount++;
+    const btn1 = $('upgradeArea1Btn');
+    if (btn1) {
+      if (state.area1Progress >= 100) {
+        btn1.className = 'upgrade-room-btn done-btn';
+        btn1.innerHTML = '<span>✓ TAMAMLANDI</span>';
+        btn1.disabled = true;
+      } else {
+        const canAfford = state.stars >= 1 || state.prestige >= 300;
+        btn1.className = 'upgrade-room-btn';
+        btn1.innerHTML = '<span>⭐ 1 YILDIZ</span><small>VEYA 300 ◆</small>';
+        btn1.disabled = !canAfford;
       }
+    }
 
-      const item = document.createElement('div');
-      item.className = 'renovation-item' + (renov.done ? ' done' : '');
+    const btn2 = $('upgradeArea2Btn');
+    if (btn2) {
+      if (state.area2Progress >= 100) {
+        btn2.className = 'upgrade-room-btn done-btn';
+        btn2.innerHTML = '<span>✓ TAMAMLANDI</span>';
+        btn2.disabled = true;
+      } else {
+        const canAfford = state.stars >= 2 || state.prestige >= 600;
+        btn2.className = 'upgrade-room-btn';
+        btn2.innerHTML = '<span>⭐ 2 YILDIZ</span><small>VEYA 600 ◆</small>';
+        btn2.disabled = !canAfford;
+      }
+    }
 
-      item.innerHTML = `
-        <div class="renov-item-info">
-          <strong>${renov.name}</strong>
-          <p>${renov.desc}</p>
-        </div>
-        ${
-          renov.done
-            ? '<span class="renov-done-badge">✓ TAMAMLANDI</span>'
-            : `<button class="renov-action-btn" ${state.stars < renov.cost ? 'disabled' : ''}>
-                <span>⭐ ${renov.cost}</span>
-                <span>YENİLE</span>
-              </button>`
+    // Badge on bottom nav
+    let canUp = 0;
+    if (state.area1Progress < 100 && (state.stars >= 1 || state.prestige >= 300)) canUp++;
+    if (state.area2Progress < 100 && (state.stars >= 2 || state.prestige >= 600)) canUp++;
+
+    const badge = $('hotelBadgeCount');
+    if (badge) {
+      badge.textContent = canUp;
+      badge.style.display = canUp > 0 ? 'inline-block' : 'none';
+    }
+  }
+
+  function upgradeArea1(clientX, clientY) {
+    if (state.area1Progress >= 100) return;
+
+    if (state.stars >= 1) {
+      state.stars -= 1;
+    } else if (state.prestige >= 300) {
+      state.prestige -= 300;
+    } else {
+      notify('Yeterli Yıldız veya Prestij yok! Siparişleri tamamlayarak toplayabilirsin.');
+      return;
+    }
+
+    state.area1Progress = Math.min(100, state.area1Progress + 25);
+    state.hotelUpgrades++;
+    sfx.fanfare();
+
+    if (clientX && clientY) {
+      showFloatingText('✨ ALAN YENİLENDİ!', clientX, clientY);
+    }
+    addXP(50);
+
+    const txt = $('hotelDialogueText');
+    if (txt) {
+      txt.textContent = `"Isabella: Mermer fıskiye ve palmiyeler pırıl pırıl oldu! Otelimizin meydanı körfezin gözdesi haline geldi."`;
+    }
+
+    notify(`Aurelia Meydanı yenilendi! İlerleme: %${state.area1Progress}`);
+    renderAll();
+  }
+
+  function upgradeArea2(clientX, clientY) {
+    if (state.area2Progress >= 100) return;
+
+    if (state.stars >= 2) {
+      state.stars -= 2;
+    } else if (state.prestige >= 600) {
+      state.prestige -= 600;
+    } else {
+      notify('Yeterli Yıldız veya Prestij yok!');
+      return;
+    }
+
+    state.area2Progress = Math.min(100, state.area2Progress + 25);
+    state.hotelUpgrades++;
+    sfx.fanfare();
+
+    if (clientX && clientY) {
+      showFloatingText('🌟 SÜİT YENİLENDİ!', clientX, clientY);
+    }
+    addXP(70);
+
+    const txt = $('hotelDialogueText');
+    if (txt) {
+      txt.textContent = `"Adrian Vale: Başkanlık Süiti'nin manzarası nefes kesici Isabella... Burada konuşacak çok özel şeylerimiz var."`;
+    }
+
+    notify(`Başkanlık Süiti yenilendi! İlerleme: %${state.area2Progress}`);
+    renderAll();
+  }
+
+  /* ================= STORY INTERACTIVE DECISIONS (PAGE 3) ================= */
+  function initStoryChoices() {
+    const choiceBtns = document.querySelectorAll('.story-choice-btn');
+    const logBox = $('storyDecisionLog');
+
+    choiceBtns.forEach((btn) => {
+      btn.onclick = () => {
+        const choice = btn.dataset.choice;
+        state.storyChoiceMade = choice;
+        sfx.fanfare();
+
+        if (choice === 'accept') {
+          state.prestige += 150;
+          if (logBox) {
+            logBox.innerHTML = `<strong>💛 Seçim Yapıldı: Daveti Kabul Ettin!</strong><br>"Adrian gülümsedi: 'Doğru seçimi yaptın Isabella. Bu gece Monako'nun en derin sırlarını öğreneceksin.' (+150 Prestij)"`;
+          }
+        } else if (choice === 'decline') {
+          state.gems += 3;
+          if (logBox) {
+            logBox.innerHTML = `<strong>💎 Seçim Yapıldı: Mesafeli Kaldın!</strong><br>"Adrian şaşırdı ama saygı duydu: 'Gizemli ve temkinli duruşun seni daha da çekici kılıyor.' (+3 Elmas)"`;
+          }
+        } else {
+          state.stars += 1;
+          if (logBox) {
+            logBox.innerHTML = `<strong>🔍 Seçim Yapıldı: Otel Arşivini Araştırdın!</strong><br>"Eski bir kasada gizli bir ortaklık sözleşmesi buldun: Leon Marchand ile Adrian geçmişte ortaktı! (+1 Yıldız ⭐)"`;
+          }
         }
-      `;
 
-      const btn = item.querySelector('.renov-action-btn');
-      if (btn && !renov.done) {
-        btn.onclick = (e) => {
-          e.preventDefault();
-          executeRenovation(renov, e.clientX, e.clientY);
-        };
-      }
-
-      list.appendChild(item);
+        addXP(40);
+        choiceBtns.forEach((b) => (b.disabled = true));
+        notify('Kritik kararın hikâyeyi ve ilişkileri değiştirdi!');
+        renderAll();
+      };
     });
 
-    // Badge on tab
-    const badge = $('hotelTaskBadge');
-    if (badge) {
-      badge.textContent = availableCount;
-      badge.style.display = availableCount > 0 ? 'inline-block' : 'none';
+    if (state.storyChoiceMade) {
+      choiceBtns.forEach((b) => (b.disabled = true));
     }
-
-    // Room progress & visual
-    const pct = Math.round((completedCount / state.renovations.length) * 100);
-    if ($('renovationBar')) $('renovationBar').style.width = `${pct}%`;
-    if ($('renovationPercent')) $('renovationPercent').textContent = `Tamamlanma: %${pct}`;
-
-    const lastDone = [...state.renovations].reverse().find((r) => r.done);
-    if (lastDone && $('roomVisual')) {
-      $('roomVisual').textContent = lastDone.roomVisual;
-    }
-
-    // Dialogue bubble
-    if ($('dialogueAvatar')) $('dialogueAvatar').textContent = state.activeDialogue.avatar;
-    if ($('dialogueCharacter')) $('dialogueCharacter').textContent = state.activeDialogue.character;
-    if ($('dialogueText')) $('dialogueText').textContent = state.activeDialogue.text;
   }
 
-  function executeRenovation(renov, clientX, clientY) {
-    if (state.stars < renov.cost) return;
-
-    state.stars -= renov.cost;
-    renov.done = true;
-    state.renovationsDone++;
-
-    sfx.fanfare();
-    if (clientX && clientY) {
-      showFloatingText(`🛠️ YENİLENDİ!`, clientX, clientY);
-    }
-
-    addXP(40);
-
-    // Dialogue update
-    state.activeDialogue = {
-      character: renov.dialogueChar,
-      avatar: renov.dialogueAvatar,
-      text: renov.dialogueText
-    };
-
-    notify(`Tebrikler! "${renov.name}" başarıyla tamamlandı ve otel güzelleşti!`);
-    renderAll();
-  }
-
-  /* ================= LUCKY WHEEL ================= */
+  /* ================= LUCKY WHEEL (PAGE 4) ================= */
   function initLuckyWheel() {
     const wheel = $('luckyWheel');
     const spinBtn = $('spinBtn');
@@ -615,10 +598,10 @@
     const segments = [
       { name: '100 Enerji', reward: () => { state.energy = Math.min(MAX_ENERGY, state.energy + 100); } },
       { name: '500 Prestij', reward: () => { state.prestige += 500; } },
-      { name: '10 Mücevher', reward: () => { state.gems += 10; } },
+      { name: '10 Elmas', reward: () => { state.gems += 10; } },
       { name: '1 Yenileme Yıldızı', reward: () => { state.stars += 1; } },
       { name: '50 Enerji', reward: () => { state.energy = Math.min(MAX_ENERGY, state.energy + 50); } },
-      { name: 'VIP Sandık (Nadir Obje)', reward: () => { spawnItem(); state.prestige += 150; } }
+      { name: 'VIP Sürpriz Obje', reward: () => { spawnItem(); state.prestige += 200; } }
     ];
 
     function runSpin() {
@@ -628,7 +611,6 @@
 
       const chosenIndex = Math.floor(Math.random() * segments.length);
       const randomExtraRotations = (5 + Math.floor(Math.random() * 3)) * 360;
-      // segment angle
       const targetDeg = randomExtraRotations + (360 - chosenIndex * 60 - 30);
       currentDegree += targetDeg;
 
@@ -641,19 +623,13 @@
         prize.reward();
         sfx.fanfare();
         if (resultNotice) resultNotice.textContent = `🎉 TEBRİKLER! "${prize.name}" KAZANDIN!`;
-        notify(`Şans Çarkından ödül kazanıldı: ${prize.name}!`);
+        notify(`Şans Çarkından ödül: ${prize.name}!`);
         renderAll();
       }, 4200);
     }
 
-    if (spinBtn) {
-      spinBtn.onclick = () => runSpin();
-    }
-    if (spinAdBtn) {
-      spinAdBtn.onclick = () => {
-        openAdModal(() => runSpin());
-      };
-    }
+    if (spinBtn) spinBtn.onclick = () => runSpin();
+    if (spinAdBtn) spinAdBtn.onclick = () => openAdModal(() => runSpin());
   }
 
   /* ================= REWARDED AD MODAL ================= */
@@ -681,7 +657,7 @@
         clearInterval(timer);
         countdownEl.textContent = 'Tamamlandı!';
         claimBtn.disabled = false;
-        claimBtn.textContent = '🎁 Ödülünü Al!';
+        claimBtn.textContent = '🎁 Ödülü Al (+50 Enerji & 200 Prestij)';
         sfx.fanfare();
       }
     }, 1000);
@@ -711,7 +687,7 @@
     });
 
     if (emptySlots.length === 0) {
-      state.energy += 1; // refund
+      state.energy += 1;
       notify('Masa tamamen dolu! İki aynı objeyi birleştirerek yer açın.');
       return;
     }
@@ -729,12 +705,11 @@
 
     renderAll();
     const meta = getItemMeta(randomType, 1);
-    notify(`Yeni obje üretildi: ${meta.icon} ${meta.name}`);
+    notify(`Yeni obje masaya eklendi: ${meta.icon} ${meta.name}`);
   }
 
   function sortBoard() {
     const filled = state.board.filter(Boolean);
-    // Sort by type then level so matching items sit side-by-side
     filled.sort((a, b) => a.type - b.type || a.level - b.level);
 
     let k = 0;
@@ -947,23 +922,23 @@
     if (!el) return;
     el.innerHTML = '';
     tasks.forEach((t) => {
-      const count = t.metric === 'merges' ? state.merges : t.metric === 'ordersCompleted' ? state.ordersCompleted : state.renovationsDone;
+      const count = t.metric === 'merges' ? state.merges : t.metric === 'ordersCompleted' ? state.ordersCompleted : state.hotelUpgrades;
       const done = count >= t.goal;
       const claimed = state.claimedTasks.includes(t.id);
       const pct = Math.min(100, (count / t.goal) * 100);
 
       const d = document.createElement('div');
-      d.className = 'task';
+      d.className = 'task-item';
       d.innerHTML = `
-        <div class="tasktop">
-          <span class="taskname">${t.name}</span>
-          <span class="reward">⚡ +${t.reward}</span>
+        <div class="t-top">
+          <span class="t-name">${t.name}</span>
+          <span class="t-reward">⚡ +${t.reward}</span>
         </div>
-        <div class="taskdesc">${t.desc}</div>
-        <div class="bar"><div style="width:${pct}%"></div></div>
-        <div class="taskfoot">
+        <div class="t-desc">${t.desc}</div>
+        <div class="t-bar"><div style="width:${pct}%"></div></div>
+        <div class="t-foot">
           <span>${Math.min(count, t.goal)} / ${t.goal}${claimed ? ' · Alındı' : ''}</span>
-          <button class="claim" ${!done || claimed ? 'disabled' : ''}>${claimed ? 'ALINDI' : done ? 'ÖDÜLÜ AL' : 'DEVAM ET'}</button>
+          <button class="t-claim-btn" ${!done || claimed ? 'disabled' : ''}>${claimed ? 'ALINDI' : done ? 'ÖDÜLÜ AL' : 'DEVAM ET'}</button>
         </div>
       `;
 
@@ -975,7 +950,7 @@
           state.claimedTasks.push(t.id);
           state.energy = Math.min(MAX_ENERGY, state.energy + t.reward);
           sfx.coin();
-          notify(`Görev tamamlandı! +${t.reward} Enerji kazandın.`);
+          notify(`Görev ödülü alındı! +${t.reward} Enerji kazandın.`);
           addXP(25);
           renderAll();
         };
@@ -994,7 +969,7 @@
     const left = state.energy >= MAX_ENERGY ? 60 : 60 - Math.floor((Date.now() - state.energyUpdated) / 1000) % 60;
     if ($('timer')) $('timer').textContent = '00:' + String(left).padStart(2, '0');
 
-    if ($('levelBadge')) $('levelBadge').textContent = state.playerLevel;
+    if ($('levelBadge')) $('levelBadge').textContent = `LV.${state.playerLevel}`;
     const xpNeeded = state.playerLevel * 60;
     const pct = Math.min(100, (state.xp / xpNeeded) * 100);
     if ($('xpBar')) $('xpBar').style.width = `${pct}%`;
@@ -1004,25 +979,25 @@
     renderStats();
     renderOrders();
     renderBoard();
-    renderHotelStudio();
+    renderHotelPage();
     renderTasks();
     save();
   }
 
-  /* ================= TABS SETUP ================= */
-  function initTabs() {
-    const tabs = document.querySelectorAll('.tab-btn');
-    tabs.forEach((tab) => {
+  /* ================= GOSSIP HARBOR BOTTOM NAVIGATION ================= */
+  function initNavigation() {
+    const navTabs = document.querySelectorAll('.nav-tab');
+    navTabs.forEach((tab) => {
       tab.onclick = () => {
-        tabs.forEach((t) => t.classList.remove('active'));
+        navTabs.forEach((t) => t.classList.remove('active'));
         tab.classList.add('active');
 
-        const targetId = tab.dataset.tab;
-        document.querySelectorAll('.tab-content').forEach((sec) => {
-          sec.classList.remove('active-tab');
+        const targetId = tab.dataset.target;
+        document.querySelectorAll('.game-page').forEach((page) => {
+          page.classList.remove('active-page');
         });
-        const targetSec = $(targetId);
-        if (targetSec) targetSec.classList.add('active-tab');
+        const targetPage = $(targetId);
+        if (targetPage) targetPage.classList.add('active-page');
 
         sfx.pop();
         renderAll();
@@ -1031,19 +1006,21 @@
   }
 
   function initUI() {
-    // Spawner
     const spawnBtn = $('spawnBtn');
     if (spawnBtn) spawnBtn.onclick = () => spawnItem();
 
-    // Sort Board
     const sortBtn = $('sortBoardBtn');
     if (sortBtn) sortBtn.onclick = () => sortBoard();
 
-    // Add Energy Ad Button
     const addEnergyBtn = $('addEnergyBtn');
     if (addEnergyBtn) addEnergyBtn.onclick = () => openAdModal();
 
-    // Close Level Up Modal
+    const upgrade1 = $('upgradeArea1Btn');
+    if (upgrade1) upgrade1.onclick = (e) => upgradeArea1(e.clientX, e.clientY);
+
+    const upgrade2 = $('upgradeArea2Btn');
+    if (upgrade2) upgrade2.onclick = (e) => upgradeArea2(e.clientX, e.clientY);
+
     const closeLevelUpBtn = $('closeLevelUpBtn');
     if (closeLevelUpBtn) {
       closeLevelUpBtn.onclick = () => {
@@ -1067,8 +1044,9 @@
   function init() {
     load();
     renderAll();
-    initTabs();
+    initNavigation();
     initDragAndDrop();
+    initStoryChoices();
     initLuckyWheel();
     initUI();
 

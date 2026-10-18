@@ -3,242 +3,315 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0e1017">
-<title>Velvet Secrets - Gossip Harbor Edition</title>
+<meta name="theme-color" content="#0d0f17">
+<title>Velvet Secrets - Luxury Story & Merge</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="app">
 
-  <!-- Üst Bar: Oyuncu Bilgileri & Kaynaklar -->
-  <header class="app-header">
-    <div class="header-top">
-      <div class="player-profile">
-        <div class="avatar-ring">
-          <span class="avatar-emoji">👑</span>
-          <span id="levelBadge" class="level-indicator">1</span>
+  <!-- ================= TOP HERO BANNER ================= -->
+  <header class="hero-cover">
+    <img src="assets/hero_banner.jpg" alt="Velvet Secrets" class="hero-cover-img">
+    <div class="hero-overlay-gradient"></div>
+    <div class="hero-top-bar">
+      <div class="player-pill">
+        <img src="assets/avatar_isabella.jpg" alt="Isabella" class="player-mini-avatar">
+        <div class="player-pill-info">
+          <span class="player-title">Isabella Laurent</span>
+          <div class="xp-mini-wrap"><div id="xpBar" class="xp-mini-bar" style="width: 30%;"></div></div>
         </div>
-        <div class="profile-details">
-          <span class="player-name">Isabella Laurent</span>
-          <div class="xp-bar-container">
-            <div id="xpBar" class="xp-bar-inner" style="width: 25%;"></div>
-          </div>
-        </div>
+        <span id="levelBadge" class="level-badge">LV.1</span>
       </div>
-      <div class="header-tags">
-        <span class="vip-tag">✦ VIP SOSYETE</span>
-      </div>
-    </div>
-
-    <!-- 4 Temel Kaynak Barı (Enerji, Prestij, Mücevher, Yenileme Yıldızı) -->
-    <div class="currency-bar">
-      <div class="currency-item energy-item">
-        <span class="curr-icon">⚡</span>
-        <div class="curr-info">
-          <b><span id="energy">500</span><small>/500</small></b>
-          <label id="timer">01:00</label>
-        </div>
-        <button id="addEnergyBtn" class="curr-plus" title="Enerji Al">+</button>
-      </div>
-
-      <div class="currency-item">
-        <span class="curr-icon">◆</span>
-        <div class="curr-info">
-          <b id="coins">1200</b>
-          <label>PRESTİJ</label>
-        </div>
-      </div>
-
-      <div class="currency-item">
-        <span class="curr-icon">💎</span>
-        <div class="curr-info">
-          <b id="gems">15</b>
-          <label>MÜCEVHER</label>
-        </div>
-      </div>
-
-      <div class="currency-item stars-item">
-        <span class="curr-icon">⭐</span>
-        <div class="curr-info">
-          <b id="stars">2</b>
-          <label>YILDIZ</label>
-        </div>
-      </div>
+      <div class="vip-crest">✦ VIP SOSYETE</div>
     </div>
   </header>
 
-  <!-- Gossip Harbor Tarzı Ana Gezinme Sekmeleri -->
-  <nav class="main-tabs">
-    <button id="tabBoardBtn" class="tab-btn active" data-tab="boardSection">
-      <span class="tab-icon">🧩</span>
-      <span class="tab-label">BİRLEŞTİRME</span>
+  <!-- ================= 4 CURRENCY BAR ================= -->
+  <section class="currency-strip">
+    <div class="curr-box energy-box">
+      <span class="c-icon">⚡</span>
+      <div class="c-text">
+        <b id="energy">500<small>/500</small></b>
+        <label id="timer">01:00</label>
+      </div>
+      <button id="addEnergyBtn" class="c-add" title="Enerji Al">+</button>
+    </div>
+
+    <div class="curr-box">
+      <span class="c-icon">◆</span>
+      <div class="c-text">
+        <b id="coins">1200</b>
+        <label>PRESTİJ</label>
+      </div>
+    </div>
+
+    <div class="curr-box">
+      <span class="c-icon">💎</span>
+      <div class="c-text">
+        <b id="gems">25</b>
+        <label>ELMAS</label>
+      </div>
+    </div>
+
+    <div class="curr-box star-box">
+      <span class="c-icon">⭐</span>
+      <div class="c-text">
+        <b id="stars">2</b>
+        <label>YILDIZ</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GOSSIP HARBOR GÖVDE (SAYFALAR) ================= -->
+  <main class="page-container">
+
+    <!-- ========== SAYFA 1: BİRLEŞTİRME MASASI & SİPARİŞLER ========== -->
+    <section id="pageBoard" class="game-page active-page">
+      
+      <!-- Gossip Harbor Müşteri Sipariş Kuyruğu -->
+      <div class="tray-header">
+        <div class="tray-title-row">
+          <h3>✦ SOSYETE SİPARİŞLERİ</h3>
+          <span class="tray-sub">Siparişleri teslim et, Prestij (◆) ve Yıldız (⭐) kazan!</span>
+        </div>
+      </div>
+
+      <div id="orderTray" class="orders-scroll-tray">
+        <!-- JavaScript ile Adrian Vale, Serena Black, Leon Marchand kartları basılacak -->
+      </div>
+
+      <!-- Üretici Sandık ve Düzenle Çubuğu -->
+      <div class="board-top-controls">
+        <div class="spawner-widget">
+          <div class="spawner-icon-pulse">🎁</div>
+          <div class="spawner-meta">
+            <strong>Lüks Sandık</strong>
+            <small>Yeni sürpriz obje üret</small>
+          </div>
+          <button id="spawnBtn" class="spawner-tap-btn">
+            <span>⚡ ÜRET</span>
+            <small>1 Enerji</small>
+          </button>
+        </div>
+
+        <button id="sortBoardBtn" class="tidy-board-btn">
+          <span>↻</span> Masayı Düzenle
+        </button>
+      </div>
+
+      <!-- 5x5 Birleştirme Tahtası -->
+      <div id="board" class="merge-grid" aria-label="Birleştirme Masası"></div>
+
+      <div class="board-hint-strip">
+        <span class="hint-icon">💡</span>
+        <p id="notice" role="status">İki aynı objeyi sürükleyip birleştirerek siparişleri hazırla!</p>
+      </div>
+
+      <!-- Günün Görevleri Kartı -->
+      <div class="daily-tasks-card">
+        <div class="tasks-card-top">
+          <h4>GÜNÜN GÖREVLERİ</h4>
+          <span class="tasks-card-pill">Cömert Ödüller</span>
+        </div>
+        <div id="tasks" class="tasks-list-wrap"></div>
+      </div>
+    </section>
+
+    <!-- ========== SAYFA 2: OTEL RESTORASYONU (AURELIA OTELİ & SÜİTLER) ========== -->
+    <section id="pageHotel" class="game-page">
+      <div class="hotel-page-header">
+        <h2>AURELIA OTELİ RESTORASYONU</h2>
+        <p>Kazandığın Prestij (◆) ve Yıldızlarla (⭐) otelin bölümlerini yenile ve sırları çöz!</p>
+      </div>
+
+      <!-- Otel Alanları Galeri / Listesi -->
+      <div class="hotel-areas-grid">
+
+        <!-- Alan 1: Aurelia Oteli Meydanı & Girişi -->
+        <div class="hotel-room-card">
+          <div class="room-img-wrap">
+            <img src="assets/scene_hotel_exterior.jpg" alt="Aurelia Oteli">
+            <div class="room-badge">📍 ALAN 1 · OTEL MEYDANI</div>
+          </div>
+          <div class="room-details">
+            <h3>Aurelia Sarayı &amp; Fıskiye</h3>
+            <p>Monako körfezinin en görkemli saray girişi. Mermer fıskiyeleri onar ve VIP karşılama alanını hazırla.</p>
+            <div class="room-action-row">
+              <span class="room-stat">İlerleme: <b id="area1Progress">%35</b></span>
+              <button id="upgradeArea1Btn" class="upgrade-room-btn">
+                <span>⭐ 1 YILDIZ</span>
+                <small>VEYA 300 ◆</small>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alan 2: Başkanlık Süiti (Penthouse) -->
+        <div class="hotel-room-card">
+          <div class="room-img-wrap">
+            <img src="assets/scene_presidential_suite.jpg" alt="Başkanlık Süiti">
+            <div class="room-badge">📍 ALAN 2 · BAŞKANLIK SÜİTİ</div>
+          </div>
+          <div class="room-details">
+            <h3>Körfez Manzaralı Lüks Penthouse</h3>
+            <p>En özel anların ve en karanlık sırların paylaşıldığı çatı süiti. Jakuzi ve özel şömineyi tamamla.</p>
+            <div class="room-action-row">
+              <span class="room-stat">İlerleme: <b id="area2Progress">%20</b></span>
+              <button id="upgradeArea2Btn" class="upgrade-room-btn">
+                <span>⭐ 2 YILDIZ</span>
+                <small>VEYA 600 ◆</small>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Karakter Diyalog Paneli -->
+      <div class="story-character-callout">
+        <img src="assets/avatar_isabella.jpg" alt="Isabella" class="callout-avatar">
+        <div class="callout-content">
+          <strong>Isabella Laurent</strong>
+          <p id="hotelDialogueText">"Babamın mirası bu otelde büyük bir entrika dönüyor. Meydanı ve süiti yeniledikçe saklanan gizli evraklar ortaya çıkacak..."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SAYFA 3: GİZEMLİ HİKÂYE & SEÇİMLER ========== -->
+    <section id="pageStory" class="game-page">
+      <div class="story-page-container">
+        
+        <!-- Bölüm 1: Mühürlü Mektup -->
+        <div class="story-episode-card">
+          <div class="episode-img-wrap">
+            <img src="assets/scene_isabella_letter.jpg" alt="Mühürlü Mektup">
+            <span class="episode-badge">BÖLÜM 1 · AÇILIŞ GECESİ</span>
+          </div>
+          <div class="episode-body">
+            <h3>Masada Unutulan Mektup</h3>
+            <p>"Açılış gecesinde masada kırmızı mühürlü bir mektup buldum. Üzerinde sadece 'A' harfi var. Bu gece herkesin sakladığı bir şey var..."</p>
+            <div class="letter-quote">"Bu mektup... kime ait? Ve neden burada?" — Isabella</div>
+          </div>
+        </div>
+
+        <!-- Bölüm 2: Gala & Adrian'ın Teklifi (İnteraktif Karar) -->
+        <div class="story-episode-card">
+          <div class="episode-img-wrap">
+            <img src="assets/scene_romance_gala.jpg" alt="Adrian ve Isabella">
+            <span class="episode-badge">BÖLÜM 2 · KRİTİK SEÇİM</span>
+          </div>
+          <div class="episode-body">
+            <h3>Adrian'ın Gece Yarısı Teklifi</h3>
+            <p>Adrian Vale yanına yaklaştı ve seni körfez manzaralı terasa davet etti. Bakışlarında gizemli bir merak var.</p>
+            
+            <div class="interactive-choices">
+              <button class="story-choice-btn" data-choice="accept">
+                <span class="ch-icon">💛</span>
+                <div class="ch-text"><strong>Daveti kabul et</strong><small>Adrian ile yakınlaş (+150 Prestij)</small></div>
+              </button>
+              <button class="story-choice-btn" data-choice="decline">
+                <span class="ch-icon">💎</span>
+                <div class="ch-text"><strong>Daveti reddet ve mesafeli kal</strong><small>Temkinli hareket et (+3 Elmas)</small></div>
+              </button>
+              <button class="story-choice-btn" data-choice="investigate">
+                <span class="ch-icon">🔍</span>
+                <div class="ch-text"><strong>Önce otel arşivinde araştır</strong><small>Leon'un geçmişini incele (+1 Yıldız)</small></div>
+              </button>
+            </div>
+
+            <div id="storyDecisionLog" class="decision-feedback-box">
+              Henüz seçim yapmadın. Her karar otelin kaderini ve ilişkileri değiştirecek!
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========== SAYFA 4: ŞANS ÇARKI ========== -->
+    <section id="pageWheel" class="game-page">
+      <div class="wheel-panel-card">
+        <div class="wheel-headline">
+          <h2>AURELIA ŞANS ÇARKI</h2>
+          <p>Her gün çevir, büyük ödülleri ve gizemli VIP sandıkları kazan!</p>
+        </div>
+
+        <div class="wheel-visual-holder">
+          <div class="wheel-needle">▼</div>
+          <div id="luckyWheel" class="wheel-disc">
+            <div class="w-slice" style="--i:0;"><span>⚡ 100</span></div>
+            <div class="w-slice" style="--i:1;"><span>◆ 500</span></div>
+            <div class="w-slice" style="--i:2;"><span>💎 10</span></div>
+            <div class="w-slice" style="--i:3;"><span>⭐ 1</span></div>
+            <div class="w-slice" style="--i:4;"><span>⚡ 50</span></div>
+            <div class="w-slice" style="--i:5;"><span>🎁 VIP</span></div>
+          </div>
+          <div class="wheel-hub">✦</div>
+        </div>
+
+        <div class="wheel-btn-group">
+          <button id="spinBtn" class="spin-gold-btn">
+            <span>ŞANSINI DENE</span>
+            <small>ÜCRETSİZ ÇEVİR</small>
+          </button>
+          <button id="spinAdBtn" class="spin-outline-btn">
+            <span>📺 REKLAM İZLE &amp; ÇEVİR</span>
+          </button>
+        </div>
+
+        <div id="wheelResultNotice" class="wheel-announcement">Her gün 1 ücretsiz çevirme hakkın var!</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= GOSSIP HARBOR ALT GEZİNME ÇUBUĞU ================= -->
+  <nav class="bottom-nav-bar">
+    <button class="nav-tab active" data-target="pageBoard">
+      <span class="nav-icon">🧩</span>
+      <span class="nav-label">MASA</span>
     </button>
-    <button id="tabHotelBtn" class="tab-btn" data-tab="hotelSection">
-      <span class="tab-icon">🏨</span>
-      <span class="tab-label">OTEL YENİLEME</span>
-      <span id="hotelTaskBadge" class="tab-badge">2</span>
+    <button class="nav-tab" data-target="pageHotel">
+      <span class="nav-icon">🏨</span>
+      <span class="nav-label">OTEL</span>
+      <span id="hotelBadgeCount" class="nav-badge">1</span>
     </button>
-    <button id="tabWheelBtn" class="tab-btn" data-tab="wheelSection">
-      <span class="tab-icon">🎡</span>
-      <span class="tab-label">ŞANS ÇARKI</span>
+    <button class="nav-tab" data-target="pageStory">
+      <span class="nav-icon">📖</span>
+      <span class="nav-label">HİKÂYE</span>
+    </button>
+    <button class="nav-tab" data-target="pageWheel">
+      <span class="nav-icon">🎡</span>
+      <span class="nav-label">ÇARK</span>
     </button>
   </nav>
 
-  <!-- ================= SEKME 1: BİRLEŞTİRME MASASI & SİPARİŞLER ================= -->
-  <section id="boardSection" class="tab-content active-tab">
-    
-    <!-- Gossip Harbor Tarzı Müşteri Siparişleri Tepsisi -->
-    <div class="section-banner">
-      <h3>✦ SOSYETE SİPARİŞLERİ</h3>
-      <span class="section-sub">Objeleri hazırla, teslim et ve Yıldız (⭐) kazan!</span>
-    </div>
-    
-    <div id="orderTray" class="orders-carousel">
-      <!-- JavaScript tarafından dinamik sipariş kartları buraya yüklenir -->
-    </div>
-
-    <!-- Üretici & Kasa Alanı -->
-    <div class="board-control-row">
-      <div class="generator-box">
-        <div class="gen-icon">🎁</div>
-        <div class="gen-desc">
-          <strong>Lüks Mücevher Sandığı</strong>
-          <small>Yeni obje üretmek için dokun</small>
-        </div>
-        <button id="spawnBtn" class="gen-btn">
-          <span>⚡ ÜRET</span>
-          <small>1 Enerji</small>
-        </button>
-      </div>
-
-      <button id="sortBoardBtn" class="tidy-btn" title="Masayı Düzenle">
-        <span>↻</span> Düzenle
-      </button>
-    </div>
-
-    <!-- 5x5 Birleştirme Tahtası -->
-    <div id="board" class="board" aria-label="Birleştirme tahtası"></div>
-
-    <div class="notice-bar">
-      <span class="notice-icon">💡</span>
-      <p id="notice" role="status">İki aynı objeyi sürükleyip birleştirerek siparişleri tamamla!</p>
-    </div>
-
-    <!-- Günlük Görevler Mini Barı -->
-    <div class="tasks-container">
-      <div class="tasks-header">
-        <h4>GÜNÜN GÖREVLERİ</h4>
-        <span class="tasks-sub">Ödülleri Topla</span>
-      </div>
-      <div id="tasks" class="tasks-list"></div>
-    </div>
-  </section>
-
-  <!-- ================= SEKME 2: OTEL RESTORASYON & HİKAYE ================= -->
-  <section id="hotelSection" class="tab-content">
-    <div class="hotel-hero-card">
-      <div class="hotel-visual-scene" id="hotelScene">
-        <div class="hotel-room-preview">
-          <div class="room-art" id="roomVisual">🏨</div>
-          <div class="room-overlay">
-            <span class="room-tag" id="currentRoomTag">AURELIA OTELİ — LOBİ</span>
-            <h2 id="roomTitle">Harabe Lobiden Lüks Saraya</h2>
-            <div class="renovation-progress-wrap">
-              <div id="renovationBar" class="renovation-bar-fill" style="width: 20%;"></div>
-            </div>
-            <span id="renovationPercent" class="renov-sub">Tamamlanma: %20</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Hikaye Diyalog Baloncuğu -->
-      <div class="story-dialogue-bubble">
-        <div class="dialogue-avatar" id="dialogueAvatar">🥂</div>
-        <div class="dialogue-content">
-          <strong id="dialogueCharacter">Isabella Laurent</strong>
-          <p id="dialogueText">"Babamın mirası Aurelia Oteli'ni eski görkemine kavuşturacağım. Ama önce şu salondaki ipuçlarını çözmem gerek..."</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Yenileme Görevleri Listesi (Gossip Harbor tarzı Yıldız Harcama) -->
-    <div class="section-banner">
-      <h3>🛠️ YENİLEME VE DEKORASYON GÖREVLERİ</h3>
-      <span class="section-sub">Siparişlerden kazandığın Yıldızları (⭐) kullanarak oteli yenile!</span>
-    </div>
-
-    <div id="renovationList" class="renovation-list">
-      <!-- JavaScript ile yüklenecek yenileme maddeleri -->
-    </div>
-  </section>
-
-  <!-- ================= SEKME 3: ŞANS ÇARKI VE GÜNLÜK ÖDÜLLER ================= -->
-  <section id="wheelSection" class="tab-content">
-    <div class="wheel-container-card">
-      <div class="wheel-header">
-        <h2>AURELIA ŞANS ÇARKI</h2>
-        <p>Her gün çevir, büyük ödülleri ve gizemli kutuları kazan!</p>
-      </div>
-
-      <!-- Çark Görseli -->
-      <div class="wheel-wrapper">
-        <div class="wheel-pointer">▼</div>
-        <div id="luckyWheel" class="wheel-disc">
-          <div class="wheel-segment" style="--i:0;"><span>⚡ 100</span></div>
-          <div class="wheel-segment" style="--i:1;"><span>◆ 500</span></div>
-          <div class="wheel-segment" style="--i:2;"><span>💎 10</span></div>
-          <div class="wheel-segment" style="--i:3;"><span>⭐ 1</span></div>
-          <div class="wheel-segment" style="--i:4;"><span>⚡ 50</span></div>
-          <div class="wheel-segment" style="--i:5;"><span>👑 VIP</span></div>
-        </div>
-        <div class="wheel-center">✦</div>
-      </div>
-
-      <div class="wheel-controls">
-        <button id="spinBtn" class="spin-btn">
-          <span>ŞANSINI DENE</span>
-          <small>ÜCRETSİZ ÇEVİR</small>
-        </button>
-        <button id="spinAdBtn" class="spin-ad-btn">
-          <span>📺 REKLAM İZLE &amp; ÇEVİR</span>
-        </button>
-      </div>
-
-      <div id="wheelResultNotice" class="wheel-result">Her gün 1 ücretsiz çevirme hakkın var!</div>
-    </div>
-  </section>
-
-  <footer class="app-footer">
-    VELVET SECRETS · LUXURY MERGE &amp; STORY EDITION<br>
-    <span>Gossip Harbor mekanikleri ile güçlendirildi.</span>
-  </footer>
 </div>
 
-<!-- Sürükleme Hayaleti (Drag Ghost) -->
+<!-- Sürükleme Hayaleti -->
 <div id="dragGhost" class="drag-ghost" style="display: none;"></div>
 
-<!-- Efekt Katmanı (Uçan Yazılar & Parıltılar) -->
+<!-- Parıltı & Uçan Yazı Katmanı -->
 <div id="fxLayer" class="fx-layer"></div>
 
-<!-- Ödüllü Reklam Modalı -->
+<!-- VIP Reklam Modalı -->
 <div id="adModal" class="modal-overlay" style="display: none;">
   <div class="ad-modal-card">
-    <div class="ad-header">
-      <span class="ad-badge-live">VIP SPONSOR</span>
+    <div class="ad-modal-top">
+      <span class="ad-vip-tag">VIP SPONSOR</span>
       <span id="adCountdown" class="ad-timer">5 sn</span>
     </div>
-    <div class="ad-media">
+    <div class="ad-card-body">
       <div class="ad-video-mock">
-        <div class="ad-mock-icon">💎</div>
-        <h3>AURELIA GRAND CASINO &amp; RESORT</h3>
-        <p>Monako'nun en seçkin atmosferinde kazananlar kulübüne katılın.</p>
-        <div class="ad-stars">★★★★★</div>
+        <div class="ad-big-gem">💎</div>
+        <h3>AURELIA ROYALE RESORT &amp; CASINO</h3>
+        <p>Monako körfezinin en seçkin konukları burada buluşuyor. Özel VIP süitlerde yerinizi ayırtın.</p>
+        <div class="ad-stars-rating">★★★★★</div>
       </div>
     </div>
-    <div class="ad-footer">
-      <button id="adClaimBtn" class="ad-claim-btn" disabled>Ödül İçin Bekleyin (5)</button>
-    </div>
+    <button id="adClaimBtn" class="ad-claim-action" disabled>Ödül İçin Bekleyin (5)</button>
   </div>
 </div>
 
@@ -248,12 +321,12 @@
     <div class="levelup-star">🌟</div>
     <h2>TEBRİKLER!</h2>
     <p id="levelUpSubtitle">Seviye 2'ye Ulaştın!</p>
-    <div class="levelup-rewards">
+    <div class="levelup-rewards-box">
       <div><span>⚡</span> +100 Enerji</div>
-      <div><span>💎</span> +5 Mücevher</div>
+      <div><span>💎</span> +5 Elmas</div>
       <div><span>⭐</span> +1 Yıldız</div>
     </div>
-    <button id="closeLevelUpBtn" class="primary-btn pulse">Harika! Ödülü Al</button>
+    <button id="closeLevelUpBtn" class="gold-action-btn pulse">ÖDÜLLERİ TOPLA</button>
   </div>
 </div>
 
