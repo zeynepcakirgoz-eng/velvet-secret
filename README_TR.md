@@ -1,43 +1,18 @@
-# Velvet Secrets — Android prototipi
+# 🏨 Velvet Secrets — Türkçe Proje Rehberi & Sürüm Açıklamaları
 
-Bu paket, Android uygulamasına dönüştürülebilecek çalışan bir oyun prototipinin kaynak dosyalarını içerir. Henüz imzalanmış bir APK değildir; Android Studio ile derlenmesi gerekir.
+**Velvet Secrets**, Monako'daki **Aurelia Palace Hotel**'de geçen, lüks obje birleştirme (*Merge*), interaktif gizem/romantizm hikâyesi ve **tamamen gezilebilir 3D Otel Restorasyon Simülatörü** içeren Android (Telefon & Tablet) oyunudur.
 
-## Özellikler
-- 500 başlangıç enerjisi, 60 saniyede 1 enerji (500 üst sınır)
-- Enerji, prestij ve mücevher kaynakları
-- Aynı seviyedeki aynı tür objeleri birleştirme
-- Sipariş ve görev ödülleri
-- Isabella ve Adrian hikâye seçimi
-- İlerlemeyi cihazda tarayıcı depolamasında saklama
-- Android geri tuşu için web görünümü uyumlu sade arayüz
+Detaylı sürüm geçmişi için [SURUM_NOTLARI.md](SURUM_NOTLARI.md) ve [README.md](README.md) dosyalarına göz atabilirsiniz.
 
-## Gerekenler
-- Bilgisayar (Windows, macOS veya Linux)
-- Node.js LTS
-- Android Studio ve Android SDK
-- Android telefon ve USB kablosu (isteğe bağlı; emülatör de olur)
+---
 
-## Android APK oluşturma
-
-1. ZIP dosyasını bilgisayara çıkar.
-2. Proje klasöründe terminal/komut istemcisi aç.
-3. Şunları çalıştır:
-
-   ```bash
-   npm install
-   npx cap add android
-   npx cap sync android
-   npx cap open android
-   ```
-
-4. Android Studio açıldığında Gradle eşitlemesinin bitmesini bekle.
-5. Telefonu USB ile bağla ve telefonda Geliştirici seçenekleri > USB hata ayıklama seçeneğini aç; veya Android Studio'da bir emülatör başlat.
-6. Test etmek için Android Studio'daki **Run ▶** düğmesine bas.
-7. APK üretmek için **Build > Build Bundle(s) / APK(s) > Build APK(s)** yolunu kullan.
-8. Android Studio, oluşturulan APK'nın yolunu bildirir. APK'yı telefona aktar ve yükle. Bilinmeyen uygulama yükleme izni gerekebilir.
-
-## Önemli
-- Bu proje imzalı bir mağaza sürümü değildir. Google Play'e yayınlamak için paket adı, imzalama anahtarı, gizlilik metni, mağaza görselleri ve testler gerekir.
-- Görseller şu an emoji tabanlı prototip varlıklarıdır. Gerçekçi karakter portreleri, animasyonlar, sesler ve profesyonel çizimler sonraki aşamada eklenebilir.
-- Bu prototipte satın alma veya gerçek para işlemi yoktur.
-- İlerleme aynı cihazdaki uygulama verilerinde tutulur. Uygulama verilerini silmek ilerlemeyi silebilir.
+## 🌟 Güncel Sürüm (`v2.4.0`) Özellikleri
+- **500 Maksimum Enerji & Kraliyet Üretim Sandığı:** 5x5 birleştirme masasında 3 farklı lüks koleksiyondan (**18 benzersiz HD boyamalı obje**) üretim ve birleştirme.
+- **VIP Konuk Siparişleri:** *Isabella Laurent, Adrian Vale, Leon Marchand* ve *Serena Black*'in konuyla uyumlu foto-gerçekçi kartlı siparişleri.
+- **Konuyla Uyumlu 5 Aşamalı Foto-Gerçekçi Görevler & Büyük Kraliyet Sandığı:** Her görevin açıklamasıyla birebir örtüşen HD arka plan sahneleri ve **3D boyamalı kazanım ikonları** (`Enerji`, `Prestij $`, `Elmas`, `Yıldız`, `VIP Sandık`).
+- **3D Gezilebilir Otel Simülatörü (`Three.js`):**
+  - 360° Akdeniz gün batımı gökyüzü kubbesi, parıldayan deniz, oda tavanları ve altın kornişler.
+  - **11 Otel Alanı:** *Lobi Resepsiyon, Bohemya Avizesi, Kraliyet Halıları, Riviera Restoran, Şampanya Barı, Deluxe Suit 101, Panoramik Teras, Sonsuzluk Havuzu, Zen Termal Spa, Botanik Bahçe* ve *2. Kat Başkanlık Penthouse Suiti*.
+  - Her alanda bağımsız **Seviye 1 ➔ Seviye 4** ilerlemesi ve **3 farklı lüks tasarım seçeneği** (`Klasik Riviera`, `Modern Monako`, `Kraliyet Sarayı`).
+- **Birleşik Çift Gelir Kasası & Kasa Defteri:** Sipariş gelirleri ve 3D otel pasif gelirlerinin ortak kasada toplanması ve işlem geçmişi takibi.
+- **Android Telefon & Tablet Uyumluluğu:** 3D ekranı kapatmayan alt yakınlık konsolu, tam ekran dokunmatik kamera kontrolü ve tabletler için 2 sütunlu duyarlı galeri düzeni.

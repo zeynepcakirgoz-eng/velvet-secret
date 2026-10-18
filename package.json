@@ -1,8 +1,8 @@
 {
   "name": "velvet-secrets",
-  "version": "1.0.0",
+  "version": "2.4.0",
   "private": true,
-  "description": "Velvet Secrets - luxury merge story game prototype",
+  "description": "Velvet Secrets (v2.4.0) - Lüks Birleştirme (Merge), İnteraktif Hikâye ve 3D Gezilebilir Otel Restorasyon Simülatörü (Android Telefon & Tablet)",
   "scripts": {
     "sync:android": "npx cap sync android",
     "open:android": "npx cap open android"

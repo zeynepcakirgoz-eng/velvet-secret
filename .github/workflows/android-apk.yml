@@ -1,4 +1,4 @@
-name: Build Velvet Secrets APK
+name: Velvet Secrets Android APK Derleme ve Sürüm Yayınlama
 
 on:
   workflow_dispatch:
@@ -11,47 +11,47 @@ permissions:
 
 jobs:
   build-apk:
-    name: Build Android APK
+    name: Android APK Derle (v2.4.0)
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - name: Checkout repository
+      - name: Kaynak Kodları İndir (Checkout)
         uses: actions/checkout@v4
 
-      - name: Set up Java 21
+      - name: Java 21 Kurulumu
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
 
-      - name: Set up Node.js
+      - name: Node.js Kurulumu
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
-      - name: Install JavaScript dependencies
+      - name: Bağımlılıkları Yükle (npm install)
         run: npm install
 
-      - name: Add Android platform
+      - name: Capacitor Android Platformunu Ekle
         run: npx cap add android
 
-      - name: Sync Capacitor
+      - name: Capacitor Dosyalarını Eşitle (npx cap sync)
         run: npx cap sync android
 
-      - name: Make gradlew executable
+      - name: Gradle İzinlerini Ayarla
         run: chmod +x android/gradlew
 
-      - name: Build debug APK
+      - name: Debug APK Derle (assembleDebug)
         working-directory: android
         run: ./gradlew --no-daemon assembleDebug
 
-      - name: Rename APK for easy download
+      - name: APK Dosyasını Hazırla
         run: |
           mkdir -p build-output
           cp android/app/build/outputs/apk/debug/app-debug.apk build-output/VelvetSecrets-debug.apk
 
-      - name: Upload APK Artifact
+      - name: APK Artifact Yükle
         uses: actions/upload-artifact@v4
         with:
           name: VelvetSecrets-APK
@@ -59,21 +59,35 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Create GitHub Release with APK
+      - name: GitHub Sürümünü (Release) Türkçe Açıklamalarla Güncelle
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
         with:
           tag_name: v1.0.0-demo
-          name: "Velvet Secrets v1.0.0 Demo APK"
+          name: "Velvet Secrets v2.4.0 — Foto-Gerçekçi Görevler, 3D Kazanımlar & 3D Otel Simülatörü APK"
           body: |
-            ## 📱 Velvet Secrets — Android Prototip APK
-            Oyununuz başarıyla derlendi!
-            
-            ### Kurulum Talimatları:
-            1. Aşağıdaki **VelvetSecrets-debug.apk** dosyasını Android telefonunuza indirin.
-            2. İndirilen dosyaya dokunun ve "Yükle" seçeneğini seçin.
-            3. Bilinmeyen kaynaklardan yükleme uyarısı çıkarsa izin verin.
-            4. Oyunun tadını çıkarın! ✨
+            ## 🏨 Velvet Secrets — Güncel Android APK (`v2.4.0`)
+
+            ### 🌟 Sürüm `v2.4.0` Yenilikleri (Son Güncelleme)
+            - **Konuyla Birebir Uyumlu Foto-Gerçekçi Görevler (`#tasks`):** Görevlerdeki tekrarlayan/bozuk arka planlar kaldırıldı; her göreve konusuyla birebir örtüşen, temiz 16:9 HD foto-gerçekçi sahne (`scene_garden_terrace.jpg`, `scene_restaurant_bar.jpg`, `scene_lobby_reception.jpg`, `scene_penthouse_piano.jpg`, `scene_spa_wellness.jpg`) ve aşamalı ilerleme (`Aşama 1 ➔ Aşama 2 ➔ Aşama 3`) eklendi.
+            - **3D Boyamalı Lüks Kazanım İkonları (`Kazanımlar`) & Büyük Kraliyet Sandığı:** Tüm görev, sipariş, hikâye ve çark ödüllerine yüksek çözünürlüklü 3D boyamalı ikonlar (`Enerji`, `Prestij $`, `Elmas`, `Yıldız`, `VIP Kraliyet Sandığı`) ve her 3 görevde bir açılan **Büyük Kraliyet Hazine Sandığı Vitrini** eklendi.
+            - **Tamamlanmış 3D Otel Mimarisi (`hotel3d.js`):** 360° Akdeniz gün batımı gökyüzü kubbesi, parıldayan deniz, oda tavanları, altın kornişler, Zen Spa Mermer Pavyonu, Botanik Bahçe Avlusu ve **11 alanın tamamında Seviye 1–4 çok parçalı 3D mobilyalar** eklendi.
+            - **Android Telefon & Tablet Arayüz (UI/UX) Optimizasyonu:** 3D ekranı kapatmayan alt yakınlık konsolu (`#renovationProximityPanel`), tam ekran dokunmatik 360° kamera kontrolü ve tabletler için 2 sütunlu duyarlı galeri düzeni eklendi.
+
+            ---
+
+            ### 📜 Önceki Versiyon Açıklamaları
+            - **`v2.2.0` — 4 Seviyeli Bağımsız Restorasyon & 18 HD Obje İllüstrasyonu:** 11 otel alanında bağımsız `Seviye 1 ➔ Seviye 4` yükseltme sistemi ve 5x5 birleştirme masasında 18 benzersiz boyamalı lüks obje illüstrasyonu.
+            - **`v2.0.0` — Görünür Maliyetler, Çift Gelir Kasası & Kilitli Tasarımlar:** Başlangıçtan itibaren görünür restorasyon maliyet tablosu (`📋 Tüm Maliyetler`), sipariş + pasif otel gelirini birleştiren ortak kasa (`💼 Kasa Defteri`) ve bütçe dolduğunda kilidi açılan 3 tasarım seçeneği.
+            - **`v1.5.0` — 3D Gezilebilir Otel Simülatörü:** Three.js tabanlı birinci şahıs yürüyüş, mobil sanal joystick, çarpışma algılama, radar minimap ve 2. Kat Penthouse asansörü.
+            - **`v1.0.0` — İlk Prototip:** 5x5 birleştirme tahtası, VIP müşteri siparişleri, interaktif hikâye seçimleri ve Şans Çarkı.
+
+            ---
+
+            ### 📲 Kurulum Talimatları:
+            1. Aşağıdaki **VelvetSecrets-debug.apk** dosyasını Android telefonunuza veya tabletinize indirin.
+            2. İndirilen dosyaya dokunun ve **"Yükle"** seçeneğini seçin.
+            3. Bilinmeyen kaynaklardan yükleme uyarısı çıkarsa izin verin ve oyunun tadını çıkarın! ✨
           files: build-output/VelvetSecrets-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
