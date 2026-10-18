@@ -23,6 +23,7 @@ class Hotel3DSimulator {
         this.isMapMode = false;
         this.selectedAreaId = 'reception_desk';
         this.selectedOptionIndex = 0;
+        this.isRenovationDockOpen = false;
         this.previewingRenovation = null;
         this.activeModalPoint = null;
         this.notifiedAffordable = new Set();
@@ -35,15 +36,15 @@ class Hotel3DSimulator {
         this.dragStart = { x: 0, y: 0 };
 
         // Isabella's walkable position inside the current room (in percentage 0..100)
-        this.characterPos = { x: 24, y: 78, walking: false, speech: 'Otelimizin yenilenecek eşyalarına (🔨) dokunarak alt çubuktaki 3 lüks tasarımı canlı dene!' };
+        this.characterPos = { x: 24, y: 78, walking: false, speech: 'Otelimizin yenilenecek eşyalarına (🔨) dokunarak 3 farklı lüks tasarımdan birini seçebilirsin!' };
 
         this.setupRenovationDefinitions();
         this.setupRoomDefinitions();
         this.loadState();
         this.initAudio();
         this.initStageInteractions();
+        this.closeBottomDesignDock();
         this.renderStage();
-        this.openBottomDesignDock(this.selectedAreaId, false);
         this.updateHUD();
         this.updateProximityPanel();
         this.renderHotelAreaCards();
@@ -54,7 +55,9 @@ class Hotel3DSimulator {
                 this.state.stars = window.GameEconomy.getStars();
                 this.updateHUD();
                 this.checkAffordableNotifications();
-                this.renderBottomDesignDock();
+                if (this.isRenovationDockOpen) {
+                    this.renderBottomDesignDock();
+                }
                 this.updateProximityPanel();
                 this.renderStage();
                 this.renderHotelAreaCards();
@@ -1266,48 +1269,54 @@ class Hotel3DSimulator {
             // Check if currently previewing an option on this furniture piece
             const isPreviewingThis = (this.previewingRenovation && this.previewingRenovation.id === areaId);
             const installed = this.getInstalledOption(areaId);
+            const isRenovated = Boolean(installed) || curLvl >= 2;
             const activeOptId = isPreviewingThis
                 ? this.previewingRenovation.optionId
-                : (installed ? installed.optionId : null);
+                : (installed ? installed.optionId : 'old');
             const displayLvl = isPreviewingThis ? nextLvl : curLvl;
 
             let visualThumbUrl = def.sceneImg;
             try {
-                if (activeOptId && window.LuxuryArt && window.LuxuryArt.getDesignPreview) {
+                if (window.LuxuryArt && window.LuxuryArt.getDesignPreview) {
                     visualThumbUrl = window.LuxuryArt.getDesignPreview(areaId, activeOptId, displayLvl) || def.sceneImg;
                 }
             } catch (e) {}
-            const patchFilterStyle = (activeOptId && window.LuxuryArt && window.LuxuryArt.getDesignCssFilter)
-                ? `filter: ${window.LuxuryArt.getDesignCssFilter(activeOptId)};`
-                : '';
 
-            const activeOptObj = activeOptId ? (def.options.find(o => o.id === activeOptId) || def.options[0]) : null;
+            const activeOptObj = (activeOptId && activeOptId !== 'old')
+                ? (def.options.find(o => o.id === activeOptId) || def.options[0])
+                : null;
             const styleBadgeText = isPreviewingThis
                 ? `👁️ ÖNİZLEME: ${activeOptObj ? activeOptObj.style : 'Yeni Tasarım'}`
-                : (installed && activeOptObj ? `✨ Lv.${curLvl} · ${activeOptObj.style}` : `🕸️ Seviye 1 (Eski Hali)`);
+                : (isRenovated && activeOptObj ? `✅ Kurulu: ${activeOptObj.style}` : `🕸️ Seviye 1 (Yenilenmedi)`);
 
-            const pinClass = isMax ? 'pin-max' : (canAfford ? 'pin-ready' : 'pin-saving');
-            const pinBadgeHtml = isMax
-                ? `<span class="gh-pin-bubble ${pinClass}">👑 MAX (Lv.4)</span>`
-                : (canAfford
-                    ? `<span class="gh-pin-bubble ${pinClass}">🔨 YENİLE! ($${cost})</span>`
-                    : `<span class="gh-pin-bubble ${pinClass}">🔨 $${cost} (Lv.${nextLvl})</span>`);
+            let pinBadgeHtml = '';
+            if (isPreviewingThis) {
+                pinBadgeHtml = `<span class="gh-pin-bubble pin-ready">👁️ SEÇİM ÖNİZLEME</span>`;
+            } else if (isRenovated) {
+                pinBadgeHtml = `<span class="gh-pin-bubble pin-max">✅ ${activeOptObj ? activeOptObj.style : 'TAMAMLANDI'}</span>`;
+            } else if (canAfford) {
+                pinBadgeHtml = `<span class="gh-pin-bubble pin-ready">🔨 YENİLE! ($${cost})</span>`;
+            } else {
+                pinBadgeHtml = `<span class="gh-pin-bubble pin-saving">🔨 $${cost}</span>`;
+            }
+
+            const isActivelySelected = isSelected && this.isRenovationDockOpen;
 
             furnitureNodesHtml += `
-                <div class="gh-furniture-node ${curLvl > 1 || isPreviewingThis ? 'is-upgraded' : 'is-unrenovated'} ${isSelected ? 'is-selected' : ''} ${isPreviewingThis ? 'is-previewing' : ''}"
+                <div class="gh-furniture-node ${isRenovated || isPreviewingThis ? 'is-upgraded' : 'is-unrenovated'} ${isActivelySelected ? 'is-selected' : ''} ${isPreviewingThis ? 'is-previewing' : ''}"
                      style="left: ${def.pinX}%; top: ${def.pinY}%; width: ${def.cardW || 160}px;"
                      onclick="hotel3D.selectFurnitureOnStage('${areaId}', event)">
                     
-                    <!-- Floating Gossip Harbor Hammer/Star Pin -->
+                    <!-- Floating Gossip Harbor Hammer/Completed Pin -->
                     <div class="gh-pin-anchor">
                         ${pinBadgeHtml}
                     </div>
 
                     <!-- Furniture Visual Showcase Patch on the Room Stage -->
-                    <div class="gh-furniture-visual-patch" style="background-image: url('${visualThumbUrl}'); ${patchFilterStyle}">
+                    <div class="gh-furniture-visual-patch" style="background-image: url('${visualThumbUrl}');">
                         <div class="gh-patch-top-row">
-                            <span class="gh-patch-lv">Lv.${displayLvl}/4</span>
-                            ${curLvl > 1 || isPreviewingThis ? '<span class="gh-patch-sparkle">✦</span>' : '<span class="gh-patch-cobweb">🕸️</span>'}
+                            <span class="gh-patch-lv">${isRenovated ? '✅ Kurulu' : `Lv.${displayLvl}/4`}</span>
+                            ${isRenovated || isPreviewingThis ? '<span class="gh-patch-sparkle">✦</span>' : '<span class="gh-patch-cobweb">🕸️</span>'}
                         </div>
                         <div class="gh-patch-bottom-label">
                             <strong>${def.name}</strong>
@@ -1396,10 +1405,10 @@ class Hotel3DSimulator {
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
 
         const speech = curLvl >= 4
-            ? `${def.name} maksimum seviyede (Lv.4)! Alt çubuktan 3 tasarım arasında geçiş yapabilirsin.`
+            ? `${def.name} tamamlandı! Alt çubuktan 3 farklı tasarım arasında geçiş yapıp onaylayabilirsin.`
             : (balance >= cost
-                ? `Harika! $${balance} bakiyemiz var. ${def.name} için alt çubuktan 3 tasarımdan birini seçip onaylayalım!`
-                : `${def.name} Seviye ${nextLvl} için $${cost} gerekiyor. Aşağıdaki 3 tasarımı şimdiden canlı deneyebilirsin!`);
+                ? `Harika! $${balance} bakiyemiz var. ${def.name} için alt çubuktan 3 farklı tasarımdan birini seçip onaylayalım!`
+                : `${def.name} için $${cost} gerekiyor. Aşağıdaki 3 farklı tasarımı şimdiden canlı deneyebilirsin!`);
 
         this.walkCharacterTo(Math.max(18, Math.min(82, def.pinX - 18)), Math.min(84, def.pinY + 14), speech);
         this.focusCameraOnPin(def.pinX, def.pinY);
@@ -1419,6 +1428,7 @@ class Hotel3DSimulator {
         if (!def) return;
 
         this.selectedAreaId = targetId;
+        this.isRenovationDockOpen = true;
         const installed = this.getInstalledOption(targetId);
         if (installed && (!this.previewingRenovation || this.previewingRenovation.id !== targetId)) {
             const idx = def.options.findIndex(o => o.id === installed.optionId);
@@ -1453,11 +1463,18 @@ class Hotel3DSimulator {
     }
 
     closeBottomDesignDock() {
+        this.isRenovationDockOpen = false;
         this.previewingRenovation = null;
         this.zoom = 1.0;
         this.panX = 0;
         this.panY = 0;
-        this.renderBottomDesignDock();
+        const dock = document.getElementById('ghBottomDesignDock');
+        if (dock) {
+            dock.classList.remove('dock-pulse-highlight');
+            dock.style.display = 'none';
+            dock.innerHTML = '';
+        }
+        this.updateProximityPanel();
         this.renderStage();
     }
 
@@ -1466,6 +1483,7 @@ class Hotel3DSimulator {
         if (!def || !def.options[idx]) return;
         this.selectedAreaId = areaId;
         this.selectedOptionIndex = idx;
+        this.isRenovationDockOpen = true;
         const opt = def.options[idx];
         this.previewingRenovation = { id: areaId, optionId: opt.id };
         this.playSound('chime');
@@ -1478,6 +1496,10 @@ class Hotel3DSimulator {
     renderBottomDesignDock() {
         const dock = document.getElementById('ghBottomDesignDock');
         if (!dock) return;
+        if (!this.isRenovationDockOpen) {
+            dock.style.display = 'none';
+            return;
+        }
         const activeId = this.selectedAreaId || 'reception_desk';
         const def = this.renovationDefs[activeId];
         if (!def) return;
@@ -1499,20 +1521,17 @@ class Hotel3DSimulator {
 
         def.options.forEach((opt, idx) => {
             const isSelected = (idx === this.selectedOptionIndex);
-            let thumbSrc = def.sceneImg || 'assets/scene_lobby_reception.jpg';
+            let thumbSrc = `assets/designs/${id}_${opt.id}.jpg`;
             try {
                 if (window.LuxuryArt && window.LuxuryArt.getDesignPreview) {
                     thumbSrc = window.LuxuryArt.getDesignPreview(id, opt.id, nextLvl) || thumbSrc;
                 }
             } catch (e) {}
-            const cssFilter = (window.LuxuryArt && window.LuxuryArt.getDesignCssFilter)
-                ? window.LuxuryArt.getDesignCssFilter(opt.id)
-                : '';
 
             cardsHtml += `
                 <div class="gh-dock-option-card ${isSelected ? 'active' : ''}"
                      onclick="hotel3D.selectBottomDockOption('${id}', ${idx})">
-                    <div class="gh-dock-thumb" style="background-image: url('${thumbSrc}'); filter: ${cssFilter};">
+                    <div class="gh-dock-thumb" style="background-image: url('${thumbSrc}');">
                         <span class="gh-dock-opt-num">${styleNames[idx]}</span>
                         ${isSelected ? '<span class="gh-dock-check-tag">✓ SEÇİLİ</span>' : (!canAfford && !isMax ? '<span class="gh-dock-lock-tag">👁️ Dene</span>' : '<span class="gh-dock-check-tag">Seç</span>')}
                     </div>
@@ -1530,10 +1549,11 @@ class Hotel3DSimulator {
             <div class="gh-dock-header">
                 <div class="gh-dock-title-wrap">
                     <span class="gh-dock-lvl-badge">🔨 ${def.area} · Seviye ${curLvl} ➔ Seviye ${nextLvl}</span>
-                    <h4>${def.name} — 3 Lüks Tasarım Seçeneğinden Birini Seçin:</h4>
+                    <h4>${def.name} — 3 Farklı Tasarım Seçeneğinden Birini Seçip Onaylayın:</h4>
                 </div>
-                <div class="gh-dock-header-right">
-                    <button class="gh-dock-detail-btn" onclick="hotel3D.openRenovationModal('${id}')">📋 Tam Ekran İncele</button>
+                <div class="gh-dock-header-right" style="display:flex; gap:6px; align-items:center;">
+                    <button class="gh-dock-detail-btn" onclick="hotel3D.openRenovationModal('${id}')">📋 Detay</button>
+                    <button class="gh-dock-detail-btn" onclick="hotel3D.closeBottomDesignDock()" style="background: rgba(239,68,68,0.22); border-color: rgba(239,68,68,0.65); color: #fecaca;">✕ Kapat</button>
                 </div>
             </div>
 
@@ -1552,13 +1572,13 @@ class Hotel3DSimulator {
                 <div class="gh-dock-action-btns">
                     ${canAfford ? `
                         <button class="gh-dock-confirm-btn ready" onclick="hotel3D.executePurchase('${id}', '${chosenOpt.id}')">
-                            ✓ ${isMax ? 'Bu Tasarımı Uygula (Ücretsiz)' : `Seçimi Onayla & Kur ($${cost})`}
+                            ✓ ${isMax ? 'Seçimi Onayla & Kapat' : `Seçimi Onayla & Kur ($${cost})`}
                         </button>
                     ` : `
                         <button class="gh-dock-target-btn" onclick="hotel3D.setTargetRenovation('${id}')">
                             🎯 Hedef Yap
                         </button>
-                        <button class="gh-dock-confirm-btn locked" onclick="window.switchMainPage && window.switchMainPage('pageBoard')">
+                        <button class="gh-dock-confirm-btn locked" onclick="hotel3D.closeBottomDesignDock(); window.switchMainPage && window.switchMainPage('pageBoard')">
                             🧩 Masada Sipariş Tamamla ($${stillNeeded} Eksik)
                         </button>
                     `}
@@ -1819,8 +1839,9 @@ class Hotel3DSimulator {
             }
         }
 
-        // Advance ONLY this area's level (1 -> 2 -> 3 -> 4)
+        // Save selected design and mark renovation completed for this step
         this.state.renovations[id] = { optionId: optionId, level: nextLvl };
+        this.isRenovationDockOpen = false;
         this.previewingRenovation = null;
 
         this.recalcHotelStats();
@@ -1830,15 +1851,27 @@ class Hotel3DSimulator {
         this.cancelPreviewAndClose();
         this.closeBottomDesignDock();
 
-        this.walkCharacterTo(def.pinX, Math.min(84, def.pinY + 14), `Harika! ${def.name} (${opt.name}) Seviye ${nextLvl} olarak odaya kuruldu!`);
+        this.walkCharacterTo(def.pinX, Math.min(84, def.pinY + 14), `Harika! ${def.name} için "${opt.name}" kuruldu ve yenileme tamamlandı!`);
         this.renderStage();
         this.updateProximityPanel();
         this.renderHotelAreaCards();
 
-        const nextUpgradeMsg = nextLvl < 4
-            ? `Sonraki Seviye (Lv.${nextLvl + 1}) Kilidi Açıldı!`
-            : `👑 Maksimum Seviye (Lv.4 Kraliyet Lüksü) Tamamlandı!`;
-        this.showBanner(`🎉 ${def.name} Seviye ${nextLvl} (${opt.name}) Tamamlandı! ${nextUpgradeMsg}`);
+        const stageEl = document.getElementById('ghSceneStage');
+        if (stageEl && stageEl.scrollIntoView) {
+            setTimeout(() => {
+                stageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 60);
+        }
+
+        this.showBanner(`✅ ${def.name} — "${opt.name}" başarıyla kuruldu ve yenileme tamamlandı!`);
+    }
+
+    goToNextUnrenovatedArea() {
+        const allIds = Object.keys(this.renovationDefs);
+        const nextUnreno = allIds.find(aId => !this.getInstalledOption(aId)) || allIds.find(aId => this.getAreaLevel(aId) < 4) || allIds[0];
+        if (nextUnreno) {
+            this.goToAndOpenRenovation(nextUnreno);
+        }
     }
 
     // ----------------------------------------------------
@@ -1865,15 +1898,20 @@ class Hotel3DSimulator {
             const isTarget = (id === targetId);
 
             const installed = this.getInstalledOption(id);
+            const isRenovated = Boolean(installed) || curLvl >= 2;
             const installedOpt = installed ? (def.options.find(o => o.id === installed.optionId) || def.options[0]) : null;
             const conditionText = installedOpt
-                ? `Seviye ${curLvl}: ${installedOpt.name} (${installedOpt.style})`
+                ? `✅ Kurulu: ${installedOpt.name} (${installedOpt.style})`
                 : (def.defaultDesc || 'Seviye 1: Başlangıç Durumu');
 
-            const statusClass = isMax ? 'badge-max' : (canAfford ? 'badge-ready' : 'badge-saving');
-            const statusLabel = isMax
-                ? '👑 SEVİYE 4 (MAKSİMUM)'
-                : (canAfford ? `🟢 BÜTÇE HAZIR (Lv.${nextLvl})` : `⏳ $${stillNeeded} EKSİK`);
+            const cardImgUrl = installedOpt
+                ? `assets/designs/${id}_${installedOpt.id}.jpg`
+                : `assets/designs/${id}_old.jpg`;
+
+            const statusClass = isRenovated ? 'badge-max' : (canAfford ? 'badge-ready' : 'badge-saving');
+            const statusLabel = isRenovated
+                ? `✅ KURULDU (${installedOpt ? installedOpt.style : 'Lv.' + curLvl})`
+                : (canAfford ? `🟢 BÜTÇE HAZIR ($${cost})` : `⏳ $${stillNeeded} EKSİK`);
 
             let lvDots = '';
             for (let l = 1; l <= 4; l++) {
@@ -1881,8 +1919,8 @@ class Hotel3DSimulator {
             }
 
             cardsHtml += `
-                <div class="hotel-visual-area-card ${curLvl > 1 ? 'area-upgraded' : ''} ${isTarget ? 'area-target' : ''}">
-                    <div class="hotel-area-img-box" style="background-image: url('${def.sceneImg || 'assets/scene_lobby_reception.jpg'}')"
+                <div class="hotel-visual-area-card ${isRenovated ? 'area-upgraded' : ''} ${isTarget ? 'area-target' : ''}">
+                    <div class="hotel-area-img-box" style="background-image: url('${cardImgUrl}')"
                          onclick="hotel3D.goToAndOpenRenovation('${id}')">
                         <div class="hotel-area-top-badges">
                             <span class="hotel-area-cat">${def.area}</span>
@@ -1902,8 +1940,8 @@ class Hotel3DSimulator {
 
                         <div class="area-cost-metrics">
                             <div class="area-metric">
-                                <span>${isMax ? 'Durum' : `Seviye ${nextLvl} Maliyeti`}</span>
-                                <b class="text-gold">${isMax ? 'TAMAMLANDI' : '$' + cost}</b>
+                                <span>${isRenovated ? 'Durum' : 'Yenileme Maliyeti'}</span>
+                                <b class="text-gold">${isRenovated ? 'TAMAMLANDI' : '$' + cost}</b>
                             </div>
                             <div class="area-metric">
                                 <span>Mevcut Kasa</span>
@@ -1911,18 +1949,18 @@ class Hotel3DSimulator {
                             </div>
                             <div class="area-metric">
                                 <span>${canAfford ? '3 Tasarım' : 'Gereken Para'}</span>
-                                <b class="${canAfford ? 'text-green' : 'text-warn'}">${canAfford ? '🔓 AÇIK' : '-$' + stillNeeded}</b>
+                                <b class="${canAfford ? 'text-green' : 'text-warn'}">${isRenovated ? '✅ KURULU' : (canAfford ? '🔓 AÇIK' : '-$' + stillNeeded)}</b>
                             </div>
                         </div>
 
                         <div class="area-card-actions">
                             <button class="area-walk-btn" onclick="hotel3D.walkToArea('${id}')">
-                                📍 Odaya Git &amp; Sahnede Gör
+                                📍 Odaya Git
                             </button>
                             <button class="area-reno-btn ${canAfford ? 'unlocked' : 'locked'}" onclick="hotel3D.goToAndOpenRenovation('${id}')">
-                                ${isMax
+                                ${isRenovated
                                     ? '🎨 Tasarım Değiştir'
-                                    : (canAfford ? `✨ 3 Tasarımı Dene (Lv.${nextLvl})` : `🔒 Maliyet &amp; Önizleme ($${cost})`)}
+                                    : (canAfford ? `🔨 Yenile (3 Tasarım)` : `🔒 Önizle ($${cost})`)}
                             </button>
                         </div>
                     </div>
@@ -2151,27 +2189,89 @@ class Hotel3DSimulator {
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
         const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
         const installed = this.getInstalledOption(id);
+        const isRenovated = Boolean(installed) || curLvl >= 2;
         const cost = this.getNextUpgradeCost(id);
         const starsNeeded = this.getNextUpgradeStars(id);
         const canAfford = isMax || (balance >= cost && stars >= starsNeeded);
 
-        let statusClass = 'status-saving';
-        let statusText = 'BİRİKTİRİLİYOR';
-        let currentCondition = def.defaultDesc || 'Seviye 1: Başlangıç Durumu';
+        const installedOpt = installed ? (def.options.find(o => o.id === installed.optionId) || def.options[0]) : null;
 
-        if (installed) {
-            const opt = def.options.find(o => o.id === installed.optionId) || def.options[0];
-            currentCondition = `Seviye ${curLvl}: ${opt.name} (${opt.style})`;
+        // If renovation mode is CLOSED and this item is ALREADY RENOVATED, show clean completed state!
+        if (!this.isRenovationDockOpen && isRenovated && installedOpt) {
+            const installedThumb = `assets/designs/${id}_${installedOpt.id}.jpg`;
+            proxPanel.innerHTML = `
+                <div class="prox-card-inner" style="border-color: rgba(16, 185, 129, 0.55);">
+                    <div class="prox-top-row">
+                        <span class="prox-area-badge">${def.area}</span>
+                        <span class="prox-status-badge status-completed">✅ YENİLEME TAMAMLANDI</span>
+                    </div>
+                    <h3 class="prox-title">${def.name.toUpperCase()}</h3>
+                    <div style="display:flex; gap:12px; align-items:center; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.35); border-radius:12px; padding:10px; margin:8px 0;">
+                        <div style="width:96px; height:58px; border-radius:8px; background-image:url('${installedThumb}'); background-size:cover; background-position:center; flex-shrink:0; border:1.5px solid #ffd700;"></div>
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:0.75rem; color:#6ee7b7; font-weight:700;">SEÇİLEN &amp; KURULAN TASARIM:</div>
+                            <div style="font-size:0.9rem; color:#fff; font-weight:800;">${installedOpt.icon} ${installedOpt.name}</div>
+                            <div style="font-size:0.74rem; color:#cbd5e1;">Stil: ${installedOpt.style} · +$${installedOpt.incomeBoost}/dk Gelir</div>
+                        </div>
+                    </div>
+                    <div class="prox-actions-row">
+                        <button class="prox-btn-view-designs" onclick="hotel3D.goToNextUnrenovatedArea()">
+                            ➡️ Sıradaki Yenilenecek Eşyaya Geç
+                        </button>
+                        <button class="prox-btn-set-target" onclick="hotel3D.selectFurnitureOnStage('${def.id}')">
+                            🎨 Tasarımı Değiştir
+                        </button>
+                    </div>
+                </div>
+            `;
+            proxPanel.style.display = 'block';
+            return;
         }
 
-        if (isMax) {
-            statusClass = 'status-completed';
-            statusText = 'SEVİYE 4 (MAKSİMUM)';
-        } else if (canAfford) {
-            statusClass = 'status-ready';
-            statusText = `SEVİYE ${nextLvl} HAZIR!`;
+        // If renovation mode is CLOSED and item is NOT renovated yet, show compact summary with "Yenilemeyi Aç" button
+        if (!this.isRenovationDockOpen) {
+            const stillNeeded = Math.max(0, cost - balance);
+            const remainingAfter = Math.max(0, balance - cost);
+            proxPanel.innerHTML = `
+                <div class="prox-card-inner">
+                    <div class="prox-top-row">
+                        <span class="prox-area-badge">${def.area}</span>
+                        <span class="prox-status-badge ${canAfford ? 'status-ready' : 'status-saving'}">${canAfford ? '🟢 BÜTÇE HAZIR' : '⏳ BİRİKTİRİLİYOR'}</span>
+                    </div>
+                    <h3 class="prox-title">${def.name.toUpperCase()}</h3>
+                    <div class="prox-condition-row">
+                        <span class="prox-cond-label">Mevcut Durum:</span>
+                        <b class="prox-cond-val">${def.defaultDesc || 'Seviye 1: Yenilenmedi'}</b>
+                    </div>
+                    <div class="prox-fin-grid">
+                        <div class="prox-fin-box">
+                            <label>Yenileme Maliyeti</label>
+                            <b class="prox-cost">$${cost}</b>
+                        </div>
+                        <div class="prox-fin-box">
+                            <label>Mevcut Bakiye</label>
+                            <b class="prox-bal">$${balance}</b>
+                        </div>
+                        <div class="prox-fin-box highlight">
+                            <label>${canAfford ? 'Kalan Bakiye' : 'Gereken Para'}</label>
+                            <b class="${canAfford ? 'text-green' : 'text-warn'}">${canAfford ? '+$' + remainingAfter : '-$' + stillNeeded}</b>
+                        </div>
+                    </div>
+                    <div class="prox-actions-row">
+                        <button class="prox-btn-view-designs pulse" onclick="hotel3D.selectFurnitureOnStage('${def.id}')">
+                            🔨 Yenilemeyi Aç (3 Farklı Tasarımdan Seç)
+                        </button>
+                        <button class="prox-btn-set-target" onclick="hotel3D.setTargetRenovation('${def.id}')">
+                            🎯 Hedef Yap
+                        </button>
+                    </div>
+                </div>
+            `;
+            proxPanel.style.display = 'block';
+            return;
         }
 
+        // Otherwise renovation mode IS OPEN: show the 3 distinct options and Confirm & Close buttons!
         const stillNeeded = Math.max(0, cost - balance);
         const remainingAfter = Math.max(0, balance - cost);
         const chosenOpt = def.options[this.selectedOptionIndex] || def.options[0];
@@ -2180,22 +2280,14 @@ class Hotel3DSimulator {
         let inlineOptionsHtml = '';
         def.options.forEach((opt, idx) => {
             const isSelected = (idx === this.selectedOptionIndex);
-            let thumbSrc = def.sceneImg || 'assets/scene_lobby_reception.jpg';
-            try {
-                if (window.LuxuryArt && window.LuxuryArt.getDesignPreview) {
-                    thumbSrc = window.LuxuryArt.getDesignPreview(id, opt.id, nextLvl) || thumbSrc;
-                }
-            } catch (e) {}
-            const cssFilter = (window.LuxuryArt && window.LuxuryArt.getDesignCssFilter)
-                ? window.LuxuryArt.getDesignCssFilter(opt.id)
-                : '';
+            const thumbSrc = `assets/designs/${id}_${opt.id}.jpg`;
 
             inlineOptionsHtml += `
                 <div class="gh-dock-option-card ${isSelected ? 'active' : ''}"
                      onclick="hotel3D.selectBottomDockOption('${id}', ${idx})">
-                    <div class="gh-dock-thumb" style="background-image: url('${thumbSrc}'); filter: ${cssFilter};">
+                    <div class="gh-dock-thumb" style="background-image: url('${thumbSrc}');">
                         <span class="gh-dock-opt-num">${styleNames[idx]}</span>
-                        ${isSelected ? '<span class="gh-dock-check-tag">✓ SEÇİLİ</span>' : '<span class="gh-dock-lock-tag">👁️ Dene</span>'}
+                        ${isSelected ? '<span class="gh-dock-check-tag">✓ SEÇİLİ</span>' : '<span class="gh-dock-lock-tag">👁️ Seç</span>'}
                     </div>
                     <div class="gh-dock-opt-meta">
                         <strong>${opt.icon} ${opt.name}</strong>
@@ -2208,31 +2300,11 @@ class Hotel3DSimulator {
         proxPanel.innerHTML = `
             <div class="prox-card-inner">
                 <div class="prox-top-row">
-                    <span class="prox-area-badge">${def.area} · Seviye ${curLvl}/4</span>
-                    <span class="prox-status-badge ${statusClass}">${statusText}</span>
+                    <span class="prox-area-badge">🔨 ${def.area} · YENİLEME AÇIK</span>
+                    <button class="gh-dock-detail-btn" onclick="hotel3D.closeBottomDesignDock()" style="background: rgba(239,68,68,0.22); border-color: rgba(239,68,68,0.65); color: #fecaca; padding: 3px 10px; font-size: 0.75rem;">✕ Kapat</button>
                 </div>
-                <h3 class="prox-title">${def.name.toUpperCase()}</h3>
-                <div class="prox-condition-row">
-                    <span class="prox-cond-label">Mevcut Durum:</span>
-                    <b class="prox-cond-val">${currentCondition}</b>
-                </div>
+                <h3 class="prox-title">${def.name.toUpperCase()} — 3 TASARIMDAN SEÇİN</h3>
                 
-                <div class="prox-fin-grid">
-                    <div class="prox-fin-box">
-                        <label>${isMax ? 'Durum' : `Seviye ${nextLvl} Maliyeti`}</label>
-                        <b class="prox-cost">${isMax ? 'MAX' : '$' + cost}</b>
-                    </div>
-                    <div class="prox-fin-box">
-                        <label>Mevcut Bakiye</label>
-                        <b class="prox-bal">$${balance}</b>
-                    </div>
-                    <div class="prox-fin-box highlight">
-                        <label>${canAfford ? 'Kalan Bakiye' : 'Gereken Para'}</label>
-                        <b class="${canAfford ? 'text-green' : 'text-warn'}">${canAfford ? '+$' + remainingAfter : '-$' + stillNeeded}</b>
-                    </div>
-                </div>
-
-                <!-- 3 Tasarım Seçeneği Doğrudan Burada da Görünür ve Tıklanabilir -->
                 <div class="gh-dock-options-grid" style="margin: 10px 0;">
                     ${inlineOptionsHtml}
                 </div>
@@ -2240,15 +2312,15 @@ class Hotel3DSimulator {
                 <div class="prox-actions-row">
                     ${canAfford ? `
                         <button class="prox-btn-view-designs pulse" onclick="hotel3D.executePurchase('${def.id}', '${chosenOpt.id}')">
-                            ✓ ${isMax ? 'Seçili Tasarımı Uygula (Ücretsiz)' : `Seçili Tasarımı Onayla & Seviye ${nextLvl}'e Yükselt ($${cost})`}
+                            ✓ ${isMax ? 'Seçimi Onayla & Kapat' : `Seçimi Onayla & Kur ($${cost})`}
                         </button>
                     ` : `
-                        <button class="prox-btn-locked" onclick="hotel3D.openRenovationModal('${def.id}')">
-                            📋 Detaylı İncele ($${stillNeeded} eksik · Maliyet: $${cost})
+                        <button class="prox-btn-locked" onclick="hotel3D.closeBottomDesignDock(); window.switchMainPage && window.switchMainPage('pageBoard');">
+                            🧩 Masada Sipariş Tamamla ($${stillNeeded} eksik · Maliyet: $${cost})
                         </button>
                     `}
-                    <button class="prox-btn-set-target" onclick="hotel3D.setTargetRenovation('${def.id}')">
-                        🎯 Hedef Yap
+                    <button class="prox-btn-set-target" onclick="hotel3D.closeBottomDesignDock()">
+                        ✕ Vazgeç
                     </button>
                 </div>
             </div>
@@ -2285,6 +2357,7 @@ class Hotel3DSimulator {
         this.currentRoom = roomKey;
         const rm = this.rooms[roomKey];
         this.selectedAreaId = rm.areas[0] || this.selectedAreaId;
+        this.isRenovationDockOpen = false;
         this.previewingRenovation = null;
         this.panX = 0;
         this.panY = 0;
@@ -2295,14 +2368,14 @@ class Hotel3DSimulator {
             x: 24,
             y: 78,
             walking: false,
-            speech: `${rm.name} odasındayız! Alt çubuktan 3 lüks tasarımı canlı deneyebilirsin.`
+            speech: `${rm.name} odasındayız! Yenilemek istediğin eşyanın 🔨 butonuna dokunabilirsin.`
         };
 
         document.querySelectorAll('.room-jump-btn').forEach(b => b.classList.remove('active'));
         const btn = document.querySelector(`.room-jump-btn[onclick*="${roomKey}"]`);
         if (btn) btn.classList.add('active');
 
-        this.openBottomDesignDock(this.selectedAreaId, false);
+        this.closeBottomDesignDock();
         this.renderStage();
         this.updateProximityPanel();
         this.showBanner(`📍 ${rm.name} sahnesine geçildi.`);
@@ -2310,7 +2383,9 @@ class Hotel3DSimulator {
 
     onResize() {
         this.renderStage();
-        this.renderBottomDesignDock();
+        if (this.isRenovationDockOpen) {
+            this.renderBottomDesignDock();
+        }
     }
 }
 

@@ -4,6 +4,21 @@ Bu dosya, **Velvet Secrets (Aurelia Palace Hotel)** Android oyununun tüm versiy
 
 ---
 
+## 🎨 Sürüm `v2.5.2` (18 Ekim 2026) — *44 Farklı Full-HD Tasarım Seçeneği Görseli (`assets/designs/`) ve Onay Sonrası Otomatik Kapanan Yenileme Çubuğu*
+- **Her Eşya İçin Birbirinden Tamamen Farklı 4 Full-HD Görsel (`11 Alan × 4 Durum = 44 Görsel`):**
+  - `www/assets/designs/` klasöründe 11 otel alanının tamamı için birbirinden görsel, renk paleti, kadraj, materyal küreleri ve 3D madalyon olarak tamamen ayrışan **44 adet keskin Full-HD `.jpg`** üretildi:
+    - `{alan}_old.jpg`: Yıpranmış, soluk sepya-gri **Seviye 1 (Yenilenmemiş Eski Hali)** görseli.
+    - `{alan}_opt_a.jpg`: **1. Modern Zarafet** — İtalyan Beyaz Carrara Mermeri, 24K Altın ve Kristal aydınlatmalı tasarım.
+    - `{alan}_opt_b.jpg`: **2. Kraliyet Kadife** — Bordo/Yakut Kraliyet Kadifesi, Siyah Nero Mermer ve şamdanlı tasarım.
+    - `{alan}_opt_c.jpg`: **3. Akdeniz Riviera** — Turkuaz Mozaik, Zümrüt İpek ve Oyma Maun sahil tasarımı.
+- **Seçim Yapıp Onaylandığında Yenilemenin Otomatik Kapanması (`hotel3d.js`):**
+  - Oyuncu 3 tasarımdan birini seçip **`✓ Seçimi Onayla & Kur`** butonuna bastığı anda:
+    1. Seçilen tasarım oda sahnesindeki eşyaya kalıcı olarak uygulanır.
+    2. Alt 3-Tasarım Seçici Çubuğu (`#ghBottomDesignDock`) ve Yenileme Penceresi (`#renoModal`) **otomatik olarak kapanır**.
+    3. Sahnedeki eşyanın üzerindeki `🔨 YENİLE!` çekici kalkar ve yerine **`✅ Kurulu`** rozeti gelir; yakınlık paneli de **`✅ YENİLEME TAMAMLANDI`** durumuna geçerek sıradaki yenilenecek eşyaya geçiş butonu sunar.
+
+---
+
 ## 🛠️ Sürüm `v2.5.1` (18 Ekim 2026) — *Alt 3-Tasarım Seçici Çubuğu (`#ghBottomDesignDock`) Görünürlük, Android WebView Canvas ve Mobil Etkileşim Düzeltmesi*
 - **Android WebView `SecurityError` (Tainted Canvas) Çökmesi Giderildi (`luxury_art.js`):**
   - Android `file://` protokolünde yerel görseller `<canvas>` üzerine çizilip `toDataURL()` çağrıldığında oluşan güvenlik hatası (`SecurityError`), alt 3-tasarım seçici çubuğunun (`#ghBottomDesignDock`) HTML içeriği oluşturulmadan hemen önce kodun durmasına yol açıyordu. `getDesignPreview()` fonksiyonu güvenli `try/catch` yapısına alındı ve her 3 tasarım için özel foto-gerçekçi CSS filtre ve ışıklandırma (`getDesignCssFilter`) eklendi.

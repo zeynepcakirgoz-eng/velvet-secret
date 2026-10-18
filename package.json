@@ -1,8 +1,8 @@
 {
   "name": "velvet-secrets",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "private": true,
-  "description": "Velvet Secrets (v2.5.1) - Gossip Harbor Tarzı 2.5D Foto-Gerçekçi Otel Restorasyonu, Sabitlenmiş Alt 3-Tasarım Seçici Çubuğu ve Canlı Önizleme",
+  "description": "Velvet Secrets (v2.5.2) - 44 Farklı Full-HD Tasarım Görseli ve Seçim Onaylandığında Otomatik Kapanan Restorasyon Sistemi",
   "scripts": {
     "sync:android": "npx cap sync android",
     "open:android": "npx cap open android"
