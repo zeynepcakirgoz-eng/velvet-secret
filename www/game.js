@@ -5,14 +5,12 @@
   const MAX_ENERGY = 500;
   const ENERGY_INTERVAL = 60000;
 
-  // Web Audio API Synthesizer for rich sound effects (no external MP3s needed)
+  // Web Audio Synthesizer (High quality chime, pop, fanfare)
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass) {
-        audioCtx = new AudioContextClass();
-      }
+      const AudioClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioClass) audioCtx = new AudioClass();
     }
     if (audioCtx && audioCtx.state === 'suspended') {
       audioCtx.resume();
@@ -28,8 +26,8 @@
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(420, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(160, ctx.currentTime + 0.08);
+        osc.frequency.setValueAtTime(450, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.08);
         gain.gain.setValueAtTime(0.2, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
         osc.connect(gain);
@@ -42,18 +40,18 @@
       try {
         const ctx = getAudioContext();
         if (!ctx) return;
-        const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
-        notes.forEach((freq, idx) => {
+        const freqs = [523.25, 659.25, 783.99, 1046.5];
+        freqs.forEach((f, idx) => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.06);
-          gain.gain.setValueAtTime(0.18, ctx.currentTime + idx * 0.06);
-          gain.gain.exponentialRampToValueAtTime(0.005, ctx.currentTime + idx * 0.06 + 0.2);
+          osc.frequency.setValueAtTime(f, ctx.currentTime + idx * 0.06);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.005, ctx.currentTime + idx * 0.06 + 0.22);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(ctx.currentTime + idx * 0.06);
-          osc.stop(ctx.currentTime + idx * 0.06 + 0.2);
+          osc.stop(ctx.currentTime + idx * 0.06 + 0.22);
         });
       } catch (e) {}
     },
@@ -85,19 +83,19 @@
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.08);
           gain.gain.setValueAtTime(0.22, ctx.currentTime + i * 0.08);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.08 + 0.4);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.08 + 0.45);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(ctx.currentTime + i * 0.08);
-          osc.stop(ctx.currentTime + i * 0.08 + 0.4);
+          osc.stop(ctx.currentTime + i * 0.08 + 0.45);
         });
       } catch (e) {}
     }
   };
 
-  // 3 Distinct Luxury Merge Item Chains (6 levels each)
+  // 3 Item Chains (6 levels each)
   const itemChains = [
-    // Chain 0: Kozmetik & Bakım
+    // 0: Kozmetik
     [
       { name: 'Nemlendirici', icon: '🧴' },
       { name: 'Mat Ruj', icon: '💄' },
@@ -106,7 +104,7 @@
       { name: 'Altın Ayna', icon: '🪞' },
       { name: 'Elmas Kozmetik Seti', icon: '💖' }
     ],
-    // Chain 1: Mücevher & Aksesuar
+    // 1: Mücevher
     [
       { name: 'Gümüş Yüzük', icon: '💍' },
       { name: 'İnci Kolye', icon: '📿' },
@@ -115,14 +113,14 @@
       { name: 'Zümrüt Kupa', icon: '🏆' },
       { name: 'Kraliyet Asası', icon: '⚜️' }
     ],
-    // Chain 2: Lüks Sosyete
+    // 2: Lüks Sosyete
     [
       { name: 'Mühürlü Davet', icon: '💌' },
       { name: 'Kristal Kadeh', icon: '🥂' },
       { name: 'Eski Şampanya', icon: '🍾' },
       { name: 'İpek Topuklu', icon: '👠' },
       { name: 'Spor Araba', icon: '🏎️' },
-      { name: 'Lüks Mega Yat', icon: '🛥️' }
+      { name: 'Mega Yat', icon: '🛥️' }
     ]
   ];
 
@@ -132,13 +130,92 @@
     return chain[lvlIdx];
   }
 
-  const tasks = [
-    { id: 'merge', name: 'Kusursuz Birleşim', desc: 'Masanızdaki objeleri birleştirin', goal: 4, reward: 50, metric: 'merges' },
-    { id: 'jewel', name: 'Göz Alıcı Lüks', desc: 'Seviye 3 veya üstü bir obje üretin', goal: 2, reward: 80, metric: 'highLevels' },
-    { id: 'order', name: 'VIP Sipariş', desc: 'Misafir siparişlerini tamamlayın', goal: 2, reward: 70, metric: 'orders' }
+  // Gossip Harbor Characters Pool
+  const customerPool = [
+    { name: 'Adrian Vale', role: 'Gizemli Milyarder', avatar: '🤵', quotes: ['Bu akşamki gizli davet için arıyordum.', 'Isabella, bu otelin sırları derin...'] },
+    { name: 'Olivia Sterling', role: 'Magazin Muhabiri', avatar: '🕵️‍♀️', quotes: ['Sosyete bu haberi konuşacak!', 'Körfez fısıltıları asla susmaz.'] },
+    { name: 'Isabella Laurent', role: 'Otel Sahibi', avatar: '👑', quotes: ['Aurelia Oteli eski görkemine kavuşacak.', 'Babamın mirasını kimseye bırakmam.'] },
+    { name: 'Harrison Vance', role: 'Aile Avukatı', avatar: '🎩', quotes: ['Vasiyetnamenin şartları yerine gelmeli.', 'Resmi kayıtlar tamamlanıyor.'] },
+    { name: 'Madame Vivienne', role: 'Antika Koleksiyoneri', avatar: '💎', quotes: ['Zarafet asla tesadüf değildir sevgilim.', 'Lüks, detaylarda gizlidir.'] }
   ];
 
-  // Storage helper
+  // Renovation Storyline Tasks (Cost in ⭐ Stars)
+  const defaultRenovations = [
+    {
+      id: 'floor',
+      name: 'Lobi Mermerlerini Temizle & Parlat',
+      cost: 1,
+      done: false,
+      desc: 'Yılların tozunu temizle, İtalyan mermerlerini pırıl pırıl parlat.',
+      dialogueChar: 'Isabella Laurent',
+      dialogueAvatar: '👑',
+      dialogueText: '"Zemindeki mermerler pırıl pırıl oldu! Zemin temizlenirken altında mühürlü eski bir plaka fark ettim..."',
+      roomVisual: '✨🏨'
+    },
+    {
+      id: 'desk',
+      name: 'Altın Varaklı Resepsiyon Bankosu',
+      cost: 1,
+      done: false,
+      desc: 'Konukları büyüleyecek gösterişli altın bankoyu kur.',
+      dialogueChar: 'Adrian Vale',
+      dialogueAvatar: '🤵',
+      dialogueText: '"Bu banko babanın dönemindeki ihtişamı yansıtıyor. Eski konuk kayıt defterleri buraya saklanmış olabilir."',
+      roomVisual: '🛎️🏨'
+    },
+    {
+      id: 'chandelier',
+      name: 'Kristal Aurelia Avizesi',
+      cost: 2,
+      done: false,
+      desc: 'Tavana körfezin en görkemli Bohemya kristal avizesini as.',
+      dialogueChar: 'Isabella Laurent',
+      dialogueAvatar: '👑',
+      dialogueText: '"Tavandaki avizenin ışıkları tüm körfezden görünüyor! Otelimiz yeniden hayat buluyor."',
+      roomVisual: '💎🏨'
+    },
+    {
+      id: 'sofas',
+      name: 'Bordo Kadife VIP Köşesi',
+      cost: 2,
+      done: false,
+      desc: 'Şöminenin etrafına konforlu kadife koltukları yerleştir.',
+      dialogueChar: 'Olivia Sterling',
+      dialogueAvatar: '🕵️‍♀️',
+      dialogueText: '"Sosyete fısıltıları başladı bile. Bu koltuklarda kim bilir hangi entrikalar konuşulacak..."',
+      roomVisual: '🛋️🏨'
+    },
+    {
+      id: 'safe',
+      name: 'Mühürlü Duvar Kasasını Açığa Çıkar',
+      cost: 3,
+      done: false,
+      desc: 'Resepsiyonun arkasındaki gizli duvar kasasının şifresini çöz.',
+      dialogueChar: 'Harrison Vance',
+      dialogueAvatar: '🎩',
+      dialogueText: '"Kasanın içinden eski bir vasiyetname çıktı... Isabella, bu otel sandığından çok daha büyük sırlar saklıyor!"',
+      roomVisual: '🗝️🏨'
+    },
+    {
+      id: 'terrace',
+      name: 'Panoramik Teras Barı & Işıklar',
+      cost: 3,
+      done: false,
+      desc: 'Körfez manzaralı lüks teras barını ve ışıklandırmayı tamamla.',
+      dialogueChar: 'Isabella Laurent',
+      dialogueAvatar: '👑',
+      dialogueText: '"Aurelia Terası açıldı! Yıldızların ve körfezin ışıkları altında yeni bir çağ başlıyor."',
+      roomVisual: '🌅🏨'
+    }
+  ];
+
+  const tasks = [
+    { id: 'merge', name: 'Kusursuz Birleşim', desc: 'Masanızdaki objeleri birleştirin', goal: 4, reward: 50, metric: 'merges' },
+    { id: 'orders', name: 'Sipariş Teslimatı', desc: 'Müşteri siparişlerini teslim edin', goal: 2, reward: 80, metric: 'ordersCompleted' },
+    { id: 'stars', name: 'Otel Yenileme', desc: 'Bir yenileme görevi tamamlayın', goal: 1, reward: 100, metric: 'renovationsDone' }
+  ];
+
+  // Safe storage helper
   const memoryStore = {};
   const safeStorage = {
     getItem(k) {
@@ -151,40 +228,79 @@
 
   let state;
 
+  function generateRandomOrder(id) {
+    const cust = customerPool[Math.floor(Math.random() * customerPool.length)];
+    const quote = cust.quotes[Math.floor(Math.random() * cust.quotes.length)];
+
+    // 1 or 2 items
+    const itemCount = Math.random() > 0.6 ? 2 : 1;
+    const reqItems = [];
+
+    for (let k = 0; k < itemCount; k++) {
+      const type = Math.floor(Math.random() * itemChains.length);
+      // levels 1 to 4 for orders
+      const level = Math.min(4, 1 + Math.floor(Math.random() * 3));
+      reqItems.push({ type, level });
+    }
+
+    const totalLvl = reqItems.reduce((acc, item) => acc + item.level, 0);
+    const rewardCoins = 80 + totalLvl * 50;
+    const rewardStars = totalLvl >= 3 ? 2 : 1;
+
+    return {
+      id: id || Date.now() + Math.random(),
+      customer: cust.name,
+      role: cust.role,
+      avatar: cust.avatar,
+      quote: quote,
+      items: reqItems,
+      rewardCoins,
+      rewardStars
+    };
+  }
+
   function initialState() {
-    // 5x5 board with some starting items
     const board = Array.from({ length: 25 }, (_, i) => {
-      if (i % 5 === 0 || i % 7 === 0) {
+      if (i % 4 === 0 || i % 6 === 0) {
         return { type: Math.floor(Math.random() * itemChains.length), level: 1 };
       }
       return null;
     });
 
+    const initialOrders = [
+      generateRandomOrder(1),
+      generateRandomOrder(2),
+      generateRandomOrder(3)
+    ];
+
     return {
       energy: 500,
       energyUpdated: Date.now(),
       prestige: 1200,
-      gems: 10,
+      gems: 15,
+      stars: 2,
       playerLevel: 1,
       xp: 0,
       board,
       selected: null,
       merges: 0,
-      highLevels: 0,
-      orders: 0,
-      claimed: [],
-      storyChoice: null,
-      hotel: 1,
-      notice: 'Hoş geldin! İki aynı objeyi sürükleyip birleştir veya Lüks Sandık ile yeni obje üret.',
-      storyTitle: 'Bir davet, bin sır…',
-      storyText: 'Açılış gecesinde Isabella Laurent, masada unutulmuş mühürlü bir mektup buldu. Bu gece herkesin sakladığı bir şey var.',
-      log: 'Henüz bir seçim yapmadın. Her karar hikâyenin yönünü değiştirecek.'
+      ordersCompleted: 0,
+      renovationsDone: 0,
+      claimedTasks: [],
+      orders: initialOrders,
+      renovations: JSON.parse(JSON.stringify(defaultRenovations)),
+      activeDialogue: {
+        character: 'Isabella Laurent',
+        avatar: '👑',
+        text: '"Aurelia Oteli eski görkemine kavuşacak. Masadaki siparişleri hazırlayıp Yıldız (⭐) toplayarak lobiyi yenilemeye başlayalım!"'
+      },
+      notice: 'Hoş geldin! Üstteki siparişleri tamamla, Yıldızları (⭐) topla ve oteli yenile.'
     };
   }
 
   function load() {
     try {
-      const raw = safeStorage.getItem('velvetSecretsSaveV2');
+      const raw = safeStorage.getItem('velvetSecretsGossipV3');
       if (raw) {
         const s = JSON.parse(raw);
         if (s && Array.isArray(s.board) && s.board.length === 25) {
@@ -198,7 +314,7 @@
 
   function save() {
     try {
-      safeStorage.setItem('velvetSecretsSaveV2', JSON.stringify(state));
+      safeStorage.setItem('velvetSecretsGossipV3', JSON.stringify(state));
     } catch (e) {}
   }
 
@@ -238,7 +354,7 @@
 
   function addXP(amount, clientX, clientY) {
     state.xp += amount;
-    const needed = state.playerLevel * 50;
+    const needed = state.playerLevel * 60;
     if (clientX && clientY) {
       showFloatingText(`+${amount} XP`, clientX, clientY);
     }
@@ -247,7 +363,7 @@
       state.playerLevel++;
       state.energy = Math.min(MAX_ENERGY, state.energy + 100);
       state.gems += 5;
-      state.prestige += 300;
+      state.stars += 1;
       sfx.fanfare();
       triggerLevelUpModal();
     }
@@ -262,46 +378,545 @@
     }
   }
 
-  function renderStats() {
+  function spend(n) {
     tick();
-    if ($('energy')) $('energy').textContent = state.energy;
-    if ($('coins')) $('coins').textContent = state.prestige;
-    if ($('gems')) $('gems').textContent = state.gems;
-
-    const left = state.energy >= MAX_ENERGY ? 60 : 60 - Math.floor((Date.now() - state.energyUpdated) / 1000) % 60;
-    if ($('timer')) $('timer').textContent = '00:' + String(left).padStart(2, '0');
-
-    if ($('playerLevelBadge')) $('playerLevelBadge').textContent = `OYUNCU SEVİYESİ ${state.playerLevel}`;
-    const xpNeeded = state.playerLevel * 50;
-    const pct = Math.min(100, (state.xp / xpNeeded) * 100);
-    if ($('xpBar')) $('xpBar').style.width = `${pct}%`;
-
-    if ($('storyTitle')) $('storyTitle').textContent = state.storyTitle;
-    if ($('storyText')) $('storyText').textContent = state.storyText;
-    if ($('log')) $('log').textContent = state.log;
-
-    if ($('hotelLevel')) $('hotelLevel').textContent = 'Seviye ' + state.hotel;
-    if ($('hotelTitle')) {
-      $('hotelTitle').textContent =
-        state.hotel === 1 ? 'Lobi — ilk adım' : state.hotel === 2 ? 'Altın Salon — yenilendi' : 'Aurelia Terası — açıldı';
+    if (state.energy < n) {
+      notify('Enerjin bitti! Reklam izleyerek veya şans çarkını çevirerek anında enerji kazanabilirsin.');
+      return false;
     }
-    if ($('hotelText')) {
-      $('hotelText').textContent =
-        state.hotel === 1
-          ? 'Prestij biriktirerek otelin yeni bölümlerini aç.'
-          : state.hotel === 2
-          ? 'Lobi yenilendi. Şimdi konukların gözdesi olan terasa hazırlan.'
-          : 'Terasın ışıkları tüm körfezi aydınlatıyor.';
+    state.energy -= n;
+    if (state.energy < MAX_ENERGY && state.energyUpdated > Date.now()) {
+      state.energyUpdated = Date.now();
     }
-    if ($('renovate')) {
-      $('renovate').textContent =
-        state.hotel === 1 ? 'Lobiyi yenile · 300 ◆' : state.hotel === 2 ? 'Terasa erişim aç · 500 ◆' : 'Tüm alanlar yenilendi ✦';
-      $('renovate').disabled = state.hotel >= 3;
+    return true;
+  }
+
+  /* ================= GOSSIP HARBOR ORDERS LOGIC ================= */
+  // Check if player has the items on the board
+  function checkOrderFulfillment(order) {
+    const boardCopy = state.board.map((x) => (x ? { ...x } : null));
+    const itemsStatus = [];
+    let allReady = true;
+
+    for (const req of order.items) {
+      let foundIdx = -1;
+      for (let i = 0; i < boardCopy.length; i++) {
+        if (boardCopy[i] && boardCopy[i].type === req.type && boardCopy[i].level === req.level) {
+          foundIdx = i;
+          break;
+        }
+      }
+
+      if (foundIdx !== -1) {
+        itemsStatus.push({ ...req, ready: true });
+        boardCopy[foundIdx] = null; // simulate consumed
+      } else {
+        itemsStatus.push({ ...req, ready: false });
+        allReady = false;
+      }
     }
 
-    document.querySelectorAll('[data-choice]').forEach((b) => {
-      b.disabled = !!state.storyChoice;
+    return { allReady, itemsStatus };
+  }
+
+  function renderOrders() {
+    const tray = $('orderTray');
+    if (!tray) return;
+    tray.innerHTML = '';
+
+    state.orders.forEach((ord, index) => {
+      const { allReady, itemsStatus } = checkOrderFulfillment(ord);
+
+      const card = document.createElement('div');
+      card.className = 'order-card' + (allReady ? ' ready-to-serve' : '');
+
+      let itemsHtml = '';
+      itemsStatus.forEach((it) => {
+        const meta = getItemMeta(it.type, it.level);
+        itemsHtml += `
+          <div class="req-item-pill ${it.ready ? 'ready' : ''}">
+            <span class="req-item-emoji">${meta.icon}</span>
+            <span class="req-item-lv">LV.${it.level}</span>
+            ${it.ready ? '<span class="req-status-check">✓</span>' : ''}
+          </div>
+        `;
+      });
+
+      card.innerHTML = `
+        <div class="order-customer">
+          <span class="order-avatar">${ord.avatar}</span>
+          <div>
+            <div class="order-c-name">${ord.customer}</div>
+          </div>
+        </div>
+        <div class="order-quote">"${ord.quote}"</div>
+        <div class="order-items">${itemsHtml}</div>
+        <div class="order-rewards">
+          <span>◆ +${ord.rewardCoins}</span>
+          <span class="reward-stars">⭐ +${ord.rewardStars}</span>
+        </div>
+        <button class="serve-btn ${allReady ? 'can-serve' : ''}" ${!allReady ? 'disabled' : ''}>
+          ${allReady ? 'TESLİM ET' : 'HAZIRLA'}
+        </button>
+      `;
+
+      const serveBtn = card.querySelector('.serve-btn');
+      if (serveBtn && allReady) {
+        serveBtn.onclick = (e) => {
+          e.preventDefault();
+          serveOrder(index, ord, e.clientX, e.clientY);
+        };
+      }
+
+      tray.appendChild(card);
     });
+  }
+
+  function serveOrder(orderIdx, order, clientX, clientY) {
+    // Actually remove the items from board
+    for (const req of order.items) {
+      for (let i = 0; i < state.board.length; i++) {
+        if (state.board[i] && state.board[i].type === req.type && state.board[i].level === req.level) {
+          state.board[i] = null;
+          break;
+        }
+      }
+    }
+
+    state.prestige += order.rewardCoins;
+    state.stars += order.rewardStars;
+    state.ordersCompleted++;
+
+    sfx.coin();
+    if (clientX && clientY) {
+      showFloatingText(`⭐ +${order.rewardStars} Yıldız!`, clientX, clientY);
+      showFloatingText(`◆ +${order.rewardCoins}`, clientX, clientY - 30);
+    }
+
+    addXP(30);
+
+    // Replace order with fresh one
+    state.orders[orderIdx] = generateRandomOrder();
+
+    // Update active dialogue
+    state.activeDialogue = {
+      character: order.customer,
+      avatar: order.avatar,
+      text: `"${order.customer}: Teşekkürler Isabella! Bu tam da ihtiyacım olan şeydi. Otelin için yıldızlarını (⭐) iyi kullan!"`
+    };
+
+    notify(`Sipariş tamamlandı! +${order.rewardCoins} Prestij ve +${order.rewardStars} Yenileme Yıldızı kazandın!`);
+    renderAll();
+  }
+
+  /* ================= HOTEL RENOVATIONS (GOSSIP HARBOR STYLE) ================= */
+  function renderHotelStudio() {
+    const list = $('renovationList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    let availableCount = 0;
+    let completedCount = 0;
+
+    state.renovations.forEach((renov) => {
+      if (renov.done) {
+        completedCount++;
+      } else if (state.stars >= renov.cost) {
+        availableCount++;
+      }
+
+      const item = document.createElement('div');
+      item.className = 'renovation-item' + (renov.done ? ' done' : '');
+
+      item.innerHTML = `
+        <div class="renov-item-info">
+          <strong>${renov.name}</strong>
+          <p>${renov.desc}</p>
+        </div>
+        ${
+          renov.done
+            ? '<span class="renov-done-badge">✓ TAMAMLANDI</span>'
+            : `<button class="renov-action-btn" ${state.stars < renov.cost ? 'disabled' : ''}>
+                <span>⭐ ${renov.cost}</span>
+                <span>YENİLE</span>
+              </button>`
+        }
+      `;
+
+      const btn = item.querySelector('.renov-action-btn');
+      if (btn && !renov.done) {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          executeRenovation(renov, e.clientX, e.clientY);
+        };
+      }
+
+      list.appendChild(item);
+    });
+
+    // Badge on tab
+    const badge = $('hotelTaskBadge');
+    if (badge) {
+      badge.textContent = availableCount;
+      badge.style.display = availableCount > 0 ? 'inline-block' : 'none';
+    }
+
+    // Room progress & visual
+    const pct = Math.round((completedCount / state.renovations.length) * 100);
+    if ($('renovationBar')) $('renovationBar').style.width = `${pct}%`;
+    if ($('renovationPercent')) $('renovationPercent').textContent = `Tamamlanma: %${pct}`;
+
+    const lastDone = [...state.renovations].reverse().find((r) => r.done);
+    if (lastDone && $('roomVisual')) {
+      $('roomVisual').textContent = lastDone.roomVisual;
+    }
+
+    // Dialogue bubble
+    if ($('dialogueAvatar')) $('dialogueAvatar').textContent = state.activeDialogue.avatar;
+    if ($('dialogueCharacter')) $('dialogueCharacter').textContent = state.activeDialogue.character;
+    if ($('dialogueText')) $('dialogueText').textContent = state.activeDialogue.text;
+  }
+
+  function executeRenovation(renov, clientX, clientY) {
+    if (state.stars < renov.cost) return;
+
+    state.stars -= renov.cost;
+    renov.done = true;
+    state.renovationsDone++;
+
+    sfx.fanfare();
+    if (clientX && clientY) {
+      showFloatingText(`🛠️ YENİLENDİ!`, clientX, clientY);
+    }
+
+    addXP(40);
+
+    // Dialogue update
+    state.activeDialogue = {
+      character: renov.dialogueChar,
+      avatar: renov.dialogueAvatar,
+      text: renov.dialogueText
+    };
+
+    notify(`Tebrikler! "${renov.name}" başarıyla tamamlandı ve otel güzelleşti!`);
+    renderAll();
+  }
+
+  /* ================= LUCKY WHEEL ================= */
+  function initLuckyWheel() {
+    const wheel = $('luckyWheel');
+    const spinBtn = $('spinBtn');
+    const spinAdBtn = $('spinAdBtn');
+    const resultNotice = $('wheelResultNotice');
+
+    let isSpinning = false;
+    let currentDegree = 0;
+
+    const segments = [
+      { name: '100 Enerji', reward: () => { state.energy = Math.min(MAX_ENERGY, state.energy + 100); } },
+      { name: '500 Prestij', reward: () => { state.prestige += 500; } },
+      { name: '10 Mücevher', reward: () => { state.gems += 10; } },
+      { name: '1 Yenileme Yıldızı', reward: () => { state.stars += 1; } },
+      { name: '50 Enerji', reward: () => { state.energy = Math.min(MAX_ENERGY, state.energy + 50); } },
+      { name: 'VIP Sandık (Nadir Obje)', reward: () => { spawnItem(); state.prestige += 150; } }
+    ];
+
+    function runSpin() {
+      if (isSpinning) return;
+      isSpinning = true;
+      sfx.pop();
+
+      const chosenIndex = Math.floor(Math.random() * segments.length);
+      const randomExtraRotations = (5 + Math.floor(Math.random() * 3)) * 360;
+      // segment angle
+      const targetDeg = randomExtraRotations + (360 - chosenIndex * 60 - 30);
+      currentDegree += targetDeg;
+
+      if (wheel) wheel.style.transform = `rotate(${currentDegree}deg)`;
+      if (resultNotice) resultNotice.textContent = 'Çark dönüyor... Şans seninle olsun!';
+
+      setTimeout(() => {
+        isSpinning = false;
+        const prize = segments[chosenIndex];
+        prize.reward();
+        sfx.fanfare();
+        if (resultNotice) resultNotice.textContent = `🎉 TEBRİKLER! "${prize.name}" KAZANDIN!`;
+        notify(`Şans Çarkından ödül kazanıldı: ${prize.name}!`);
+        renderAll();
+      }, 4200);
+    }
+
+    if (spinBtn) {
+      spinBtn.onclick = () => runSpin();
+    }
+    if (spinAdBtn) {
+      spinAdBtn.onclick = () => {
+        openAdModal(() => runSpin());
+      };
+    }
+  }
+
+  /* ================= REWARDED AD MODAL ================= */
+  let adCallback = null;
+  function openAdModal(cb) {
+    adCallback = cb;
+    const modal = $('adModal');
+    const countdownEl = $('adCountdown');
+    const claimBtn = $('adClaimBtn');
+
+    if (!modal || !countdownEl || !claimBtn) return;
+
+    modal.style.display = 'flex';
+    let sec = 5;
+    claimBtn.disabled = true;
+    claimBtn.textContent = `Ödül İçin Bekleyin (${sec})`;
+    countdownEl.textContent = `${sec} sn`;
+
+    const timer = setInterval(() => {
+      sec--;
+      if (sec > 0) {
+        countdownEl.textContent = `${sec} sn`;
+        claimBtn.textContent = `Ödül İçin Bekleyin (${sec})`;
+      } else {
+        clearInterval(timer);
+        countdownEl.textContent = 'Tamamlandı!';
+        claimBtn.disabled = false;
+        claimBtn.textContent = '🎁 Ödülünü Al!';
+        sfx.fanfare();
+      }
+    }, 1000);
+
+    claimBtn.onclick = () => {
+      modal.style.display = 'none';
+      if (adCallback) {
+        adCallback();
+      } else {
+        state.energy = Math.min(MAX_ENERGY, state.energy + 50);
+        state.prestige += 200;
+        sfx.coin();
+        notify('VIP Reklam ödülü hesabına aktarıldı: +50 Enerji ve +200 Prestij!');
+        renderAll();
+      }
+      adCallback = null;
+    };
+  }
+
+  /* ================= BOARD & SPAWNER ================= */
+  function spawnItem() {
+    if (!spend(1)) return;
+
+    const emptySlots = [];
+    state.board.forEach((it, idx) => {
+      if (!it) emptySlots.push(idx);
+    });
+
+    if (emptySlots.length === 0) {
+      state.energy += 1; // refund
+      notify('Masa tamamen dolu! İki aynı objeyi birleştirerek yer açın.');
+      return;
+    }
+
+    const targetIdx = emptySlots[Math.floor(Math.random() * emptySlots.length)];
+    const randomType = Math.floor(Math.random() * itemChains.length);
+    state.board[targetIdx] = { type: randomType, level: 1 };
+    sfx.pop();
+
+    const spawnBtn = $('spawnBtn');
+    if (spawnBtn) {
+      const rect = spawnBtn.getBoundingClientRect();
+      showFloatingText('🎁 +1 Obje', rect.left + rect.width / 2, rect.top);
+    }
+
+    renderAll();
+    const meta = getItemMeta(randomType, 1);
+    notify(`Yeni obje üretildi: ${meta.icon} ${meta.name}`);
+  }
+
+  function sortBoard() {
+    const filled = state.board.filter(Boolean);
+    // Sort by type then level so matching items sit side-by-side
+    filled.sort((a, b) => a.type - b.type || a.level - b.level);
+
+    let k = 0;
+    state.board = state.board.map((x) => (x ? filled[k++] : null));
+    state.selected = null;
+    sfx.pop();
+    renderAll();
+    notify('Masa düzenlendi! Eşleşen objeler yan yana getirildi.');
+  }
+
+  function handleMergeOrMove(fromIdx, toIdx, clientX, clientY) {
+    if (fromIdx === toIdx) {
+      state.selected = null;
+      renderBoard();
+      return;
+    }
+
+    const source = state.board[fromIdx];
+    const target = state.board[toIdx];
+
+    if (!source) {
+      state.selected = null;
+      renderBoard();
+      return;
+    }
+
+    // Move to empty
+    if (!target) {
+      state.board[toIdx] = source;
+      state.board[fromIdx] = null;
+      state.selected = null;
+      sfx.pop();
+      renderAll();
+      notify('Obje yeni alana taşındı.');
+      return;
+    }
+
+    // Same type & level -> MERGE!
+    if (source.type === target.type && source.level === target.level) {
+      const newLevel = target.level + 1;
+      state.board[toIdx] = { type: target.type, level: newLevel };
+      state.board[fromIdx] = null;
+      state.selected = null;
+      state.merges++;
+
+      sfx.merge();
+      const meta = getItemMeta(target.type, newLevel);
+      if (clientX && clientY) {
+        showFloatingText(`✨ ${meta.name} (LV.${newLevel})`, clientX, clientY);
+      }
+      addXP(15 * newLevel, clientX, clientY);
+
+      renderAll();
+      notify(`Muhteşem birleşim! ${meta.icon} ${meta.name} (Seviye ${newLevel}) üretildi!`);
+      return;
+    }
+
+    // Different item -> SWAP
+    state.board[toIdx] = source;
+    state.board[fromIdx] = target;
+    state.selected = null;
+    sfx.pop();
+    renderAll();
+    notify('Objelerin yerleri değiştirildi.');
+  }
+
+  /* ================= DRAG & DROP CONTROLLER ================= */
+  function initDragAndDrop() {
+    const board = $('board');
+    const ghost = $('dragGhost');
+    if (!board || !ghost) return;
+
+    let dragSourceIdx = null;
+    let startX = 0;
+    let startY = 0;
+    let isDragging = false;
+    let currentHoverTile = null;
+
+    board.addEventListener('pointerdown', (e) => {
+      const tile = e.target.closest('.tile');
+      if (!tile) return;
+      const idx = parseInt(tile.dataset.index, 10);
+      if (isNaN(idx)) return;
+
+      const item = state.board[idx];
+
+      if (state.selected !== null && idx !== state.selected) {
+        handleMergeOrMove(state.selected, idx, e.clientX, e.clientY);
+        return;
+      }
+
+      if (!item) return;
+
+      dragSourceIdx = idx;
+      startX = e.clientX;
+      startY = e.clientY;
+      isDragging = false;
+      tile.setPointerCapture(e.pointerId);
+    });
+
+    board.addEventListener('pointermove', (e) => {
+      if (dragSourceIdx === null) return;
+
+      const dist = Math.hypot(e.clientX - startX, e.clientY - startY);
+      const item = state.board[dragSourceIdx];
+      if (!item) return;
+
+      if (dist > 8) {
+        isDragging = true;
+        const meta = getItemMeta(item.type, item.level);
+        ghost.innerHTML = `<span class="emoji">${meta.icon}</span><span class="lv">LV.${item.level}</span>`;
+        ghost.style.display = 'flex';
+        ghost.style.left = `${e.clientX}px`;
+        ghost.style.top = `${e.clientY}px`;
+
+        const sourceEl = board.querySelector(`[data-index="${dragSourceIdx}"]`);
+        if (sourceEl) sourceEl.classList.add('drag-source');
+
+        ghost.style.pointerEvents = 'none';
+        const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+        const overTile = elemBelow ? elemBelow.closest('.tile') : null;
+
+        if (currentHoverTile && currentHoverTile !== overTile) {
+          currentHoverTile.classList.remove('drag-over');
+        }
+        if (overTile && overTile.dataset.index !== String(dragSourceIdx)) {
+          overTile.classList.add('drag-over');
+          currentHoverTile = overTile;
+        } else {
+          currentHoverTile = null;
+        }
+      }
+    });
+
+    const finishDrag = (e) => {
+      if (dragSourceIdx === null) return;
+
+      ghost.style.display = 'none';
+      if (currentHoverTile) {
+        currentHoverTile.classList.remove('drag-over');
+        currentHoverTile = null;
+      }
+
+      const sourceEl = board.querySelector(`[data-index="${dragSourceIdx}"]`);
+      if (sourceEl) sourceEl.classList.remove('drag-source');
+
+      if (isDragging) {
+        const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+        const targetTile = elemBelow ? elemBelow.closest('.tile') : null;
+
+        if (targetTile) {
+          const targetIdx = parseInt(targetTile.dataset.index, 10);
+          if (!isNaN(targetIdx)) {
+            handleMergeOrMove(dragSourceIdx, targetIdx, e.clientX, e.clientY);
+          }
+        } else {
+          renderBoard();
+        }
+      } else {
+        if (state.selected === dragSourceIdx) {
+          state.selected = null;
+          renderBoard();
+        } else if (state.selected === null) {
+          state.selected = dragSourceIdx;
+          sfx.pop();
+          renderBoard();
+          const it = state.board[dragSourceIdx];
+          if (it) {
+            const meta = getItemMeta(it.type, it.level);
+            notify(`${meta.icon} ${meta.name} seçildi. Eşleşen bir objeye sürükle veya dokun.`);
+          }
+        } else {
+          handleMergeOrMove(state.selected, dragSourceIdx, e.clientX, e.clientY);
+        }
+      }
+
+      dragSourceIdx = null;
+      isDragging = false;
+    };
+
+    board.addEventListener('pointerup', finishDrag);
+    board.addEventListener('pointercancel', finishDrag);
   }
 
   function renderBoard() {
@@ -332,9 +947,9 @@
     if (!el) return;
     el.innerHTML = '';
     tasks.forEach((t) => {
-      const count = t.metric === 'merges' ? state.merges : t.metric === 'highLevels' ? state.highLevels : state.orders;
+      const count = t.metric === 'merges' ? state.merges : t.metric === 'ordersCompleted' ? state.ordersCompleted : state.renovationsDone;
       const done = count >= t.goal;
-      const claimed = state.claimed.includes(t.id);
+      const claimed = state.claimedTasks.includes(t.id);
       const pct = Math.min(100, (count / t.goal) * 100);
 
       const d = document.createElement('div');
@@ -342,7 +957,7 @@
       d.innerHTML = `
         <div class="tasktop">
           <span class="taskname">${t.name}</span>
-          <span class="reward">⚡ +${t.reward} enerji</span>
+          <span class="reward">⚡ +${t.reward}</span>
         </div>
         <div class="taskdesc">${t.desc}</div>
         <div class="bar"><div style="width:${pct}%"></div></div>
@@ -357,11 +972,10 @@
         claimBtn.onclick = (e) => {
           e.preventDefault();
           if (!done || claimed) return;
-          state.claimed.push(t.id);
+          state.claimedTasks.push(t.id);
           state.energy = Math.min(MAX_ENERGY, state.energy + t.reward);
-          state.prestige += 80;
           sfx.coin();
-          notify(`Görev tamamlandı! +${t.reward} Enerji ve +80 Prestij kazandın.`);
+          notify(`Görev tamamlandı! +${t.reward} Enerji kazandın.`);
           addXP(25);
           renderAll();
         };
@@ -370,404 +984,66 @@
     });
   }
 
+  function renderStats() {
+    tick();
+    if ($('energy')) $('energy').textContent = state.energy;
+    if ($('coins')) $('coins').textContent = state.prestige;
+    if ($('gems')) $('gems').textContent = state.gems;
+    if ($('stars')) $('stars').textContent = state.stars;
+
+    const left = state.energy >= MAX_ENERGY ? 60 : 60 - Math.floor((Date.now() - state.energyUpdated) / 1000) % 60;
+    if ($('timer')) $('timer').textContent = '00:' + String(left).padStart(2, '0');
+
+    if ($('levelBadge')) $('levelBadge').textContent = state.playerLevel;
+    const xpNeeded = state.playerLevel * 60;
+    const pct = Math.min(100, (state.xp / xpNeeded) * 100);
+    if ($('xpBar')) $('xpBar').style.width = `${pct}%`;
+  }
+
   function renderAll() {
     renderStats();
+    renderOrders();
     renderBoard();
+    renderHotelStudio();
     renderTasks();
     save();
   }
 
-  function spend(n) {
-    tick();
-    if (state.energy < n) {
-      notify('Enerjin bitti! Üstteki "Ücretsiz Enerji Al" butonuna basarak reklam izleyebilirsin.');
-      return false;
-    }
-    state.energy -= n;
-    if (state.energy < MAX_ENERGY && state.energyUpdated > Date.now()) {
-      state.energyUpdated = Date.now();
-    }
-    return true;
-  }
+  /* ================= TABS SETUP ================= */
+  function initTabs() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach((tab) => {
+      tab.onclick = () => {
+        tabs.forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
 
-  // Spawner: Drop a new Lv 1 item on the board
-  function spawnItem() {
-    if (!spend(1)) return;
+        const targetId = tab.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach((sec) => {
+          sec.classList.remove('active-tab');
+        });
+        const targetSec = $(targetId);
+        if (targetSec) targetSec.classList.add('active-tab');
 
-    // Find first empty slot
-    const emptyIndices = [];
-    state.board.forEach((item, idx) => {
-      if (!item) emptyIndices.push(idx);
-    });
-
-    if (emptyIndices.length === 0) {
-      state.energy += 1; // refund
-      notify('Masa tamamen dolu! İki aynı objeyi birleştirerek yeni yer açın.');
-      return;
-    }
-
-    const targetIdx = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-    const randomType = Math.floor(Math.random() * itemChains.length);
-    state.board[targetIdx] = { type: randomType, level: 1 };
-    sfx.pop();
-
-    const spawnBtn = $('spawnBtn');
-    if (spawnBtn) {
-      const rect = spawnBtn.getBoundingClientRect();
-      showFloatingText('🎁 +1 Obje', rect.left + rect.width / 2, rect.top);
-    }
-
-    renderAll();
-    const meta = getItemMeta(randomType, 1);
-    notify(`Yeni obje üretildi: ${meta.icon} ${meta.name}`);
-  }
-
-  // Core Merge & Move Logic
-  function handleMergeOrMove(fromIdx, toIdx, clientX, clientY) {
-    if (fromIdx === toIdx) {
-      state.selected = null;
-      renderBoard();
-      return;
-    }
-
-    const source = state.board[fromIdx];
-    const target = state.board[toIdx];
-
-    if (!source) {
-      state.selected = null;
-      renderBoard();
-      return;
-    }
-
-    // Drop on empty slot -> Move
-    if (!target) {
-      state.board[toIdx] = source;
-      state.board[fromIdx] = null;
-      state.selected = null;
-      sfx.pop();
-      renderAll();
-      notify('Obje yeni alana taşındı.');
-      return;
-    }
-
-    // Same type & same level -> MERGE!
-    if (source.type === target.type && source.level === target.level) {
-      const newLevel = target.level + 1;
-      state.board[toIdx] = { type: target.type, level: newLevel };
-      state.board[fromIdx] = null;
-      state.selected = null;
-      state.merges++;
-
-      if (newLevel >= 3) state.highLevels++;
-      state.prestige += newLevel * 20;
-
-      sfx.merge();
-      const meta = getItemMeta(target.type, newLevel);
-      if (clientX && clientY) {
-        showFloatingText(`✨ ${meta.name} (LV.${newLevel})`, clientX, clientY);
-      }
-      addXP(15 * newLevel, clientX, clientY);
-
-      renderAll();
-      notify(`Muhteşem birleşim! ${meta.icon} ${meta.name} (Seviye ${newLevel}) üretildi!`);
-      return;
-    }
-
-    // Different item -> SWAP positions
-    state.board[toIdx] = source;
-    state.board[fromIdx] = target;
-    state.selected = null;
-    sfx.pop();
-    renderAll();
-    notify('Objelerin yerleri değiştirildi.');
-  }
-
-  // Unified Drag-and-Drop & Tap Controller using Pointer Events
-  function initDragAndDrop() {
-    const board = $('board');
-    const ghost = $('dragGhost');
-    if (!board || !ghost) return;
-
-    let dragSourceIdx = null;
-    let startX = 0;
-    let startY = 0;
-    let isDragging = false;
-    let currentHoverTile = null;
-
-    board.addEventListener('pointerdown', (e) => {
-      const tile = e.target.closest('.tile');
-      if (!tile) return;
-      const idx = parseInt(tile.dataset.index, 10);
-      if (isNaN(idx)) return;
-
-      const item = state.board[idx];
-
-      // If tapping on an empty slot while an item was selected, move it
-      if (state.selected !== null && idx !== state.selected) {
-        handleMergeOrMove(state.selected, idx, e.clientX, e.clientY);
-        return;
-      }
-
-      if (!item) return;
-
-      dragSourceIdx = idx;
-      startX = e.clientX;
-      startY = e.clientY;
-      isDragging = false;
-      tile.setPointerCapture(e.pointerId);
-    });
-
-    board.addEventListener('pointermove', (e) => {
-      if (dragSourceIdx === null) return;
-
-      const dist = Math.hypot(e.clientX - startX, e.clientY - startY);
-      const item = state.board[dragSourceIdx];
-      if (!item) return;
-
-      // Start drag ghost once moved > 8px
-      if (dist > 8) {
-        isDragging = true;
-        const meta = getItemMeta(item.type, item.level);
-        ghost.innerHTML = `<span class="emoji">${meta.icon}</span><span class="lv">LV.${item.level}</span>`;
-        ghost.style.display = 'flex';
-        ghost.style.left = `${e.clientX}px`;
-        ghost.style.top = `${e.clientY}px`;
-
-        const sourceEl = board.querySelector(`[data-index="${dragSourceIdx}"]`);
-        if (sourceEl) sourceEl.classList.add('drag-source');
-
-        // Highlight element under pointer
-        ghost.style.pointerEvents = 'none';
-        const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
-        const overTile = elemBelow ? elemBelow.closest('.tile') : null;
-
-        if (currentHoverTile && currentHoverTile !== overTile) {
-          currentHoverTile.classList.remove('drag-over');
-        }
-        if (overTile && overTile.dataset.index !== String(dragSourceIdx)) {
-          overTile.classList.add('drag-over');
-          currentHoverTile = overTile;
-        } else {
-          currentHoverTile = null;
-        }
-      }
-    });
-
-    const finishDrag = (e) => {
-      if (dragSourceIdx === null) return;
-
-      ghost.style.display = 'none';
-      if (currentHoverTile) {
-        currentHoverTile.classList.remove('drag-over');
-        currentHoverTile = null;
-      }
-
-      const sourceEl = board.querySelector(`[data-index="${dragSourceIdx}"]`);
-      if (sourceEl) sourceEl.classList.remove('drag-source');
-
-      if (isDragging) {
-        // Dropped: find target tile under cursor
-        const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
-        const targetTile = elemBelow ? elemBelow.closest('.tile') : null;
-
-        if (targetTile) {
-          const targetIdx = parseInt(targetTile.dataset.index, 10);
-          if (!isNaN(targetIdx)) {
-            handleMergeOrMove(dragSourceIdx, targetIdx, e.clientX, e.clientY);
-          }
-        } else {
-          renderBoard();
-        }
-      } else {
-        // Simple TAP: toggle selection
-        if (state.selected === dragSourceIdx) {
-          state.selected = null;
-          renderBoard();
-        } else if (state.selected === null) {
-          state.selected = dragSourceIdx;
-          sfx.pop();
-          renderBoard();
-          const it = state.board[dragSourceIdx];
-          if (it) {
-            const meta = getItemMeta(it.type, it.level);
-            notify(`${meta.icon} ${meta.name} seçildi. Birleştirmek için eşleşen bir objeye dokun veya sürükle.`);
-          }
-        } else {
-          handleMergeOrMove(state.selected, dragSourceIdx, e.clientX, e.clientY);
-        }
-      }
-
-      dragSourceIdx = null;
-      isDragging = false;
-    };
-
-    board.addEventListener('pointerup', finishDrag);
-    board.addEventListener('pointercancel', finishDrag);
-  }
-
-  // Rewarded Ad Simulation (5 seconds timer with rewards)
-  function initRewardedAd() {
-    const triggerBtn = $('watchAdBtn');
-    const modal = $('adModal');
-    const countdownEl = $('adCountdown');
-    const claimBtn = $('adClaimBtn');
-
-    if (!triggerBtn || !modal || !countdownEl || !claimBtn) return;
-
-    let countdownTimer = null;
-
-    triggerBtn.onclick = () => {
-      sfx.pop();
-      modal.style.display = 'flex';
-      let secondsLeft = 5;
-      claimBtn.disabled = true;
-      claimBtn.textContent = `Ödül İçin Bekleyin (${secondsLeft})`;
-      countdownEl.textContent = `${secondsLeft} sn`;
-
-      if (countdownTimer) clearInterval(countdownTimer);
-      countdownTimer = setInterval(() => {
-        secondsLeft--;
-        if (secondsLeft > 0) {
-          countdownEl.textContent = `${secondsLeft} sn`;
-          claimBtn.textContent = `Ödül İçin Bekleyin (${secondsLeft})`;
-        } else {
-          clearInterval(countdownTimer);
-          countdownEl.textContent = 'Tamamlandı!';
-          claimBtn.disabled = false;
-          claimBtn.textContent = '🎁 50 Enerji & 200 Prestij Al!';
-          sfx.fanfare();
-        }
-      }, 1000);
-    };
-
-    claimBtn.onclick = () => {
-      modal.style.display = 'none';
-      state.energy = Math.min(MAX_ENERGY, state.energy + 50);
-      state.prestige += 200;
-      sfx.coin();
-      notify('Reklam ödülü hesabına tanımlandı: +50 Enerji ve +200 Prestij!');
-      addXP(30);
-      renderAll();
-    };
-  }
-
-  // Setup Static UI Events
-  function initUIEvents() {
-    // Spawner Button
-    const spawnBtn = $('spawnBtn');
-    if (spawnBtn) {
-      spawnBtn.onclick = (e) => {
-        e.preventDefault();
-        spawnItem();
-      };
-    }
-
-    // Order Completion
-    const orderBtn = $('order');
-    if (orderBtn) {
-      orderBtn.onclick = (e) => {
-        e.preventDefault();
-        if (state.orders >= 8) {
-          notify('Bu bölümün tüm müşteri siparişleri tamamlandı! Yeni siparişler için oteli geliştir.');
-          return;
-        }
-        if (!spend(5)) return;
-        state.orders++;
-        state.prestige += 150;
-        state.energy = Math.min(MAX_ENERGY, state.energy + 25);
-        sfx.coin();
-
-        state.storyTitle = state.orders === 1 ? 'Gizemli Bir Misafir' : 'Gece Yarısı Gelen Mesaj';
-        state.storyText =
-          state.orders === 1
-            ? 'Adrian Vale, Isabella’ya özel bir sipariş bıraktı. İçindeki mühürlü notta üç kelime vardı: “Ona güvenme, Isabella.”'
-            : 'Bir mesaj tüm geceyi değiştirdi. Birisi otelin güvenlik kayıtlarını görmek istiyor. Kimin tarafında olacaksın?';
-
-        addXP(25);
-        renderAll();
-        notify('Sipariş başarıyla teslim edildi! +150 Prestij ve +25 Enerji kazandın.');
-      };
-    }
-
-    // Rearrange Board Button
-    const refreshBtn = $('refresh');
-    if (refreshBtn) {
-      refreshBtn.onclick = (e) => {
-        e.preventDefault();
-        if (!spend(10)) return;
-        const filled = state.board.filter(Boolean);
-        for (let i = filled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [filled[i], filled[j]] = [filled[j], filled[i]];
-        }
-        let k = 0;
-        state.board = state.board.map((x) => (x ? filled[k++] : null));
-        state.selected = null;
         sfx.pop();
         renderAll();
-        notify('Masa yeniden düzenlendi. Yeni birleşimler oluşturmaya devam et!');
-      };
-    }
-
-    // Story Choices
-    document.querySelectorAll('[data-choice]').forEach((b) => {
-      b.onclick = (e) => {
-        e.preventDefault();
-        if (state.storyChoice) {
-          notify('Bu bölümde kararını zaten verdin. Yeni kararlar sonraki bölümlerde açılacak.');
-          return;
-        }
-        state.storyChoice = b.dataset.choice;
-        sfx.fanfare();
-        if (state.storyChoice === 'love') {
-          state.prestige += 100;
-          state.log =
-            'Isabella mektubu Adrian’a gösterdi. Adrian’ın bakışlarında hem korku hem şefkat vardı. “Sana anlatmam gereken bir şey var,” dedi. Güven bağı kuruldu (+100 Prestij).';
-        } else if (state.storyChoice === 'gossip') {
-          state.prestige += 200;
-          state.log =
-            'Isabella davetteki fısıltıların izini sürdü. Bir davetli ona gizli kasanın şifresini fısıldadı (+200 Prestij). Bu bilgi yakında büyük bir koz olacak!';
-        } else {
-          state.gems += 3;
-          state.log =
-            'Isabella acele etmedi. Mührü dikkatle inceleyince otelin gizli mahzenine ait bir işaret buldu (+3 Mücevher).';
-        }
-        addXP(40);
-        renderAll();
-        notify('Kritik kararın hikâyeyi değiştirdi!');
       };
     });
+  }
 
-    // Hotel Renovation
-    const renovateBtn = $('renovate');
-    if (renovateBtn) {
-      renovateBtn.onclick = (e) => {
-        e.preventDefault();
-        if (state.hotel >= 3) return;
-        const cost = state.hotel === 1 ? 300 : 500;
-        if (state.prestige < cost) {
-          notify(`Yetersiz prestij! Lobiyi yenilemek için ${cost} ◆ prestij gerekiyor.`);
-          return;
-        }
-        state.prestige -= cost;
-        state.hotel++;
-        sfx.fanfare();
-        if (state.hotel === 2) {
-          state.storyTitle = 'Altın Salon Açıldı!';
-          state.storyText =
-            'Lobi yenilendi ve konuklar akın etti. Açılış gecesinin davetli listesinde silinmiş bir isim ortaya çıktı: Adrian Vale.';
-        } else {
-          state.storyTitle = 'Terasın Ardındaki Büyük Sır';
-          state.storyText =
-            'Aurelia Terası ışık saçıyor. Körfeze bakan en özel masada yeni bir mühürlü zarf duruyor...';
-        }
-        addXP(50);
-        renderAll();
-        notify('Otel yeni bir seviyeye kavuştu! Yeni misafirler ve siparişler açıldı.');
-      };
-    }
+  function initUI() {
+    // Spawner
+    const spawnBtn = $('spawnBtn');
+    if (spawnBtn) spawnBtn.onclick = () => spawnItem();
 
-    // Close Level Up Modal Button
+    // Sort Board
+    const sortBtn = $('sortBoardBtn');
+    if (sortBtn) sortBtn.onclick = () => sortBoard();
+
+    // Add Energy Ad Button
+    const addEnergyBtn = $('addEnergyBtn');
+    if (addEnergyBtn) addEnergyBtn.onclick = () => openAdModal();
+
+    // Close Level Up Modal
     const closeLevelUpBtn = $('closeLevelUpBtn');
     if (closeLevelUpBtn) {
       closeLevelUpBtn.onclick = () => {
@@ -788,15 +1064,14 @@
     window.addEventListener('beforeunload', save);
   }
 
-  // Game Initializer
   function init() {
     load();
     renderAll();
+    initTabs();
     initDragAndDrop();
-    initRewardedAd();
-    initUIEvents();
+    initLuckyWheel();
+    initUI();
 
-    // Stats updater (every second without redrawing board elements)
     setInterval(renderStats, 1000);
   }
 
