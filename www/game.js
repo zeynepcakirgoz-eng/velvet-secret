@@ -93,41 +93,46 @@
     }
   };
 
-  // 3 Luxury Merge Item Chains (6 levels each)
+  // 3 Luxury Merge Item Chains (6 levels each) with High-Res Painted Artwork
   const itemChains = [
-    // 0: Kozmetik & Bakım
+    // 0: Kraliyet Gülleri & Parfümeri
     [
-      { name: 'Nemlendirici', icon: '🧴' },
-      { name: 'Mat Ruj', icon: '💄' },
-      { name: 'Kırmızı Oje', icon: '💅' },
-      { name: 'Lüks Parfüm', icon: '✨' },
-      { name: 'Altın Ayna', icon: '🪞' },
-      { name: 'Elmas Kozmetik', icon: '💖' }
+      { name: 'Kırmızı Kadife Gül', icon: '🌹', img: 'assets/items/item_0_1.jpg' },
+      { name: 'Altın Kurdeleli Çift Gül', icon: '🥀', img: 'assets/items/item_0_2.jpg' },
+      { name: 'Kraliyet Gül Buketi', icon: '💐', img: 'assets/items/item_0_3.jpg' },
+      { name: 'Safir Kristal Parfüm', icon: '💎', img: 'assets/items/item_0_4.jpg' },
+      { name: 'Yakut İksir Şişesi', icon: '✨', img: 'assets/items/item_0_5.jpg' },
+      { name: 'İmparatorluk Elmas Tacı', icon: '👑', img: 'assets/items/item_0_6.jpg' }
     ],
-    // 1: Mücevher & Aksesuar
+    // 1: Couture & Mücevherat
     [
-      { name: 'Gümüş Yüzük', icon: '💍' },
-      { name: 'İnci Kolye', icon: '📿' },
-      { name: 'Zümrüt Broş', icon: '💎' },
-      { name: 'Kraliçe Tacı', icon: '👑' },
-      { name: 'Zümrüt Kupa', icon: '🏆' },
-      { name: 'Kraliyet Asası', icon: '⚜️' }
+      { name: 'Siyah & Altın Hediye Kutusu', icon: '🎁', img: 'assets/items/item_1_1.jpg' },
+      { name: 'Elmas Stiletto Topuklu', icon: '👠', img: 'assets/items/item_1_2.jpg' },
+      { name: 'Zümrüt & İnci Gerdanlık', icon: '📿', img: 'assets/items/item_1_3.jpg' },
+      { name: 'Kraliyet Deri Valiz', icon: '🧳', img: 'assets/items/item_1_4.jpg' },
+      { name: 'Altın Zafer Kupası', icon: '🏆', img: 'assets/items/item_1_5.jpg' },
+      { name: 'Monako Kraliyet Tacı', icon: '👑', img: 'assets/items/item_1_6.jpg' }
     ],
-    // 2: Lüks Sosyete
+    // 2: Riviera Gala & Gurme
     [
-      { name: 'Mühürlü Davet', icon: '💌' },
-      { name: 'Kristal Kadeh', icon: '🥂' },
-      { name: 'Eski Şampanya', icon: '🍾' },
-      { name: 'İpek Topuklu', icon: '👠' },
-      { name: 'Spor Araba', icon: '🏎️' },
-      { name: 'Mega Yat', icon: '🛥️' }
+      { name: 'Altın Yaldızlı Espresso', icon: '☕', img: 'assets/items/item_2_1.jpg' },
+      { name: 'Kristal & Altın Çaydanlık', icon: '🫖', img: 'assets/items/item_2_2.jpg' },
+      { name: 'Fransız Güllü Pasta', icon: '🎂', img: 'assets/items/item_2_3.jpg' },
+      { name: 'Kristal Şampanya Kadehi', icon: '🥂', img: 'assets/items/item_2_4.jpg' },
+      { name: 'Buz Kovasında Şampanya', icon: '🍾', img: 'assets/items/item_2_5.jpg' },
+      { name: 'Aurelia Altın Kadeh Ödülü', icon: '🏆', img: 'assets/items/item_2_6.jpg' }
     ]
   ];
 
   function getItemMeta(type, level) {
-    const chain = itemChains[type % itemChains.length];
+    const t = type % itemChains.length;
+    const chain = itemChains[t];
     const lvlIdx = Math.max(0, Math.min(chain.length - 1, (level || 1) - 1));
-    return chain[lvlIdx];
+    const item = chain[lvlIdx];
+    const imgUrl = (window.LuxuryArt && window.LuxuryArt.getItemImage)
+      ? window.LuxuryArt.getItemImage(t, lvlIdx + 1)
+      : item.img;
+    return { ...item, img: imgUrl };
   }
 
   // 4 Main Characters from Concept Art with Real Photo Avatars
@@ -396,8 +401,8 @@
       itemsStatus.forEach((it) => {
         const meta = getItemMeta(it.type, it.level);
         itemsHtml += `
-          <div class="req-pill ${it.ready ? 'ready' : ''}">
-            <span class="req-emoji">${meta.icon}</span>
+          <div class="req-pill ${it.ready ? 'ready' : ''}" title="${meta.name}">
+            <img src="${meta.img}" alt="${meta.name}" class="req-item-img">
             <span class="req-level">LV.${it.level}</span>
             ${it.ready ? '<span class="req-check-badge">✓</span>' : ''}
           </div>
@@ -407,12 +412,15 @@
       card.innerHTML = `
         <div class="order-customer-head">
           <img src="${ord.avatarImg}" alt="${ord.customer}" class="order-photo-avatar">
-          <span class="order-name-text">${ord.customer}</span>
+          <div class="order-customer-meta">
+            <span class="order-name-text">${ord.customer}</span>
+            <small class="order-role-text">${ord.role || ''}</small>
+          </div>
         </div>
         <div class="order-speech-bubble">"${ord.quote}"</div>
         <div class="order-req-items">${itemsHtml}</div>
         <div class="order-rewards-bar">
-          <span>◆ +${ord.rewardCoins}</span>
+          <span>💰 +$${ord.rewardCoins}</span>
           <span class="stars-num">⭐ +${ord.rewardStars}</span>
         </div>
         <button class="serve-action-btn ${allReady ? 'can-serve' : ''}" ${!allReady ? 'disabled' : ''}>
@@ -458,63 +466,46 @@
       window.hotel3D.saveState();
       window.hotel3D.checkAffordableNotifications();
       if (window.hotel3D.updateProximityPanel) window.hotel3D.updateProximityPanel();
+      if (window.hotel3D.renderHotelAreaCards) window.hotel3D.renderHotelAreaCards();
     }
 
     sfx.coin();
     if (clientX && clientY) {
       showFloatingText(`⭐ +${order.rewardStars} Yıldız!`, clientX, clientY);
-      showFloatingText(`◆ +$${order.rewardCoins}`, clientX, clientY - 30);
+      showFloatingText(`💰 +$${order.rewardCoins}`, clientX, clientY - 30);
     }
 
     addXP(35);
     state.orders[orderIdx] = generateRandomOrder();
 
-    notify(`Sipariş teslim edildi! ${order.customer} çok memnun kaldı. +$${order.rewardCoins} Prestij ve +⭐${order.rewardStars} Yıldız kazandın!`);
+    notify(`Sipariş teslim edildi! ${order.customer} çok memnun kaldı. +$${order.rewardCoins} ve +⭐${order.rewardStars} Yıldız kazandın!`);
     renderAll();
   }
 
   /* ================= HOTEL RENOVATION (PAGE 2) ================= */
   function renderHotelPage() {
-    if ($('area1Progress')) $('area1Progress').textContent = `%${state.area1Progress}`;
-    if ($('area2Progress')) $('area2Progress').textContent = `%${state.area2Progress}`;
-
-    const btn1 = $('upgradeArea1Btn');
-    if (btn1) {
-      if (state.area1Progress >= 100) {
-        btn1.className = 'upgrade-room-btn done-btn';
-        btn1.innerHTML = '<span>✓ TAMAMLANDI</span>';
-        btn1.disabled = true;
-      } else {
-        const canAfford = state.stars >= 1 || state.prestige >= 300;
-        btn1.className = 'upgrade-room-btn';
-        btn1.innerHTML = '<span>⭐ 1 YILDIZ</span><small>VEYA 300 ◆</small>';
-        btn1.disabled = !canAfford;
-      }
-    }
-
-    const btn2 = $('upgradeArea2Btn');
-    if (btn2) {
-      if (state.area2Progress >= 100) {
-        btn2.className = 'upgrade-room-btn done-btn';
-        btn2.innerHTML = '<span>✓ TAMAMLANDI</span>';
-        btn2.disabled = true;
-      } else {
-        const canAfford = state.stars >= 2 || state.prestige >= 600;
-        btn2.className = 'upgrade-room-btn';
-        btn2.innerHTML = '<span>⭐ 2 YILDIZ</span><small>VEYA 600 ◆</small>';
-        btn2.disabled = !canAfford;
-      }
-    }
-
-    // Badge on bottom nav
     let canUp = 0;
-    if (state.area1Progress < 100 && (state.stars >= 1 || state.prestige >= 300)) canUp++;
-    if (state.area2Progress < 100 && (state.stars >= 2 || state.prestige >= 600)) canUp++;
+    if (window.GameEconomy && window.GameEconomy.renovationCosts) {
+      const bal = window.GameEconomy.getBalance();
+      const st = window.GameEconomy.getStars();
+      Object.keys(window.GameEconomy.renovationCosts).forEach((id) => {
+        const curLvl = window.GameEconomy.getAreaLevel(id);
+        if (curLvl < 4) {
+          const nextCost = window.GameEconomy.getNextUpgradeCost(id);
+          const nextStars = window.GameEconomy.getNextUpgradeStars(id);
+          if (bal >= nextCost && st >= nextStars) canUp++;
+        }
+      });
+    }
 
     const badge = $('hotelBadgeCount');
     if (badge) {
       badge.textContent = canUp;
       badge.style.display = canUp > 0 ? 'inline-block' : 'none';
+    }
+
+    if (window.hotel3D && window.hotel3D.renderHotelAreaCards) {
+      window.hotel3D.renderHotelAreaCards();
     }
   }
 
@@ -853,7 +844,7 @@
       if (dist > 8) {
         isDragging = true;
         const meta = getItemMeta(item.type, item.level);
-        ghost.innerHTML = `<span class="emoji">${meta.icon}</span><span class="lv">LV.${item.level}</span>`;
+        ghost.innerHTML = `<img src="${meta.img}" alt="${meta.name}" class="tile-item-img"><span class="lv">LV.${item.level}</span>`;
         ghost.style.display = 'flex';
         ghost.style.left = `${e.clientX}px`;
         ghost.style.top = `${e.clientY}px`;
@@ -912,7 +903,7 @@
           const it = state.board[dragSourceIdx];
           if (it) {
             const meta = getItemMeta(it.type, it.level);
-            notify(`${meta.icon} ${meta.name} seçildi. Eşleşen bir objeye sürükle veya dokun.`);
+            notify(`${meta.name} (LV.${it.level}) seçildi. Eşleşen bir objeye sürükle veya dokun.`);
           }
         } else {
           handleMergeOrMove(state.selected, dragSourceIdx, e.clientX, e.clientY);
@@ -939,7 +930,7 @@
 
       if (it) {
         const meta = getItemMeta(it.type, it.level);
-        b.innerHTML = `<span class="emoji">${meta.icon}</span><span class="lv">LV.${it.level}</span>`;
+        b.innerHTML = `<img src="${meta.img}" alt="${meta.name}" class="tile-item-img"><span class="lv">LV.${it.level}</span>`;
         b.setAttribute('aria-label', `${meta.name} Seviye ${it.level}`);
       } else {
         b.innerHTML = `<span class="emoji">＋</span>`;
@@ -1022,35 +1013,43 @@
   }
 
   /* ================= GOSSIP HARBOR BOTTOM NAVIGATION ================= */
+  function switchMainPage(targetId) {
+    const navTabs = document.querySelectorAll('.nav-tab');
+    navTabs.forEach((t) => {
+      if (t.dataset.target === targetId) t.classList.add('active');
+      else t.classList.remove('active');
+    });
+
+    document.querySelectorAll('.game-page').forEach((page) => {
+      page.classList.remove('active-page');
+    });
+    const targetPage = $(targetId);
+    if (targetPage) targetPage.classList.add('active-page');
+
+    if (targetId === 'pageHotel') {
+      if (window.initHotel3D) window.initHotel3D();
+      if (window.hotel3D) {
+        setTimeout(() => window.hotel3D.onResize(), 50);
+        if (window.GameEconomy) {
+          window.hotel3D.state.coins = window.GameEconomy.getBalance();
+          window.hotel3D.state.stars = window.GameEconomy.getStars();
+        }
+        window.hotel3D.updateHUD();
+        if (window.hotel3D.updateProximityPanel) window.hotel3D.updateProximityPanel();
+        if (window.hotel3D.renderHotelAreaCards) window.hotel3D.renderHotelAreaCards();
+      }
+    }
+
+    sfx.pop();
+    renderAll();
+  }
+  window.switchMainPage = switchMainPage;
+
   function initNavigation() {
     const navTabs = document.querySelectorAll('.nav-tab');
     navTabs.forEach((tab) => {
       tab.onclick = () => {
-        navTabs.forEach((t) => t.classList.remove('active'));
-        tab.classList.add('active');
-
-        const targetId = tab.dataset.target;
-        document.querySelectorAll('.game-page').forEach((page) => {
-          page.classList.remove('active-page');
-        });
-        const targetPage = $(targetId);
-        if (targetPage) targetPage.classList.add('active-page');
-
-        if (targetId === 'pageHotel') {
-          if (window.initHotel3D) window.initHotel3D();
-          if (window.hotel3D) {
-            window.hotel3D.onResize();
-            if (window.GameEconomy) {
-              window.hotel3D.state.coins = window.GameEconomy.getBalance();
-              window.hotel3D.state.stars = window.GameEconomy.getStars();
-            }
-            window.hotel3D.updateHUD();
-            if (window.hotel3D.updateProximityPanel) window.hotel3D.updateProximityPanel();
-          }
-        }
-
-        sfx.pop();
-        renderAll();
+        switchMainPage(tab.dataset.target);
       };
     });
   }

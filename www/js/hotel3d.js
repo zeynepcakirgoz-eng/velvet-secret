@@ -464,17 +464,60 @@ class Hotel3DSimulator {
                 ]
             },
 
+            garden_courtyard: {
+                id: 'garden_courtyard',
+                stage: 5,
+                name: 'Akdeniz Botanik Bahçesi & Mermer Çeşme',
+                area: 'Bahçe & Açık Alanlar',
+                pos: new THREE.Vector3(-12, 1.0, -22),
+                options: [
+                    {
+                        id: 'opt_a',
+                        name: 'Modern Zen Su Aynası & Bambu Bahçe',
+                        style: 'Modern Elegance',
+                        costCoins: 3000,
+                        costStars: 4,
+                        incomeBoost: 110,
+                        repBoost: 170,
+                        desc: 'Siyah bazalt yansıma havuzu, minimalist su fıskiyesi ve aydınlatmalı bambu yürüyüş yolu.',
+                        icon: '🎋'
+                    },
+                    {
+                        id: 'opt_b',
+                        name: 'Kraliyet Gül Bahçesi & Altın Varaklı Çeşme',
+                        style: 'Velvet Luxury',
+                        costCoins: 3000,
+                        costStars: 4,
+                        incomeBoost: 145,
+                        repBoost: 240,
+                        desc: 'Üç katlı altın varaklı mermer çeşme, kırmızı kadife güller ve kristal bahçe fenerleri.',
+                        icon: '🌹'
+                    },
+                    {
+                        id: 'opt_c',
+                        name: 'Riviera Limon & Begonvil Avlusu',
+                        style: 'Mediterranean Suite',
+                        costCoins: 3000,
+                        costStars: 4,
+                        incomeBoost: 125,
+                        repBoost: 205,
+                        desc: 'Klasik Akdeniz taş çeşmesi, terrakota saksılarda limon ağaçları ve mor begonvil kemerleri.',
+                        icon: '🍋'
+                    }
+                ]
+            },
+
             penthouse_suite: {
                 id: 'penthouse_suite',
                 stage: 6,
-                name: '2. Kat Başkanlık Penthouse Suiti',
-                area: 'Aurelia Çatı Katı',
+                name: '2. Kat Kraliyet Penthouse & Piyano Salonu',
+                area: 'Başkanlık Çatı Suiti',
                 pos: new THREE.Vector3(0, 7.2, 0),
                 options: [
                     {
                         id: 'opt_a',
                         name: 'Panoramik Şömineli Beyaz Kuyruklu Piyano Salonu',
-                        style: 'Modern Lüks',
+                        style: 'Modern Elegance',
                         costCoins: 2100,
                         costStars: 12,
                         incomeBoost: 220,
@@ -485,7 +528,7 @@ class Hotel3DSimulator {
                     {
                         id: 'opt_b',
                         name: 'Monako 5 Yıldızlı Altın & Noir Çatı Suiti',
-                        style: 'Monako Palace',
+                        style: 'Velvet Luxury',
                         costCoins: 2800,
                         costStars: 15,
                         incomeBoost: 320,
@@ -496,7 +539,7 @@ class Hotel3DSimulator {
                     {
                         id: 'opt_c',
                         name: 'Venedik Sarayı Barok Penthouse',
-                        style: 'Barok Miras',
+                        style: 'Mediterranean Suite',
                         costCoins: 2400,
                         costStars: 13,
                         incomeBoost: 260,
@@ -514,13 +557,64 @@ class Hotel3DSimulator {
                 const econDef = window.GameEconomy.renovationCosts[k];
                 if (econDef) {
                     this.renovationDefs[k].cost = econDef.cost;
+                    this.renovationDefs[k].levelCosts = econDef.levelCosts || {
+                        2: econDef.cost,
+                        3: Math.round(econDef.cost * 1.6),
+                        4: Math.round(econDef.cost * 2.4)
+                    };
                     this.renovationDefs[k].stars = econDef.stars;
                     this.renovationDefs[k].defaultDesc = econDef.defaultDesc;
                     this.renovationDefs[k].name = econDef.name;
                     this.renovationDefs[k].area = econDef.area;
+                    this.renovationDefs[k].sceneImg = econDef.sceneImg || 'assets/scene_lobby_reception.jpg';
+                    this.renovationDefs[k].jumpRoom = econDef.jumpRoom || 'lobby';
                 }
             });
         }
+    }
+
+    // ----------------------------------------------------
+    // INDEPENDENT 4-LEVEL AREA PROGRESSION HELPERS
+    // Level 1: Basic (Unrenovated) -> Level 2: Modern -> Level 3: Premium -> Level 4: Luxury Suite
+    // ----------------------------------------------------
+    getAreaLevel(id) {
+        const saved = this.state && this.state.renovations ? this.state.renovations[id] : null;
+        if (!saved) return 1;
+        if (typeof saved === 'object' && typeof saved.level === 'number') {
+            return Math.max(1, Math.min(4, saved.level));
+        }
+        return 2; // Legacy renovated items are at least Level 2
+    }
+
+    getLevelTitle(lvl) {
+        const titles = {
+            1: 'Seviye 1: Başlangıç Durumu',
+            2: 'Seviye 2: Modern Yenileme',
+            3: 'Seviye 3: Premium Tasarım',
+            4: 'Seviye 4: Kraliyet Lüksü (MAX)'
+        };
+        return titles[lvl] || `Seviye ${lvl}`;
+    }
+
+    getNextUpgradeCost(id) {
+        const def = this.renovationDefs[id];
+        if (!def) return 1200;
+        const curLvl = this.getAreaLevel(id);
+        const nextLvl = Math.min(4, curLvl + 1);
+        if (def.levelCosts && def.levelCosts[nextLvl]) {
+            return def.levelCosts[nextLvl];
+        }
+        const base = def.cost || 1200;
+        if (nextLvl === 2) return base;
+        if (nextLvl === 3) return Math.round(base * 1.6);
+        return Math.round(base * 2.4);
+    }
+
+    getNextUpgradeStars(id) {
+        const def = this.renovationDefs[id];
+        if (!def) return 2;
+        const curLvl = this.getAreaLevel(id);
+        return (def.stars || 2) + Math.max(0, curLvl - 1);
     }
 
     // ----------------------------------------------------
@@ -538,19 +632,26 @@ class Hotel3DSimulator {
             incomePerMin: 45,
             lastIncomeTick: Date.now(),
             currentStage: 1,
-            // Maps renovationId -> { optionId: 'opt_b', level: 1 } or null
+            // Maps renovationId -> { optionId: 'opt_b', level: 2..4 } or null (Level 1)
             renovations: {}
         };
 
-        // Try reading v2 state, fallback to v1 migration
         if (saved) {
             try {
                 this.state = Object.assign(defaultState, JSON.parse(saved));
+                if (this.state.renovations) {
+                    Object.keys(this.state.renovations).forEach(k => {
+                        const r = this.state.renovations[k];
+                        if (r && typeof r === 'object' && r.level === 1 && r.optionId) {
+                            // Migrate legacy level:1 installed object to Level 2 (since Level 1 is Basic/Unrenovated)
+                            r.level = 2;
+                        }
+                    });
+                }
             } catch (e) {
                 this.state = defaultState;
             }
         } else {
-            // Check legacy state
             const legacy = localStorage.getItem('velvet_hotel_3d_state');
             if (legacy) {
                 try {
@@ -560,7 +661,7 @@ class Hotel3DSimulator {
                         this.state.renovations = {};
                         Object.keys(parsed.renovations).forEach(k => {
                             if (parsed.renovations[k] > 0) {
-                                this.state.renovations[k] = { optionId: 'opt_b', level: 1 };
+                                this.state.renovations[k] = { optionId: 'opt_b', level: 2 };
                             }
                         });
                     }
@@ -581,33 +682,37 @@ class Hotel3DSimulator {
                 this.state.stars = econ.getStars();
                 this.updateHUD();
                 this.updateProximityPanel();
+                this.renderHotelAreaCards();
             });
         }
 
-        // Calculate total income from installed renovations
         this.recalcHotelStats();
+        setTimeout(() => this.renderHotelAreaCards(), 50);
     }
 
     saveState() {
         localStorage.setItem('velvet_hotel_3d_state_v2', JSON.stringify(this.state));
         this.updateHUD();
+        this.renderHotelAreaCards();
     }
 
     recalcHotelStats() {
-        let baseIncome = 35;
+        let baseIncome = 45;
         let baseRep = 200;
-        let count = 0;
+        let totalLevelsGained = 0;
 
         Object.keys(this.state.renovations).forEach(id => {
             const reno = this.state.renovations[id];
             if (reno && reno.optionId) {
-                count++;
+                const lvl = Math.max(2, reno.level || 2);
+                const lvlMultiplier = 1 + (lvl - 2) * 0.55; // Lv2=1x, Lv3=1.55x, Lv4=2.1x
+                totalLevelsGained += (lvl - 1);
                 const def = this.renovationDefs[id];
                 if (def) {
                     const opt = def.options.find(o => o.id === reno.optionId) || def.options[0];
                     if (opt) {
-                        baseIncome += opt.incomeBoost;
-                        baseRep += opt.repBoost;
+                        baseIncome += Math.round(opt.incomeBoost * lvlMultiplier);
+                        baseRep += Math.round(opt.repBoost * lvlMultiplier);
                     }
                 }
             }
@@ -616,10 +721,10 @@ class Hotel3DSimulator {
         this.state.incomePerMin = baseIncome;
         this.state.reputation = baseRep;
 
-        if (count >= 8) this.state.hotelStars = 5;
-        else if (count >= 6) this.state.hotelStars = 4;
-        else if (count >= 4) this.state.hotelStars = 3;
-        else if (count >= 2) this.state.hotelStars = 2;
+        if (totalLevelsGained >= 16) this.state.hotelStars = 5;
+        else if (totalLevelsGained >= 10) this.state.hotelStars = 4;
+        else if (totalLevelsGained >= 5) this.state.hotelStars = 3;
+        else if (totalLevelsGained >= 2) this.state.hotelStars = 2;
         else this.state.hotelStars = 1;
     }
 
@@ -1291,19 +1396,28 @@ class Hotel3DSimulator {
 
     getInstalledOption(id) {
         if (this.previewingRenovation && this.previewingRenovation.id === id) {
-            return { optionId: this.previewingRenovation.optionId, isPreview: true };
+            return {
+                optionId: this.previewingRenovation.optionId,
+                level: this.previewingRenovation.level || Math.min(4, this.getAreaLevel(id) + 1),
+                isPreview: true
+            };
         }
         const saved = this.state.renovations[id];
         if (!saved) return null;
-        if (typeof saved === 'string') return { optionId: saved, isPreview: false };
-        if (typeof saved === 'object' && saved.optionId) return { optionId: saved.optionId, isPreview: false };
-        return { optionId: 'opt_b', isPreview: false };
+        if (typeof saved === 'string') return { optionId: saved, level: 2, isPreview: false };
+        if (typeof saved === 'object' && saved.optionId) {
+            return { optionId: saved.optionId, level: Math.max(2, saved.level || 2), isPreview: false };
+        }
+        return { optionId: 'opt_b', level: 2, isPreview: false };
     }
 
-    buildObjectMesh(id, optionId) {
+    buildObjectMesh(id, optionId, levelOverride = null) {
         if (this.upgradeMeshes[id]) {
             this.scene.remove(this.upgradeMeshes[id]);
         }
+
+        const installed = this.getInstalledOption(id);
+        const activeLevel = levelOverride || (installed ? installed.level : 1);
 
         let meshGroup = null;
         switch (id) {
@@ -1316,12 +1430,55 @@ class Hotel3DSimulator {
             case 'restaurant_tables': meshGroup = this.buildRestaurantTables3D(optionId); break;
             case 'swimming_pool': meshGroup = this.buildSwimmingPool3D(optionId); break;
             case 'spa_jacuzzi': meshGroup = this.buildSpaJacuzzi3D(optionId); break;
+            case 'garden_courtyard': meshGroup = this.buildGardenCourtyard3D(optionId); break;
             case 'penthouse_suite': meshGroup = this.buildPenthouseSuite3D(optionId); break;
         }
 
         if (meshGroup) {
+            if (optionId && activeLevel >= 3) {
+                this.applyLevelEnhancements3D(meshGroup, id, activeLevel);
+            }
             this.upgradeMeshes[id] = meshGroup;
             this.scene.add(meshGroup);
+        }
+    }
+
+    // Adds visible 3D architectural & luxury features at Level 3 (Premium) and Level 4 (Royal Luxury Suite)
+    applyLevelEnhancements3D(group, id, level) {
+        const def = this.renovationDefs[id];
+        if (!def) return;
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.95, roughness: 0.12 });
+        const crystalMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 0.9, opacity: 1, transparent: true, roughness: 0.05 });
+
+        // Level 3: Premium golden border trim & warm ambient spotlight
+        if (level >= 3) {
+            const haloRing = new THREE.Mesh(new THREE.RingGeometry(1.6, 1.85, 32), new THREE.MeshBasicMaterial({
+                color: 0xd4af37,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.55
+            }));
+            haloRing.rotation.x = -Math.PI / 2;
+            haloRing.position.set(def.pos.x, (def.pos.y > 5 ? 6.03 : 0.03), def.pos.z);
+            group.add(haloRing);
+
+            const warmLight = new THREE.PointLight(0xffdf88, 0.9, 6);
+            warmLight.position.set(def.pos.x, def.pos.y + 1.8, def.pos.z);
+            group.add(warmLight);
+        }
+
+        // Level 4: Royal Luxury Suite twin golden pedestals with crystal globes
+        if (level >= 4) {
+            const baseY = (def.pos.y > 5) ? 6.0 : 0.0;
+            [-2.2, 2.2].forEach(offsetX => {
+                const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 1.1, 16), goldMat);
+                ped.position.set(def.pos.x + offsetX, baseY + 0.55, def.pos.z + 1.1);
+                group.add(ped);
+
+                const orb = new THREE.Mesh(new THREE.OctahedronGeometry(0.26, 1), crystalMat);
+                orb.position.set(def.pos.x + offsetX, baseY + 1.3, def.pos.z + 1.1);
+                group.add(orb);
+            });
         }
     }
 
@@ -1329,27 +1486,22 @@ class Hotel3DSimulator {
     buildReceptionDesk3D(optionId) {
         const group = new THREE.Group();
         if (!optionId) {
-            // Old dusty wooden crate
             const oldMat = new THREE.MeshStandardMaterial({ color: 0x4a3728, roughness: 0.9 });
             const desk = new THREE.Mesh(new THREE.BoxGeometry(4.5, 1.1, 1.2), oldMat);
             desk.position.set(0, 0.55, -4);
             group.add(desk);
         } else if (optionId === 'opt_a') {
-            // Modern Minimalist Nordic Oak
             const oakTex = this.getTexture('light_nordic_oak');
             const desk = new THREE.Mesh(new THREE.BoxGeometry(5.0, 1.15, 1.3), new THREE.MeshStandardMaterial({ map: oakTex, roughness: 0.3 }));
             desk.position.set(0, 0.58, -4);
             group.add(desk);
-            // Floating glass top
             const glass = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.06, 1.4), new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: 0.9, opacity: 1, transparent: true, roughness: 0.05 }));
             glass.position.set(0, 1.18, -4);
             group.add(glass);
-            // White LED light strip
             const strip = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.04, 0.04), new THREE.MeshBasicMaterial({ color: 0xffffff }));
             strip.position.set(0, 0.05, -3.34);
             group.add(strip);
         } else if (optionId === 'opt_b') {
-            // Nero Marquina Black & Gold Marble
             const neroTex = this.getTexture('nero_marble');
             const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.15 });
             const desk = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1.2, 1.4), new THREE.MeshStandardMaterial({ map: neroTex, roughness: 0.1 }));
@@ -1358,7 +1510,6 @@ class Hotel3DSimulator {
             const trim = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.1, 1.5), goldMat);
             trim.position.set(0, 1.25, -4);
             group.add(trim);
-            // Computer & lamp
             const comp = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 0.1), new THREE.MeshStandardMaterial({ color: 0x111111 }));
             comp.position.set(0, 1.55, -4);
             group.add(comp);
@@ -1366,13 +1517,11 @@ class Hotel3DSimulator {
             lampLight.position.set(-1.8, 1.6, -4);
             group.add(lampLight);
         } else if (optionId === 'opt_c') {
-            // Neoclassical Imperial Carrara White Marble & Brass
             const whiteTex = this.getTexture('carrara_marble');
             const brassMat = new THREE.MeshStandardMaterial({ color: 0xc5a059, metalness: 0.85, roughness: 0.2 });
             const desk = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1.2, 1.4), new THREE.MeshStandardMaterial({ map: whiteTex, roughness: 0.15 }));
             desk.position.set(0, 0.6, -4);
             group.add(desk);
-            // Ionic fluting details
             [-2.4, 2.4].forEach(x => {
                 const pil = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1.2, 12), brassMat);
                 pil.position.set(x, 0.6, -3.3);
@@ -1386,13 +1535,11 @@ class Hotel3DSimulator {
     buildLobbyCarpet3D(optionId) {
         const group = new THREE.Group();
         if (optionId === 'opt_a') {
-            // Modern Geometric Gold
             const carpet = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 14), new THREE.MeshStandardMaterial({ color: 0x222633, roughness: 0.85 }));
             carpet.rotation.x = -Math.PI / 2;
             carpet.position.set(0, 0.015, 2);
             group.add(carpet);
         } else if (optionId === 'opt_b') {
-            // Royal Crimson Damask Velvet
             const carpetTex = this.getTexture('velvet_carpet');
             carpetTex.repeat.set(1, 4);
             const carpet = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 14), new THREE.MeshStandardMaterial({ map: carpetTex, roughness: 0.85 }));
@@ -1400,7 +1547,6 @@ class Hotel3DSimulator {
             carpet.position.set(0, 0.015, 2);
             group.add(carpet);
         } else if (optionId === 'opt_c') {
-            // Monaco Emerald Velvet
             const emeraldTex = this.getTexture('emerald_velvet');
             emeraldTex.repeat.set(1, 4);
             const carpet = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 14), new THREE.MeshStandardMaterial({ map: emeraldTex, roughness: 0.85 }));
@@ -1424,7 +1570,6 @@ class Hotel3DSimulator {
             bulb.position.set(0, 3.5, -1);
             group.add(bulb);
         } else if (optionId === 'opt_a') {
-            // Modern Minimalist Ring Halo
             const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.04, 16, 32), new THREE.MeshBasicMaterial({ color: 0xffeedd }));
             ring1.rotation.x = Math.PI / 2.3;
             ring1.position.set(0, 3.8, -1);
@@ -1434,7 +1579,6 @@ class Hotel3DSimulator {
             ring2.position.set(0, 3.4, -1);
             group.add(ring2);
         } else if (optionId === 'opt_b') {
-            // Bohemya 12 Kollu Kristal Avize
             const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.2), goldMat);
             stem.position.set(0, 4.4, -1);
             group.add(stem);
@@ -1450,7 +1594,6 @@ class Hotel3DSimulator {
                 group.add(prism);
             }
         } else if (optionId === 'opt_c') {
-            // Art Deco Gold Tube Chandelier
             for (let i = 0; i < 20; i++) {
                 const angle = (i / 20) * Math.PI * 2;
                 const r = (i % 2 === 0 ? 1.2 : 0.8);
@@ -1470,7 +1613,6 @@ class Hotel3DSimulator {
             frame.position.set(-19, 0.2, -12);
             group.add(frame);
         } else if (optionId === 'opt_a') {
-            // Scandinavian Floating Bed
             const oakTex = this.getTexture('light_nordic_oak');
             const bedBase = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.5, 3.8), new THREE.MeshStandardMaterial({ map: oakTex, roughness: 0.3 }));
             bedBase.position.set(-19, 0.25, -12);
@@ -1479,7 +1621,6 @@ class Hotel3DSimulator {
             quilt.position.set(-19, 0.65, -11.7);
             group.add(quilt);
         } else if (optionId === 'opt_b') {
-            // Royal Gold Canopy Bed (Cibinlikli)
             const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
             const bedBase = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.7, 3.8), new THREE.MeshStandardMaterial({ color: 0x2b180d, roughness: 0.3 }));
             bedBase.position.set(-19, 0.35, -12);
@@ -1487,18 +1628,15 @@ class Hotel3DSimulator {
             const quilt = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.3, 3.2), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }));
             quilt.position.set(-19, 0.85, -11.7);
             group.add(quilt);
-            // 4 Canopy Posts
             [[-20.6, -13.8], [-17.4, -13.8], [-20.6, -10.2], [-17.4, -10.2]].forEach(pos => {
                 const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 3.5), goldMat);
                 post.position.set(pos[0], 1.75, pos[1]);
                 group.add(post);
             });
-            // Canopy Top Frame
             const topFrame = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.08, 3.7), goldMat);
             topFrame.position.set(-19, 3.5, -12);
             group.add(topFrame);
         } else if (optionId === 'opt_c') {
-            // Chesterfield Bordo Kadife King Bed
             const bedBase = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.7, 3.8), new THREE.MeshStandardMaterial({ color: 0x3a2012, roughness: 0.3 }));
             bedBase.position.set(-19, 0.35, -12);
             group.add(bedBase);
@@ -1516,7 +1654,6 @@ class Hotel3DSimulator {
     buildRoom101Decor3D(optionId) {
         const group = new THREE.Group();
         if (optionId === 'opt_a') {
-            // Modern Minimalist Grey & Glass
             const mat = new THREE.MeshStandardMaterial({ color: 0x4a5568, roughness: 0.5 });
             const chair1 = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.8, 1.0), mat);
             chair1.position.set(-22, 0.4, -7);
@@ -1524,7 +1661,6 @@ class Hotel3DSimulator {
             chair2.position.set(-20, 0.4, -7);
             group.add(chair1); group.add(chair2);
         } else if (optionId === 'opt_b') {
-            // Emerald Velvet & Brass Champagne Table
             const emeraldMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.7 });
             const chair1 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.9, 1.1), emeraldMat);
             chair1.position.set(-22, 0.45, -7);
@@ -1535,7 +1671,6 @@ class Hotel3DSimulator {
             table.position.set(-21, 0.25, -7);
             group.add(table);
         } else if (optionId === 'opt_c') {
-            // Riviera Bambu & Wicker
             const wickerMat = new THREE.MeshStandardMaterial({ color: 0xc89d66, roughness: 0.9 });
             const chair1 = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.5, 0.8, 16), wickerMat);
             chair1.position.set(-22, 0.4, -7);
@@ -1554,12 +1689,10 @@ class Hotel3DSimulator {
             oldBar.position.set(20, 0.6, -6);
             group.add(oldBar);
         } else if (optionId === 'opt_a') {
-            // Amber Backlit Onyx
             const bar = new THREE.Mesh(new THREE.BoxGeometry(7.0, 1.2, 1.5), new THREE.MeshStandardMaterial({ color: 0xcc7722, roughness: 0.2, emissive: 0x552200 }));
             bar.position.set(20, 0.6, -6);
             group.add(bar);
         } else if (optionId === 'opt_b') {
-            // White Carrara Marble & Fluted Gold
             const marbleTex = this.getTexture('carrara_marble');
             const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
             const bar = new THREE.Mesh(new THREE.BoxGeometry(7.0, 1.2, 1.5), new THREE.MeshStandardMaterial({ map: marbleTex, roughness: 0.15 }));
@@ -1574,7 +1707,6 @@ class Hotel3DSimulator {
                 group.add(stool);
             }
         } else if (optionId === 'opt_c') {
-            // Dark Speakeasy Walnut
             const walnutTex = this.getTexture('dark_walnut');
             const bar = new THREE.Mesh(new THREE.BoxGeometry(7.0, 1.2, 1.5), new THREE.MeshStandardMaterial({ map: walnutTex, roughness: 0.3 }));
             bar.position.set(20, 0.6, -6);
@@ -1651,9 +1783,9 @@ class Hotel3DSimulator {
         const group = new THREE.Group();
         if (optionId) {
             let tubMat;
-            if (optionId === 'opt_a') tubMat = new THREE.MeshStandardMaterial({ color: 0xc89d66, roughness: 0.8 }); // Cedar wood
-            else if (optionId === 'opt_b') tubMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15 }); // Marble
-            else tubMat = new THREE.MeshStandardMaterial({ color: 0xd8c29d, roughness: 0.6 }); // Roman stone
+            if (optionId === 'opt_a') tubMat = new THREE.MeshStandardMaterial({ color: 0xc89d66, roughness: 0.8 });
+            else if (optionId === 'opt_b') tubMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15 });
+            else tubMat = new THREE.MeshStandardMaterial({ color: 0xd8c29d, roughness: 0.6 });
 
             const tub = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.0, 1.0, 24), tubMat);
             tub.position.set(18, 0.5, -22);
@@ -1667,7 +1799,50 @@ class Hotel3DSimulator {
         return group;
     }
 
-    // 10. PENTHOUSE SUITE 3D
+    // 10. GARDEN COURTYARD & FOUNTAIN 3D
+    buildGardenCourtyard3D(optionId) {
+        const group = new THREE.Group();
+        if (!optionId) {
+            const dryBasin = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.4, 0.4, 16), new THREE.MeshStandardMaterial({ color: 0x6b655e, roughness: 0.95 }));
+            dryBasin.position.set(-12, 0.2, -22);
+            group.add(dryBasin);
+        } else {
+            const marbleMat = new THREE.MeshStandardMaterial({
+                color: optionId === 'opt_b' ? 0xd4af37 : (optionId === 'opt_a' ? 0x2d3748 : 0xf4efe6),
+                metalness: optionId === 'opt_b' ? 0.8 : 0.1,
+                roughness: 0.25
+            });
+            const basin = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.7, 0.55, 24), marbleMat);
+            basin.position.set(-12, 0.28, -22);
+            group.add(basin);
+
+            const water = new THREE.Mesh(new THREE.CircleGeometry(2.3, 24), new THREE.MeshStandardMaterial({ color: 0x22d3ee, roughness: 0.1 }));
+            water.rotation.x = -Math.PI / 2;
+            water.position.set(-12, 0.58, -22);
+            group.add(water);
+
+            const tier1 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.55, 1.4, 16), marbleMat);
+            tier1.position.set(-12, 1.1, -22);
+            group.add(tier1);
+
+            const bowl = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 0.4, 0.35, 20), marbleMat);
+            bowl.position.set(-12, 1.75, -22);
+            group.add(bowl);
+
+            const foliageMat = new THREE.MeshStandardMaterial({
+                color: optionId === 'opt_b' ? 0x991b1b : (optionId === 'opt_c' ? 0xbe185d : 0x15803d),
+                roughness: 0.7
+            });
+            [[-14.8, -20], [-9.2, -20], [-14.8, -24], [-9.2, -24]].forEach(pos => {
+                const bush = new THREE.Mesh(new THREE.SphereGeometry(0.65, 12, 12), foliageMat);
+                bush.position.set(pos[0], 0.65, pos[1]);
+                group.add(bush);
+            });
+        }
+        return group;
+    }
+
+    // 11. PENTHOUSE SUITE 3D
     buildPenthouseSuite3D(optionId) {
         const group = new THREE.Group();
         if (optionId) {
@@ -1691,22 +1866,18 @@ class Hotel3DSimulator {
         const def = this.renovationDefs[id];
         if (!def) return;
 
-        const installed = this.getInstalledOption(id);
-        const isCompleted = (installed && !installed.isPreview);
-
-        // Check if player can afford ANY option
-        const minCostCoins = Math.min(...def.options.map(o => o.costCoins));
-        const minCostStars = Math.min(...def.options.map(o => o.costStars));
-        const canAfford = (this.state.coins >= minCostCoins && this.state.stars >= minCostStars);
+        const curLvl = this.getAreaLevel(id);
+        const isMaxLevel = (curLvl >= 4);
+        const nextCost = this.getNextUpgradeCost(id);
+        const nextStars = this.getNextUpgradeStars(id);
+        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
+        const canAfford = !isMaxLevel && (balance >= nextCost && stars >= nextStars);
 
         const group = new THREE.Group();
 
-        // Color coding:
-        // Green: Affordable now!
-        // Gold: Unaffordable yet
-        // Cyan: Completed
-        let beaconColor = isCompleted ? 0x00f0ff : (canAfford ? 0x00ff88 : 0xffcc00);
-        let emissiveColor = isCompleted ? 0x004466 : (canAfford ? 0x006622 : 0xcc8800);
+        let beaconColor = isMaxLevel ? 0x00f0ff : (canAfford ? 0x00ff88 : 0xffcc00);
+        let emissiveColor = isMaxLevel ? 0x004466 : (canAfford ? 0x006622 : 0xcc8800);
 
         const markerGeo = new THREE.OctahedronGeometry(0.35, 0);
         const markerMat = new THREE.MeshStandardMaterial({
@@ -1741,7 +1912,7 @@ class Hotel3DSimulator {
             marker: marker,
             ring: ring,
             pos: def.pos,
-            isCompleted: isCompleted,
+            isCompleted: isMaxLevel,
             canAfford: canAfford,
             action: () => this.openRenovationModal(id)
         });
@@ -1753,33 +1924,35 @@ class Hotel3DSimulator {
     checkAffordableNotifications() {
         Object.keys(this.renovationDefs).forEach(id => {
             const def = this.renovationDefs[id];
-            const installed = this.getInstalledOption(id);
-            if (installed && !installed.isPreview) return; // already done
+            const curLvl = this.getAreaLevel(id);
+            if (curLvl >= 4) return;
 
-            const minCostCoins = Math.min(...def.options.map(o => o.costCoins));
-            const minCostStars = Math.min(...def.options.map(o => o.costStars));
+            const nextCost = this.getNextUpgradeCost(id);
+            const nextStars = this.getNextUpgradeStars(id);
+            const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+            const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
+            const canAfford = (balance >= nextCost && stars >= nextStars);
+            const notifyKey = `${id}_lv${curLvl + 1}`;
 
-            const canAfford = (this.state.coins >= minCostCoins && this.state.stars >= minCostStars);
-
-            if (canAfford && !this.notifiedAffordable[id]) {
-                this.notifiedAffordable[id] = true;
-                this.triggerAffordableAlert(def);
+            if (canAfford && !this.notifiedAffordable[notifyKey]) {
+                this.notifiedAffordable[notifyKey] = true;
+                this.triggerAffordableAlert(def, curLvl + 1, nextCost);
             }
         });
     }
 
-    triggerAffordableAlert(def) {
+    triggerAffordableAlert(def, nextLvl = 2, nextCost = 1200) {
         this.playSound('chime');
         const alertBox = document.getElementById('budgetAlertToast');
         if (!alertBox) return;
 
         alertBox.innerHTML = `
             <div class="alert-content">
-                <span class="alert-sparkle">✨ BÜTÇE HAZIR!</span>
-                <p><b>${def.name}</b> yenilemesi için yeterli birikime ulaştınız! Tasarımınızı seçebilirsiniz.</p>
+                <span class="alert-sparkle">✨ 3 TASARIM KİLİDİ AÇILDI! (SEVİYE ${nextLvl})</span>
+                <p><b>${def.name}</b> (Seviye ${nextLvl} — $${nextCost}) yenilemesi için yeterli birikime ulaştınız! 3 farklı lüks tasarımdan favorinizi seçebilirsiniz.</p>
             </div>
             <button class="alert-action-btn" onclick="hotel3D.goToAndOpenRenovation('${def.id}')">
-                İncele &amp; Tasarla ➔
+                3 Tasarımı Gör ➔
             </button>
         `;
         alertBox.style.display = 'flex';
@@ -1795,41 +1968,31 @@ class Hotel3DSimulator {
         const alertBox = document.getElementById('budgetAlertToast');
         if (alertBox) alertBox.style.display = 'none';
 
-        // Teleport near the object
+        // Ensure Hotel page is active
+        if (window.switchMainPage) {
+            window.switchMainPage('pageHotel');
+        }
+
+        // Teleport near the object inside 3D hotel
         this.player.currentFloor = (def.pos.y > 5.0) ? 2 : 1;
         this.player.pos.set(def.pos.x, (this.player.currentFloor === 2 ? 7.7 : 1.7), def.pos.z + 2.5);
         this.player.rot.yaw = 0;
         this.playSound('door');
 
         setTimeout(() => {
+            this.onResize();
             this.updateInteractions(0);
             this.updateProximityPanel();
             this.openRenovationModal(id);
-        }, 300);
+        }, 250);
     }
 
     // ----------------------------------------------------
-    // INTERACTIVE 3-DESIGN SELECTION MODAL WITH 3D PREVIEW
+    // INTERACTIVE 3-DESIGN SELECTION & MULTI-LEVEL MODAL
     // ----------------------------------------------------
     openRenovationModal(id) {
         const def = this.renovationDefs[id];
         if (!def) return;
-
-        const installed = this.getInstalledOption(id);
-        const isCompleted = (installed && !installed.isPreview);
-        const currentBalance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
-        const currentStars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
-        const cost = def.cost || 1200;
-        const stars = def.stars || 3;
-        const canAfford = window.GameEconomy ? window.GameEconomy.canAfford(cost, stars) : (currentBalance >= cost);
-
-        // Strict Requirement: Design options unlock ONLY when player can afford the renovation!
-        if (!canAfford && !isCompleted) {
-            this.playSound('step');
-            const defCoins = Math.max(0, cost - currentBalance);
-            this.showBanner(`🔒 Tasarımlar Kilitli! Bütçeniz henüz yeterli değil ($${defCoins} eksik).`);
-            return;
-        }
 
         const modal = document.getElementById('renoModal');
         const modalContent = document.getElementById('renoModalContent');
@@ -1838,7 +2001,7 @@ class Hotel3DSimulator {
         this.currentViewingId = id;
         this.selectedOptionIndex = 0;
 
-        // Find which option was installed or default to 0
+        const installed = this.getInstalledOption(id);
         if (installed) {
             const idx = def.options.findIndex(o => o.id === installed.optionId);
             if (idx !== -1) this.selectedOptionIndex = idx;
@@ -1849,17 +2012,32 @@ class Hotel3DSimulator {
     }
 
     selectDesignTab(idx) {
+        const id = this.currentViewingId;
+        const curLvl = this.getAreaLevel(id);
+        const cost = this.getNextUpgradeCost(id);
+        const starsNeeded = this.getNextUpgradeStars(id);
+        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
+        const canAfford = (balance >= cost && stars >= starsNeeded);
+
+        if (!canAfford && curLvl < 4) {
+            const defCoins = Math.max(0, cost - balance);
+            this.showBanner(`🔒 3 Tasarım Kilitli! Seviye ${curLvl + 1} için $${defCoins} daha biriktirmelisiniz.`);
+            return;
+        }
+
         this.selectedOptionIndex = idx;
         this.renderModalContent();
     }
 
-    // Live 3D Preview: Swaps the 3D model in the world so player can walk/look!
     previewDesignInWorld(optionId) {
         const id = this.currentViewingId;
-        this.previewingRenovation = { id: id, optionId: optionId };
-        this.buildObjectMesh(id, optionId);
+        const curLvl = this.getAreaLevel(id);
+        const targetLvl = Math.min(4, curLvl + 1);
+        this.previewingRenovation = { id: id, optionId: optionId, level: targetLvl };
+        this.buildObjectMesh(id, optionId, targetLvl);
         this.playSound('step');
-        this.showBanner(`👁️ 3D Önizleme Aktif: ${this.renovationDefs[id].name}`);
+        this.showBanner(`👁️ 3D Önizleme Aktif: ${this.renovationDefs[id].name} (Seviye ${targetLvl})`);
         this.renderModalContent();
     }
 
@@ -1867,9 +2045,8 @@ class Hotel3DSimulator {
         if (this.previewingRenovation) {
             const id = this.previewingRenovation.id;
             this.previewingRenovation = null;
-            // Restore saved state
             const installed = this.getInstalledOption(id);
-            this.buildObjectMesh(id, installed ? installed.optionId : null);
+            this.buildObjectMesh(id, installed ? installed.optionId : null, installed ? installed.level : 1);
         }
         const modal = document.getElementById('renoModal');
         if (modal) modal.style.display = 'none';
@@ -1881,20 +2058,112 @@ class Hotel3DSimulator {
         const modalContent = document.getElementById('renoModalContent');
         if (!modalContent || !def) return;
 
+        const curLvl = this.getAreaLevel(id);
+        const isMaxLevel = (curLvl >= 4);
+        const nextLvl = Math.min(4, curLvl + 1);
+
         const opt = def.options[this.selectedOptionIndex];
         const installed = this.state.renovations[id];
-        const isCurrentInstalled = (installed && (installed === opt.id || installed.optionId === opt.id));
         const isPreviewing = (this.previewingRenovation && this.previewingRenovation.optionId === opt.id);
 
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
         const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
-        const cost = def.cost || opt.costCoins;
-        const starsNeeded = def.stars || opt.costStars;
+        const cost = this.getNextUpgradeCost(id);
+        const starsNeeded = this.getNextUpgradeStars(id);
 
         const deficitCoins = Math.max(0, cost - balance);
         const deficitStars = Math.max(0, starsNeeded - stars);
-        const canAfford = (deficitCoins === 0 && deficitStars === 0);
+        const canAfford = isMaxLevel || (deficitCoins === 0 && deficitStars === 0);
 
+        const optionStyleLabels = [
+            'Seçenek 1 — Modern Elegance',
+            'Seçenek 2 — Velvet Luxury',
+            'Seçenek 3 — Mediterranean Suite'
+        ];
+
+        // Build 4-level progress pills
+        let levelStepsHtml = '';
+        for (let lv = 1; lv <= 4; lv++) {
+            const lvClass = lv < curLvl ? 'lv-done' : (lv === curLvl ? 'lv-current' : (lv === nextLvl ? 'lv-next' : 'lv-future'));
+            const lvNames = { 1: 'Lv.1 Başlangıç', 2: 'Lv.2 Modern', 3: 'Lv.3 Premium', 4: 'Lv.4 Kraliyet Lüksü' };
+            levelStepsHtml += `<div class="reno-lv-step ${lvClass}"><span>${lvNames[lv]}</span></div>`;
+        }
+
+        // If player cannot afford next upgrade yet, show LOCKED 3-design showcase as required!
+        if (!canAfford && !isMaxLevel) {
+            let lockedCardsHtml = '';
+            def.options.forEach((o, idx) => {
+                lockedCardsHtml += `
+                    <div class="locked-design-option-card">
+                        <div class="locked-design-icon">🔒</div>
+                        <div class="locked-design-info">
+                            <b>${optionStyleLabels[idx]}</b>
+                            <span>${o.name}</span>
+                            <small>Maliyet: $${cost} &nbsp;•&nbsp; Gelir: +$${o.incomeBoost}/dk</small>
+                        </div>
+                        <span class="locked-pill">KİLİTLİ</span>
+                    </div>
+                `;
+            });
+
+            modalContent.innerHTML = `
+                <div class="reno-card-header">
+                    <div class="header-left">
+                        <span class="reno-badge">${def.area} · Mevcut: Seviye ${curLvl}/4</span>
+                        <h3 class="reno-title">${def.name}</h3>
+                    </div>
+                    <button class="reno-close-btn" onclick="hotel3D.cancelPreviewAndClose()">&times;</button>
+                </div>
+
+                <div class="reno-lv-stepper">${levelStepsHtml}</div>
+
+                <div class="area-visual-banner" style="background-image: url('${def.sceneImg || 'assets/scene_lobby_reception.jpg'}')">
+                    <div class="area-visual-overlay">
+                        <span class="area-cond-tag">${this.getLevelTitle(curLvl)}</span>
+                        <b>Sonraki Hedef: ${this.getLevelTitle(nextLvl)} ($${cost})</b>
+                    </div>
+                </div>
+
+                <div class="budget-breakdown-card" style="margin-bottom: 12px;">
+                    <div class="budget-row">
+                        <span>Seviye ${nextLvl} Yenileme Maliyeti:</span>
+                        <b class="text-gold">💰 $${cost} &nbsp;|&nbsp; ⭐ ${starsNeeded} Yıldız</b>
+                    </div>
+                    <div class="budget-row">
+                        <span>Mevcut Kasanız:</span>
+                        <b>💰 $${balance} &nbsp;|&nbsp; ⭐ ${stars} Yıldız</b>
+                    </div>
+                    <div class="budget-deficit-box">
+                        <span class="deficit-title">🔒 DURUM: BİRİKTİRİLİYOR (SAVING MONEY)</span>
+                        <div class="deficit-pills">
+                            ${deficitCoins > 0 ? `<span class="def-tag coin">$${deficitCoins} daha gerekli</span>` : ''}
+                            ${deficitStars > 0 ? `<span class="def-tag star">${deficitStars} ⭐ daha gerekli</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="locked-designs-box">
+                    <div class="locked-box-title">
+                        <span>🎨 3 TASARIM SEÇENEĞİ ($${cost} Biriktiğinde Kilidi Açılır)</span>
+                    </div>
+                    <div class="locked-designs-list">
+                        ${lockedCardsHtml}
+                    </div>
+                </div>
+
+                <div class="reno-actions-footer">
+                    <button class="preview-3d-btn" onclick="hotel3D.setTargetRenovation('${id}'); hotel3D.cancelPreviewAndClose();">
+                        🎯 Bu Alanı Birikim Hedefi Yap
+                    </button>
+                    <button class="purchase-confirm-btn btn-disabled" disabled>
+                        🔒 Yetersiz Bakiye ($${deficitCoins} Eksik)
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        // UNLOCKED 3 DESIGN OPTIONS WITH VISUAL PREVIEW
         let optionsTabsHtml = '';
         def.options.forEach((o, idx) => {
             const isSelected = (idx === this.selectedOptionIndex);
@@ -1904,37 +2173,52 @@ class Hotel3DSimulator {
                     onclick="hotel3D.selectDesignTab(${idx})">
                     <span class="tab-icon">${o.icon}</span>
                     <div class="tab-text">
-                        <b>Seçenek ${String.fromCharCode(65 + idx)}</b>
-                        <small>${o.style}</small>
+                        <b>Seçenek ${idx + 1}</b>
+                        <small>${optionStyleLabels[idx].split('— ')[1]}</small>
                     </div>
-                    ${isInstalled ? '<span class="installed-tag">Mevcut</span>' : ''}
+                    ${isInstalled ? `<span class="installed-tag">Lv.${curLvl}</span>` : ''}
                 </button>
             `;
         });
 
+        const previewImgSrc = (window.LuxuryArt && window.LuxuryArt.getDesignPreview)
+            ? window.LuxuryArt.getDesignPreview(id, opt.id, nextLvl)
+            : (def.sceneImg || 'assets/scene_lobby_reception.jpg');
+
+        const lvlMultiplier = 1 + (nextLvl - 2) * 0.55;
+        const boostedIncome = Math.round(opt.incomeBoost * lvlMultiplier);
+        const boostedRep = Math.round(opt.repBoost * lvlMultiplier);
+
         modalContent.innerHTML = `
             <div class="reno-card-header">
                 <div class="header-left">
-                    <span class="reno-badge">${def.area}</span>
+                    <span class="reno-badge">${def.area} · Seviye ${curLvl} ➔ Seviye ${nextLvl}</span>
                     <h3 class="reno-title">${def.name}</h3>
                 </div>
                 <button class="reno-close-btn" onclick="hotel3D.cancelPreviewAndClose()">&times;</button>
             </div>
+
+            <div class="reno-lv-stepper">${levelStepsHtml}</div>
 
             <!-- 3 DESIGN OPTIONS PICKER TABS -->
             <div class="design-tabs-row">
                 ${optionsTabsHtml}
             </div>
 
-            <!-- SELECTED OPTION CARD -->
+            <!-- SELECTED OPTION CARD WITH VISUAL PREVIEW -->
             <div class="design-detail-card">
+                <div class="design-visual-preview-wrap">
+                    <img src="${previewImgSrc}" alt="${opt.name}" class="design-visual-preview-img" />
+                    <span class="design-preview-badge">🔓 ${optionStyleLabels[this.selectedOptionIndex]}</span>
+                </div>
+
                 <div class="design-head-row">
                     <div class="design-title-box">
-                        <span class="opt-badge">${opt.style}</span>
+                        <span class="opt-badge">${optionStyleLabels[this.selectedOptionIndex]}</span>
                         <h4>${opt.name}</h4>
                     </div>
                     <div class="design-price-tag">
-                        <span>💰 $${cost}</span>
+                        <span>💰 ${isMaxLevel ? 'KURULU' : '$' + cost}</span>
                         <span class="star-pill">⭐ ${starsNeeded}</span>
                     </div>
                 </div>
@@ -1944,34 +2228,23 @@ class Hotel3DSimulator {
                 <!-- STATS BENEFIT -->
                 <div class="design-stats-strip">
                     <div class="stat-pill">
-                        <label>Pasif Otel Geliri</label>
-                        <b class="positive">+$${opt.incomeBoost}/dk</b>
+                        <label>Seviye ${nextLvl} Pasif Geliri</label>
+                        <b class="positive">+$${boostedIncome}/dk</b>
                     </div>
                     <div class="stat-pill">
-                        <label>Otel Prestiji</label>
-                        <b class="rep">+${opt.repBoost} Rep</b>
+                        <label>Seviye ${nextLvl} Prestiji</label>
+                        <b class="rep">+${boostedRep} Rep</b>
                     </div>
                 </div>
 
-                <!-- BUDGET BREAKDOWN & DEFICIT CALCULATION -->
                 <div class="budget-breakdown-card">
                     <div class="budget-row">
                         <span>Mevcut Kasanız:</span>
                         <b>💰 $${balance} &nbsp;|&nbsp; ⭐ ${stars} Yıldız</b>
                     </div>
-                    ${!canAfford ? `
-                        <div class="budget-deficit-box">
-                            <span class="deficit-title">⚠️ Bütçe Durumu: Yetersiz Bakiye</span>
-                            <div class="deficit-pills">
-                                ${deficitCoins > 0 ? `<span class="def-tag coin">$${deficitCoins} eksik</span>` : ''}
-                                ${deficitStars > 0 ? `<span class="def-tag star">${deficitStars} ⭐ eksik</span>` : ''}
-                            </div>
-                        </div>
-                    ` : `
-                        <div class="budget-sufficient-box">
-                            <span>✅ Bütçeniz bu lüks tasarımı uygulamak için yeterli! Kalan para: +$${balance - cost}</span>
-                        </div>
-                    `}
+                    <div class="budget-sufficient-box">
+                        <span>✅ ${isMaxLevel ? 'Maksimum Seviye (Lv.4) tamamlandı! Tasarımlar arasında ücretsiz geçiş yapabilirsiniz.' : `Bütçeniz Seviye ${nextLvl} yükseltmesi için yeterli! İşlem sonrası kalan: +$${balance - cost}`}</span>
+                    </div>
                 </div>
             </div>
 
@@ -1982,10 +2255,11 @@ class Hotel3DSimulator {
                     ${isPreviewing ? '👁️ 3D Önizleniyor' : '👁️ 3D Dünyada Önizle'}
                 </button>
 
-                <button class="purchase-confirm-btn ${isCurrentInstalled ? 'btn-installed' : (canAfford ? 'btn-ready' : 'btn-disabled')}"
-                    ${(!canAfford || isCurrentInstalled) ? 'disabled' : ''}
+                <button class="purchase-confirm-btn btn-ready"
                     onclick="hotel3D.executePurchase('${id}', '${opt.id}')">
-                    ${isCurrentInstalled ? '🌟 Bu Tasarım Kurulu' : (canAfford ? `🛠️ Satın Al & Uygula ($${cost})` : '❌ Yetersiz Bakiye')}
+                    ${isMaxLevel
+                        ? `🎨 Bu Tasarımı Uygula (Ücretsiz)`
+                        : `🛠️ Seviye ${nextLvl}'e Yükselt & Uygula ($${cost})`}
                 </button>
             </div>
         `;
@@ -1997,27 +2271,38 @@ class Hotel3DSimulator {
         const opt = def.options.find(o => o.id === optionId);
         if (!opt) return;
 
-        const costCoins = def.cost || opt.costCoins;
-        const costStars = def.stars || opt.costStars;
+        const curLvl = this.getAreaLevel(id);
+        const isMaxLevel = (curLvl >= 4);
+        const nextLvl = Math.min(4, curLvl + 1);
+        const costCoins = isMaxLevel ? 0 : this.getNextUpgradeCost(id);
+        const costStars = isMaxLevel ? 0 : this.getNextUpgradeStars(id);
 
-        if (window.GameEconomy) {
-            const res = window.GameEconomy.purchaseRenovation(id, optionId, costCoins, costStars, `${def.name} - ${opt.name}`);
-            if (!res.success) {
-                this.showBanner('Yetersiz bakiye! Masadan sipariş tamamlayın veya otel gelirini toplayın.');
-                return;
+        if (!isMaxLevel) {
+            if (window.GameEconomy) {
+                const res = window.GameEconomy.purchaseRenovation(
+                    id,
+                    optionId,
+                    costCoins,
+                    costStars,
+                    `${def.name} (Seviye ${nextLvl}: ${opt.name})`
+                );
+                if (!res.success) {
+                    this.showBanner('Yetersiz bakiye! Masadan sipariş tamamlayın veya otel gelirini toplayın.');
+                    return;
+                }
+                this.state.coins = res.remainingBalance;
+            } else {
+                if (this.state.coins < costCoins || this.state.stars < costStars) {
+                    this.showBanner('Yetersiz bakiye! Masadan sipariş tamamlayın.');
+                    return;
+                }
+                this.state.coins -= costCoins;
+                this.state.stars -= costStars;
             }
-            this.state.coins = res.remainingBalance;
-        } else {
-            if (this.state.coins < costCoins || this.state.stars < costStars) {
-                this.showBanner('Yetersiz bakiye! Masadan sipariş tamamlayın.');
-                return;
-            }
-            this.state.coins -= costCoins;
-            this.state.stars -= costStars;
         }
 
-        // Save selected design
-        this.state.renovations[id] = { optionId: optionId, level: 1 };
+        // Independently advance ONLY this area's level (1 -> 2 -> 3 -> 4)
+        this.state.renovations[id] = { optionId: optionId, level: nextLvl };
         this.previewingRenovation = null;
 
         this.recalcHotelStats();
@@ -2029,7 +2314,122 @@ class Hotel3DSimulator {
 
         this.cancelPreviewAndClose();
         this.updateProximityPanel();
-        this.showBanner(`🎉 ${opt.name} Başarıyla Uygulandı! (+$${opt.incomeBoost}/dk)`);
+        this.renderHotelAreaCards();
+
+        const nextUpgradeMsg = nextLvl < 4
+            ? `Sonraki Seviye (Lv.${nextLvl + 1}) Kilidi Açıldı!`
+            : `👑 Maksimum Seviye (Lv.4 Kraliyet Lüksü) Tamamlandı!`;
+        this.showBanner(`🎉 ${def.name} Seviye ${nextLvl} (${opt.name}) Tamamlandı! ${nextUpgradeMsg}`);
+    }
+
+    // ----------------------------------------------------
+    // VISUAL HOTEL AREA SHOWCASE CARDS (#hotelAreasVisualGrid)
+    // Restores & upgrades visible realistic hotel environments on #pageHotel
+    // ----------------------------------------------------
+    renderHotelAreaCards() {
+        const grid = document.getElementById('hotelAreasVisualGrid');
+        if (!grid || !this.renovationDefs) return;
+
+        const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
+        const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
+        const targetId = window.GameEconomy ? window.GameEconomy.getTargetRenovation() : 'restaurant_tables';
+
+        let cardsHtml = '';
+        Object.keys(this.renovationDefs).forEach((id) => {
+            const def = this.renovationDefs[id];
+            const curLvl = this.getAreaLevel(id);
+            const isMax = (curLvl >= 4);
+            const nextLvl = Math.min(4, curLvl + 1);
+            const cost = this.getNextUpgradeCost(id);
+            const starsNeeded = this.getNextUpgradeStars(id);
+            const stillNeeded = Math.max(0, cost - balance);
+            const canAfford = isMax || (balance >= cost && stars >= starsNeeded);
+            const isTarget = (id === targetId);
+
+            const installed = this.getInstalledOption(id);
+            const installedOpt = installed ? (def.options.find(o => o.id === installed.optionId) || def.options[0]) : null;
+            const conditionText = installedOpt
+                ? `Seviye ${curLvl}: ${installedOpt.name} (${installedOpt.style})`
+                : (def.defaultDesc || 'Seviye 1: Başlangıç Durumu');
+
+            // If upgraded (Lv.2+), we can also show the design preview pill alongside the realistic area photo
+            const statusClass = isMax ? 'badge-max' : (canAfford ? 'badge-ready' : 'badge-saving');
+            const statusLabel = isMax
+                ? '👑 SEVİYE 4 (MAKSİMUM)'
+                : (canAfford ? `🟢 BÜTÇE HAZIR (Lv.${nextLvl})` : `⏳ $${stillNeeded} EKSİK`);
+
+            let lvDots = '';
+            for (let l = 1; l <= 4; l++) {
+                lvDots += `<span class="area-lv-segment ${l <= curLvl ? 'filled' : ''}">Lv.${l}</span>`;
+            }
+
+            cardsHtml += `
+                <div class="hotel-visual-area-card ${curLvl > 1 ? 'area-upgraded' : ''} ${isTarget ? 'area-target' : ''}">
+                    <div class="hotel-area-img-box" style="background-image: url('${def.sceneImg || 'assets/scene_lobby_reception.jpg'}')"
+                         onclick="hotel3D.goToAndOpenRenovation('${id}')">
+                        <div class="hotel-area-top-badges">
+                            <span class="hotel-area-cat">${def.area}</span>
+                            <span class="hotel-area-status ${statusClass}">${statusLabel}</span>
+                        </div>
+                        <div class="hotel-area-bottom-overlay">
+                            <h4>${def.name}</h4>
+                            <div class="area-lv-bar">${lvDots}</div>
+                        </div>
+                    </div>
+
+                    <div class="hotel-area-body">
+                        <div class="area-cond-line">
+                            <small>Mevcut Durum:</small>
+                            <b>${conditionText}</b>
+                        </div>
+
+                        <div class="area-cost-metrics">
+                            <div class="area-metric">
+                                <span>${isMax ? 'Durum' : `Seviye ${nextLvl} Maliyeti`}</span>
+                                <b class="text-gold">${isMax ? 'TAMAMLANDI' : '$' + cost}</b>
+                            </div>
+                            <div class="area-metric">
+                                <span>Mevcut Kasa</span>
+                                <b>$${balance}</b>
+                            </div>
+                            <div class="area-metric">
+                                <span>${canAfford ? '3 Tasarım' : 'Gereken Para'}</span>
+                                <b class="${canAfford ? 'text-green' : 'text-warn'}">${canAfford ? '🔓 AÇIK' : '-$' + stillNeeded}</b>
+                            </div>
+                        </div>
+
+                        <div class="area-card-actions">
+                            <button class="area-walk-btn" onclick="hotel3D.walkToArea('${id}')">
+                                🚶‍♂️ 3D Odaya Git &amp; Gez
+                            </button>
+                            <button class="area-reno-btn ${canAfford ? 'unlocked' : 'locked'}" onclick="hotel3D.openRenovationModal('${id}')">
+                                ${isMax
+                                    ? '🎨 Tasarım Değiştir'
+                                    : (canAfford ? `✨ 3 Tasarımı Seç (Lv.${nextLvl})` : `🔒 Maliyet &amp; 3 Tasarım ($${cost})`)}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        grid.innerHTML = cardsHtml;
+    }
+
+    walkToArea(id) {
+        const def = this.renovationDefs[id];
+        if (!def) return;
+        this.player.currentFloor = (def.pos.y > 5.0) ? 2 : 1;
+        this.player.pos.set(def.pos.x, (this.player.currentFloor === 2 ? 7.7 : 1.7), def.pos.z + 2.5);
+        this.player.rot.yaw = 0;
+        this.playSound('door');
+        this.updateInteractions(0);
+        this.updateProximityPanel();
+        this.showBanner(`📍 ${def.name} (${def.area}) alanına yürüdünüz.`);
+        const container = document.getElementById('hotel3DContainer');
+        if (container && container.scrollIntoView) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     // ----------------------------------------------------
@@ -2039,44 +2439,53 @@ class Hotel3DSimulator {
         let modal = document.getElementById('projectPlanModal');
         if (!modal) return;
 
-        const totalAreas = Object.keys(this.renovationDefs).length;
-        const completedCount = Object.keys(this.state.renovations).filter(k => this.state.renovations[k]).length;
-        const progressPct = Math.round((completedCount / totalAreas) * 100);
+        const allIds = Object.keys(this.renovationDefs);
+        const totalMaxLevels = allIds.length * 3; // Each area has 3 upgrades (Lv1->2, 2->3, 3->4)
+        let completedUpgrades = 0;
+        allIds.forEach(id => {
+            completedUpgrades += Math.max(0, this.getAreaLevel(id) - 1);
+        });
+        const progressPct = Math.round((completedUpgrades / totalMaxLevels) * 100);
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
         const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
         const targetId = window.GameEconomy ? window.GameEconomy.getTargetRenovation() : 'restaurant_tables';
 
         let listHtml = '';
-        Object.keys(this.renovationDefs).forEach((id, idx) => {
+        allIds.forEach((id, idx) => {
             const def = this.renovationDefs[id];
+            const curLvl = this.getAreaLevel(id);
+            const isMax = (curLvl >= 4);
+            const nextLvl = Math.min(4, curLvl + 1);
             const installed = this.getInstalledOption(id);
-            const isDone = (installed && !installed.isPreview);
             const isTarget = (id === targetId);
 
-            const cost = def.cost || 1200;
-            const starsNeeded = def.stars || 3;
-            const canAfford = (balance >= cost && stars >= starsNeeded);
+            const cost = this.getNextUpgradeCost(id);
+            const starsNeeded = this.getNextUpgradeStars(id);
+            const canAfford = isMax || (balance >= cost && stars >= starsNeeded);
             const defCoins = Math.max(0, cost - balance);
 
             let statusClass = 'waiting';
-            let statusText = `⏳ $${defCoins} Eksik (BİRİKTİRİLİYOR)`;
-            let currentCondition = def.defaultDesc || 'Eski ve Yıpranmış Durumda';
+            let statusText = `🔒 $${defCoins} Eksik (BİRİKTİRİLİYOR)`;
+            let currentCondition = def.defaultDesc || 'Seviye 1: Başlangıç Durumu';
 
-            if (isDone) {
+            if (installed) {
                 const opt = def.options.find(o => o.id === installed.optionId) || def.options[0];
+                currentCondition = `Seviye ${curLvl}: ${opt.name} (${opt.style})`;
+            }
+
+            if (isMax) {
                 statusClass = 'done';
-                statusText = `✅ TAMAMLANDI (${opt.style})`;
-                currentCondition = `Yenilendi: ${opt.name}`;
+                statusText = `👑 SEVİYE 4 TAMAMLANDI (MAX)`;
             } else if (canAfford) {
                 statusClass = 'ready';
-                statusText = `🟢 BÜTÇE HAZIR! ($${cost})`;
+                statusText = `🟢 BÜTÇE HAZIR! (Lv.${nextLvl}: $${cost})`;
             }
 
             listHtml += `
-                <div class="proj-area-row ${isDone ? 'done-row' : ''} ${isTarget ? 'target-row' : ''}">
+                <div class="proj-area-row ${isMax ? 'done-row' : ''} ${isTarget ? 'target-row' : ''}">
                     <div class="proj-area-info">
                         <div class="proj-row-header">
-                            <span class="proj-stage">ALAN ${idx + 1} · ${def.area}</span>
+                            <span class="proj-stage">ALAN ${idx + 1} · ${def.area} · [Seviye ${curLvl}/4]</span>
                             <span class="proj-badge ${statusClass}">${statusText}</span>
                         </div>
                         <h4>${def.name}</h4>
@@ -2084,9 +2493,9 @@ class Hotel3DSimulator {
                             <small>Mevcut Durum: <b>${currentCondition}</b></small>
                         </div>
                         <div class="proj-fin-calc-line">
-                            <span>Maliyet: <b>$${cost}</b></span> &nbsp;•&nbsp; 
+                            <span>${isMax ? 'Sonraki Seviye: <b>MAX</b>' : `Seviye ${nextLvl} Maliyeti: <b>$${cost}</b>`}</span> &nbsp;•&nbsp; 
                             <span>Kasa: <b>$${balance}</b></span> &nbsp;•&nbsp; 
-                            <span class="${canAfford ? 'text-green' : 'text-warn'}">${canAfford ? '🟢 Bütçe Yeterli' : `Eksik: -$${defCoins}`}</span>
+                            <span class="${canAfford ? 'text-green' : 'text-warn'}">${isMax ? '👑 Tamamlandı' : (canAfford ? '🔓 3 Tasarım Açık!' : `Eksik: -$${defCoins}`)}</span>
                         </div>
                     </div>
                     <div class="proj-row-actions">
@@ -2095,7 +2504,7 @@ class Hotel3DSimulator {
                             ${isTarget ? '🎯 Hedef' : '🎯 Hedef Yap'}
                         </button>
                         <button class="proj-go-btn" onclick="document.getElementById('projectPlanModal').style.display='none'; hotel3D.goToAndOpenRenovation('${id}')">
-                            ${isDone ? '🎨 Tasarım Değiştir' : (canAfford ? '🛠️ Tasarla & Yap ➔' : '📍 Otele Git & İncele ➔')}
+                            ${isMax ? '🎨 Tasarım Değiştir' : (canAfford ? `🛠️ Lv.${nextLvl} Tasarla ➔` : '📍 Odaya Git & İncele ➔')}
                         </button>
                     </div>
                 </div>
@@ -2106,23 +2515,23 @@ class Hotel3DSimulator {
             <div class="proj-modal-card">
                 <div class="proj-header">
                     <div class="proj-title-box">
-                        <span class="proj-crest">✦ AURELIA PALACE PROJE VE MALİYET DEFTERİ</span>
-                        <h3>Tüm Restorasyon Maliyetleri Genel Bakış</h3>
+                        <span class="proj-crest">✦ AURELIA PALACE 4-SEVİYELİ RESTORASYON &amp; MALİYET DEFTERİ</span>
+                        <h3>Tüm Otel Alanları ve Seviye Maliyetleri (Lv.1 ➔ Lv.4)</h3>
                     </div>
                     <button class="reno-close-btn" onclick="document.getElementById('projectPlanModal').style.display='none'">&times;</button>
                 </div>
 
                 <div class="proj-summary-strip">
                     <div class="proj-sum-item">
-                        <label>Genel İlerleme</label>
-                        <b>%${progressPct} (${completedCount}/${totalAreas})</b>
+                        <label>Toplam Seviye İlerlemesi</label>
+                        <b>%${progressPct} (${completedUpgrades}/${totalMaxLevels} Yükseltme)</b>
                     </div>
                     <div class="proj-sum-item">
                         <label>Mevcut Kasa</label>
                         <b>💰 $${balance} | ⭐ ${stars}</b>
                     </div>
                     <div class="proj-sum-item">
-                        <label>Pasif Gelir</label>
+                        <label>Pasif Otel Geliri</label>
                         <b class="positive">+$${this.state.incomePerMin}/dk</b>
                     </div>
                 </div>
@@ -2142,8 +2551,6 @@ class Hotel3DSimulator {
                 </div>
             </div>
         `;
-        modal.style.display = 'flex';
-    }
         modal.style.display = 'flex';
     }
 
@@ -2542,17 +2949,18 @@ class Hotel3DSimulator {
             if (nearestBeacon) {
                 const def = this.renovationDefs[nearestBeacon.id];
                 const label = def ? def.name : nearestBeacon.name;
-                const installed = this.getInstalledOption(nearestBeacon.id);
-                const isDone = (installed && !installed.isPreview);
+                const curLvl = def ? this.getAreaLevel(nearestBeacon.id) : 1;
+                const isMax = (curLvl >= 4);
+                const nextLvl = Math.min(4, curLvl + 1);
                 const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
-                const cost = def ? (def.cost || 1200) : 1200;
-                const canAfford = (balance >= cost);
+                const cost = def ? this.getNextUpgradeCost(nearestBeacon.id) : 1200;
+                const canAfford = isMax || (balance >= cost);
 
                 prompt.innerHTML = `
-                    <div class="prompt-icon">${isDone ? '✨' : (canAfford ? '🟢' : '🛠️')}</div>
+                    <div class="prompt-icon">${isMax ? '👑' : (canAfford ? '🟢' : '🛠️')}</div>
                     <div class="prompt-text">
-                        <strong>${label}</strong>
-                        <span>${isDone ? '[E] Tasarımı Değiştir' : (canAfford ? '[E] Bütçe Hazır! Tasarla' : '[E] Bütçeyi İncele')}</span>
+                        <strong>${label} (Lv.${curLvl}/4)</strong>
+                        <span>${isMax ? '[E] Tasarımı Değiştir (MAX)' : (canAfford ? `[E] Seviye ${nextLvl} Hazır! 3 Tasarımı Gör` : `[E] Seviye ${nextLvl} Maliyetini İncele ($${cost})`)}</span>
                     </div>
                 `;
                 prompt.style.display = 'flex';
@@ -2561,7 +2969,7 @@ class Hotel3DSimulator {
             }
         }
 
-        // Live Proximity Information Card (Prompt Requirement 2)
+        // Live Proximity Information Card
         this.updateProximityPanel();
     }
 
@@ -2580,26 +2988,32 @@ class Hotel3DSimulator {
             return;
         }
 
+        const id = def.id;
+        const curLvl = this.getAreaLevel(id);
+        const isMax = (curLvl >= 4);
+        const nextLvl = Math.min(4, curLvl + 1);
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
         const stars = window.GameEconomy ? window.GameEconomy.getStars() : this.state.stars;
-        const installed = this.getInstalledOption(this.activeBeacon.id);
-        const isCompleted = (installed && !installed.isPreview);
-        const cost = def.cost || 1200;
-        const starsNeeded = def.stars || 3;
-        const canAfford = (balance >= cost && stars >= starsNeeded);
+        const installed = this.getInstalledOption(id);
+        const cost = this.getNextUpgradeCost(id);
+        const starsNeeded = this.getNextUpgradeStars(id);
+        const canAfford = isMax || (balance >= cost && stars >= starsNeeded);
 
         let statusClass = 'status-saving';
         let statusText = 'SAVING MONEY';
-        let currentCondition = def.defaultDesc || 'Eski ve Yıpranmış Durumda';
+        let currentCondition = def.defaultDesc || 'Seviye 1: Başlangıç Durumu';
 
-        if (isCompleted) {
-            statusClass = 'status-completed';
-            statusText = 'COMPLETED';
+        if (installed) {
             const opt = def.options.find(o => o.id === installed.optionId) || def.options[0];
-            currentCondition = `Yenilendi: ${opt.name} (${opt.style})`;
+            currentCondition = `Seviye ${curLvl}: ${opt.name} (${opt.style})`;
+        }
+
+        if (isMax) {
+            statusClass = 'status-completed';
+            statusText = 'MAX LEVEL 4';
         } else if (canAfford) {
             statusClass = 'status-ready';
-            statusText = 'READY TO RENOVATE';
+            statusText = `READY FOR LV.${nextLvl}`;
         }
 
         const stillNeeded = Math.max(0, cost - balance);
@@ -2608,7 +3022,7 @@ class Hotel3DSimulator {
         proxPanel.innerHTML = `
             <div class="prox-card-inner">
                 <div class="prox-top-row">
-                    <span class="prox-area-badge">${def.area}</span>
+                    <span class="prox-area-badge">${def.area} · Seviye ${curLvl}/4</span>
                     <span class="prox-status-badge ${statusClass}">${statusText}</span>
                 </div>
                 <h3 class="prox-title">${def.name.toUpperCase()}</h3>
@@ -2619,31 +3033,31 @@ class Hotel3DSimulator {
                 
                 <div class="prox-fin-grid">
                     <div class="prox-fin-box">
-                        <label>Yenileme Maliyeti</label>
-                        <b class="prox-cost">$${cost}</b>
+                        <label>${isMax ? 'Durum' : `Seviye ${nextLvl} Maliyeti`}</label>
+                        <b class="prox-cost">${isMax ? 'MAX' : '$' + cost}</b>
                     </div>
                     <div class="prox-fin-box">
                         <label>Mevcut Bakiye</label>
                         <b class="prox-bal">$${balance}</b>
                     </div>
                     <div class="prox-fin-box highlight">
-                        <label>${canAfford || isCompleted ? 'Kalan Bakiye' : 'Gereken Para'}</label>
-                        <b class="${canAfford || isCompleted ? 'text-green' : 'text-warn'}">${canAfford || isCompleted ? '+$' + remainingAfter : '-$' + stillNeeded}</b>
+                        <label>${canAfford ? 'Kalan Bakiye' : 'Gereken Para'}</label>
+                        <b class="${canAfford ? 'text-green' : 'text-warn'}">${canAfford ? '+$' + remainingAfter : '-$' + stillNeeded}</b>
                     </div>
                 </div>
                 
                 <div class="prox-actions-row">
-                    ${isCompleted ? `
+                    ${isMax ? `
                         <button class="prox-btn-view-designs" onclick="hotel3D.openRenovationModal('${def.id}')">
-                            🎨 Tasarımı Değiştir
+                            🎨 3 Tasarım Arasında Geçiş Yap
                         </button>
                     ` : canAfford ? `
                         <button class="prox-btn-view-designs pulse" onclick="hotel3D.openRenovationModal('${def.id}')">
-                            ✨ Tasarımları İncele (View Designs)
+                            🔓 3 Tasarımı İncele &amp; Seviye ${nextLvl}'e Yükselt
                         </button>
                     ` : `
-                        <button class="prox-btn-locked" disabled>
-                            🔒 Tasarımlar Kilitli ($${stillNeeded} daha gerekli)
+                        <button class="prox-btn-locked" onclick="hotel3D.openRenovationModal('${def.id}')">
+                            🔒 3 Tasarım Kilitli ($${stillNeeded} eksik · Detayları Gör)
                         </button>
                     `}
                     <button class="prox-btn-set-target" onclick="hotel3D.setTargetRenovation('${def.id}')">
@@ -2662,13 +3076,13 @@ class Hotel3DSimulator {
         const name = this.renovationDefs[id] ? this.renovationDefs[id].name : id;
         this.showBanner(`🎯 Yeni Hedef Belirlendi: ${name}`);
         this.updateProximityPanel();
+        this.renderHotelAreaCards();
     }
 
     openFinancialLedgerModal() {
         if (window.GameEconomy) {
             window.GameEconomy.openLedgerModal();
         }
-    }
     }
 
     triggerActiveBeacon() {
@@ -2720,6 +3134,18 @@ class Hotel3DSimulator {
             this.player.rot.yaw = Math.PI;
             this.playSound('door');
             this.showBanner('📍 Sonsuzluk Havuzu & Güneş Terasına geçildi.');
+        } else if (room === 'spa') {
+            this.player.currentFloor = 1;
+            this.player.pos.set(18, 1.7, -19);
+            this.player.rot.yaw = Math.PI;
+            this.playSound('door');
+            this.showBanner('📍 Zen Termal Spa & Jakuzi Merkezine geçildi.');
+        } else if (room === 'garden') {
+            this.player.currentFloor = 1;
+            this.player.pos.set(-12, 1.7, -19);
+            this.player.rot.yaw = Math.PI;
+            this.playSound('door');
+            this.showBanner('📍 Akdeniz Botanik Bahçesi & Mermer Çeşmeye geçildi.');
         } else if (room === 'penthouse') {
             this.player.currentFloor = 2;
             this.player.pos.set(0, 7.7, 4);
@@ -2731,6 +3157,8 @@ class Hotel3DSimulator {
         document.querySelectorAll('.room-jump-btn').forEach(b => b.classList.remove('active'));
         const btn = document.querySelector(`.room-jump-btn[onclick*="${room}"]`);
         if (btn) btn.classList.add('active');
+        this.updateInteractions(0);
+        this.updateProximityPanel();
     }
 
     onResize() {
@@ -2773,6 +3201,7 @@ window.initHotel3D = function() {
         window.hotel3D = new Hotel3DSimulator('hotel3DContainer');
     } else if (window.hotel3D) {
         window.hotel3D.onResize();
+        window.hotel3D.renderHotelAreaCards();
     }
 };
 

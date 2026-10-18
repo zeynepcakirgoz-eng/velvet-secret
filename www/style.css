@@ -2642,3 +2642,466 @@ button:active {
   padding: 20px;
 }
 
+/* ================= HIGH-RES LUXURY MERGE ITEM ARTWORK ================= */
+.tile {
+  position: relative;
+  overflow: hidden;
+  padding: 3px !important;
+}
+
+.tile-item-img {
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+  border-radius: 10px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.65));
+  pointer-events: none;
+  transition: transform 0.18s ease;
+}
+
+.tile:hover .tile-item-img,
+.tile.selected .tile-item-img {
+  transform: scale(1.07);
+}
+
+.tile .lv {
+  position: absolute;
+  bottom: 3px;
+  right: 4px;
+  background: linear-gradient(135deg, rgba(16, 18, 28, 0.92), rgba(38, 32, 22, 0.92));
+  border: 1px solid rgba(223, 191, 131, 0.55);
+  color: var(--gold-bright);
+  font-size: 8.5px !important;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+.req-pill {
+  position: relative;
+  padding: 3px 6px !important;
+  gap: 5px;
+}
+
+.req-item-img {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 7px;
+  border: 1px solid rgba(223, 191, 131, 0.45);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.order-customer-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-role-text {
+  font-size: 9px;
+  color: var(--gold);
+  opacity: 0.85;
+}
+
+/* ================= REALISTIC HOTEL AREAS GALLERY (#hotelAreasVisualGrid) ================= */
+.hotel-areas-gallery-section {
+  margin-top: 16px;
+  background: linear-gradient(165deg, #161926, #0f121b);
+  border: 1px solid rgba(223, 191, 131, 0.32);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+}
+
+.gallery-sec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.gallery-sec-head h3 {
+  font-family: Georgia, serif;
+  color: var(--gold-bright);
+  font-size: 14px;
+  margin: 0 0 3px 0;
+  letter-spacing: 0.5px;
+}
+
+.gallery-sec-head p {
+  font-size: 10.5px;
+  color: #b8c0d4;
+  margin: 0;
+}
+
+.hotel-areas-visual-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.hotel-visual-area-card {
+  background: linear-gradient(160deg, #1c2030, #131622);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.hotel-visual-area-card.area-upgraded {
+  border-color: rgba(212, 175, 55, 0.55);
+}
+
+.hotel-visual-area-card.area-target {
+  border: 1.5px solid #00f0ff;
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.22);
+}
+
+.hotel-area-img-box {
+  height: 155px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.hotel-area-img-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 12, 20, 0.55) 0%, rgba(10, 12, 20, 0.1) 45%, rgba(10, 12, 20, 0.88) 100%);
+}
+
+.hotel-area-top-badges,
+.hotel-area-bottom-overlay {
+  position: relative;
+  z-index: 2;
+}
+
+.hotel-area-top-badges {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.hotel-area-cat {
+  background: rgba(15, 18, 28, 0.85);
+  border: 1px solid rgba(223, 191, 131, 0.45);
+  color: var(--gold-bright);
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+
+.hotel-area-status {
+  font-size: 9.5px;
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+
+.hotel-area-status.badge-ready {
+  background: rgba(46, 204, 113, 0.92);
+  color: #081b10;
+}
+
+.hotel-area-status.badge-saving {
+  background: rgba(255, 180, 0, 0.9);
+  color: #1a1200;
+}
+
+.hotel-area-status.badge-max {
+  background: linear-gradient(135deg, #ffd700, #d4af37);
+  color: #141004;
+}
+
+.hotel-area-bottom-overlay h4 {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.area-lv-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.area-lv-segment {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 8.5px;
+  font-weight: 900;
+  text-align: center;
+  padding: 2px 0;
+  border-radius: 5px;
+}
+
+.area-lv-segment.filled {
+  background: linear-gradient(120deg, #ffd700, #c59b27);
+  border-color: #fff3b0;
+  color: #161205;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.45);
+}
+
+.hotel-area-body {
+  padding: 11px 12px;
+}
+
+.area-cond-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.area-cond-line small {
+  color: var(--muted);
+}
+
+.area-cond-line b {
+  color: #f3e6d0;
+  text-align: right;
+}
+
+.area-cost-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: #10131d;
+  padding: 7px;
+  border-radius: 10px;
+  margin-bottom: 9px;
+}
+
+.area-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.area-metric span {
+  font-size: 8.5px;
+  color: var(--muted);
+}
+
+.area-metric b {
+  font-size: 11.5px;
+  color: #fff;
+  margin-top: 2px;
+}
+
+.area-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 8px;
+}
+
+.area-walk-btn,
+.area-reno-btn {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.area-walk-btn {
+  background: #23283b;
+  color: #e2e8f0;
+}
+
+.area-reno-btn.unlocked {
+  background: linear-gradient(120deg, #f3d078, #c59b27);
+  color: #151105;
+  border-color: #ffe89e;
+  box-shadow: 0 0 12px rgba(243, 208, 120, 0.35);
+}
+
+.area-reno-btn.locked {
+  background: #1b2030;
+  color: #cbd5e1;
+  border-color: rgba(255, 190, 60, 0.35);
+}
+
+/* ================= 4-LEVEL STEPPER & VISUAL DESIGN PREVIEW IN MODAL ================= */
+.reno-lv-stepper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.reno-lv-step {
+  text-align: center;
+  padding: 5px 4px;
+  border-radius: 7px;
+  font-size: 9px;
+  font-weight: 800;
+  background: #171a26;
+  color: #7c859e;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.reno-lv-step.lv-done,
+.reno-lv-step.lv-current {
+  background: linear-gradient(135deg, #d4af37, #9e7a1c);
+  color: #120e03;
+  border-color: #ffe58f;
+}
+
+.reno-lv-step.lv-next {
+  background: rgba(0, 240, 255, 0.15);
+  color: #00f0ff;
+  border-color: #00f0ff;
+}
+
+.area-visual-banner {
+  height: 115px;
+  border-radius: 12px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid rgba(223, 191, 131, 0.4);
+  display: flex;
+  align-items: flex-end;
+}
+
+.area-visual-overlay {
+  width: 100%;
+  background: linear-gradient(0deg, rgba(10, 12, 20, 0.92), transparent);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.area-cond-tag {
+  font-size: 9px;
+  color: var(--gold-bright);
+  font-weight: 800;
+}
+
+.area-visual-overlay b {
+  font-size: 11px;
+  color: #fff;
+}
+
+.locked-designs-box {
+  background: #141722;
+  border: 1px solid rgba(255, 180, 50, 0.3);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+.locked-box-title {
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--gold-bright);
+  margin-bottom: 8px;
+}
+
+.locked-designs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.locked-design-option-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1b1f2e;
+  padding: 7px 10px;
+  border-radius: 9px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.locked-design-icon {
+  font-size: 18px;
+}
+
+.locked-design-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.locked-design-info b {
+  font-size: 10.5px;
+  color: #e2e8f0;
+}
+
+.locked-design-info span {
+  font-size: 9.5px;
+  color: var(--gold);
+}
+
+.locked-design-info small {
+  font-size: 8.5px;
+  color: var(--muted);
+}
+
+.locked-pill {
+  font-size: 8.5px;
+  font-weight: 900;
+  background: rgba(255, 82, 82, 0.18);
+  color: #ff6b6b;
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+
+.design-visual-preview-wrap {
+  position: relative;
+  width: 100%;
+  height: 135px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid rgba(223, 191, 131, 0.45);
+  background: #0d1018;
+}
+
+.design-visual-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.design-preview-badge {
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  background: rgba(12, 15, 24, 0.86);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+

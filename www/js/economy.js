@@ -1,6 +1,7 @@
 // ========================================================
 // VELVET SECRETS - CENTRAL AUTHORITATIVE GAME ECONOMY
-// Shared Wallet, Dual Income Engine, and Transaction Ledger
+// Shared Wallet, Dual Income Engine, 4-Level Area Progression
+// & Transaction Ledger
 // ========================================================
 
 class GameEconomyManager {
@@ -8,97 +9,135 @@ class GameEconomyManager {
         this.storageKey = 'velvet_authoritative_economy_v4';
         this.listeners = [];
 
-        // All 10 hotel renovation costs visible from day 1
+        this.levelTitles = {
+            1: 'Seviye 1: Başlangıç Durumu (Eski)',
+            2: 'Seviye 2: Modern Yenileme',
+            3: 'Seviye 3: Premium Tasarım',
+            4: 'Seviye 4: Kraliyet Lüksü (MAX)'
+        };
+
+        // All 11 hotel renovation areas & multi-level costs visible from day 1
         this.renovationCosts = {
             reception_desk: {
                 id: 'reception_desk',
-                name: 'Lobi Resepsiyon Masası',
-                area: 'Büyük Lobi',
+                name: 'Otel Girişi & Resepsiyon Masası',
+                area: 'Giriş & Resepsiyon',
                 cost: 1500,
+                levelCosts: { 2: 1500, 3: 2400, 4: 3600 },
                 stars: 2,
                 jumpRoom: 'lobby',
-                defaultDesc: 'Eski ve Yıpranmış Ahşap Resepsiyon Masası'
+                sceneImg: 'assets/scene_lobby_reception.jpg',
+                defaultDesc: 'Seviye 1: Eski ve Yıpranmış Ahşap Resepsiyon Masası'
             },
             lobby_carpet: {
                 id: 'lobby_carpet',
-                name: 'Giriş Protokol Halısı & Mermer',
-                area: 'Büyük Lobi',
+                name: 'Lobi & Lounge Protokol Halısı',
+                area: 'Büyük Lobi & Lounge',
                 cost: 600,
+                levelCosts: { 2: 600, 3: 1100, 4: 1800 },
                 stars: 2,
                 jumpRoom: 'lobby',
-                defaultDesc: 'Yıpranmış Ham Zemin'
+                sceneImg: 'assets/scene_lobby_reception.jpg',
+                defaultDesc: 'Seviye 1: Yıpranmış Ham Mermer Zemin'
             },
             lobby_chandelier: {
                 id: 'lobby_chandelier',
                 name: 'Büyük Lobi Kristal Tavan Avizesi',
-                area: 'Büyük Lobi',
+                area: 'Büyük Lobi & Lounge',
                 cost: 1000,
+                levelCosts: { 2: 1000, 3: 1700, 4: 2600 },
                 stars: 3,
                 jumpRoom: 'lobby',
-                defaultDesc: 'Çıplak Sarkıt Ampul'
+                sceneImg: 'assets/scene_lobby_reception.jpg',
+                defaultDesc: 'Seviye 1: Çıplak Sarkıt Ampul'
             },
             room101_bed: {
                 id: 'room101_bed',
-                name: 'Suit 101 Kraliyet Yatak Takımı',
-                area: 'Deluxe Suit (Oda 101)',
+                name: 'Misafir Suiti Kraliyet Yatak Takımı',
+                area: 'Misafir Odaları & Suitler (Oda 101)',
                 cost: 1800,
+                levelCosts: { 2: 1800, 3: 2900, 4: 4200 },
                 stars: 4,
                 jumpRoom: 'room101',
-                defaultDesc: 'Eski Gıcırdayan Demir Karyola'
+                sceneImg: 'assets/scene_presidential_suite.jpg',
+                defaultDesc: 'Seviye 1: Eski Gıcırdayan Demir Karyola'
             },
             room101_decor: {
                 id: 'room101_decor',
-                name: 'Suit 101 Panoramik Teras Mobilyası',
-                area: 'Deluxe Suit (Oda 101)',
+                name: 'Suit 101 Panoramik Teras & Lounge',
+                area: 'Misafir Odaları & Suitler (Oda 101)',
                 cost: 900,
+                levelCosts: { 2: 900, 3: 1500, 4: 2300 },
                 stars: 3,
                 jumpRoom: 'room101',
-                defaultDesc: 'Boş ve Bakımsız Teras'
+                sceneImg: 'assets/scene_presidential_suite.jpg',
+                defaultDesc: 'Seviye 1: Boş ve Bakımsız Teras Köşesi'
+            },
+            restaurant_tables: {
+                id: 'restaurant_tables',
+                name: 'Restoran & Mutfak Gurme Masaları',
+                area: 'Riviera Restoran & Mutfak',
+                cost: 1200,
+                levelCosts: { 2: 1200, 3: 1950, 4: 2900 },
+                stars: 3,
+                jumpRoom: 'restaurant',
+                sceneImg: 'assets/scene_romance_gala.jpg',
+                defaultDesc: 'Seviye 1: Eski ve Çizik Ahşap Masalar'
             },
             restaurant_bar: {
                 id: 'restaurant_bar',
                 name: 'Riviera Kokteyl & Şampanya Barı',
-                area: 'Riviera Restoran',
+                area: 'Riviera Restoran & Mutfak',
                 cost: 1400,
+                levelCosts: { 2: 1400, 3: 2200, 4: 3300 },
                 stars: 4,
                 jumpRoom: 'restaurant',
-                defaultDesc: 'Terk Edilmiş Eski Bar Tezgahı'
-            },
-            restaurant_tables: {
-                id: 'restaurant_tables',
-                name: 'Gourmet Yemek Salonu Masaları',
-                area: 'Riviera Restoran',
-                cost: 1200,
-                stars: 3,
-                jumpRoom: 'restaurant',
-                defaultDesc: 'Eski ve Çizik Ahşap Masalar'
+                sceneImg: 'assets/scene_romance_gala.jpg',
+                defaultDesc: 'Seviye 1: Terk Edilmiş Eski Bar Tezgahı'
             },
             swimming_pool: {
                 id: 'swimming_pool',
-                name: 'Aurelia Sonsuzluk Havuzu & Şezlonglar',
-                area: 'Açık Güneş Terası',
+                name: 'Aurelia Sonsuzluk Havuzu & Kabanalar',
+                area: 'Yüzme Havuzu & Güneş Terası',
                 cost: 5000,
+                levelCosts: { 2: 5000, 3: 7500, 4: 10500 },
                 stars: 5,
                 jumpRoom: 'pool',
-                defaultDesc: 'Kuru ve Boş Havuz Çukuru'
+                sceneImg: 'assets/scene_restaurant_pool.jpg',
+                defaultDesc: 'Seviye 1: Kuru ve Bakımsız Havuz Çukuru'
             },
             spa_jacuzzi: {
                 id: 'spa_jacuzzi',
-                name: 'Zen Termal Jakuzi & Masaj Alanı',
-                area: 'Aurelia Spa & Sağlık',
+                name: 'Zen Termal Spa & Mermer Jakuzi',
+                area: 'Spa & Wellness Merkezi',
                 cost: 2800,
+                levelCosts: { 2: 2800, 3: 4400, 4: 6400 },
                 stars: 4,
-                jumpRoom: 'pool',
-                defaultDesc: 'Kapalı ve Hizmet Dışı Spa Alanı'
+                jumpRoom: 'spa',
+                sceneImg: 'assets/scene_spa_wellness.jpg',
+                defaultDesc: 'Seviye 1: Hizmet Dışı Eski Termal Havuz'
+            },
+            garden_courtyard: {
+                id: 'garden_courtyard',
+                name: 'Akdeniz Botanik Bahçesi & Mermer Çeşme',
+                area: 'Bahçe & Açık Alanlar',
+                cost: 3000,
+                levelCosts: { 2: 3000, 3: 4600, 4: 6800 },
+                stars: 4,
+                jumpRoom: 'garden',
+                sceneImg: 'assets/scene_garden_terrace.jpg',
+                defaultDesc: 'Seviye 1: Kurumuş Bahçe Avlusu ve Susuz Çeşme'
             },
             penthouse_suite: {
                 id: 'penthouse_suite',
-                name: '2. Kat Başkanlık Penthouse Suiti',
-                area: 'Aurelia Çatı Katı',
+                name: '2. Kat Kraliyet Penthouse & Piyano Salonu',
+                area: 'Başkanlık Çatı Suiti',
                 cost: 6500,
+                levelCosts: { 2: 6500, 3: 9800, 4: 14000 },
                 stars: 6,
                 jumpRoom: 'penthouse',
-                defaultDesc: 'Terk Edilmiş Tozlu Çatı Katı'
+                sceneImg: 'assets/scene_hotel_exterior.jpg',
+                defaultDesc: 'Seviye 1: Terk Edilmiş Tozlu Çatı Katı'
             }
         };
 
@@ -107,7 +146,6 @@ class GameEconomyManager {
     }
 
     load() {
-        // Initial setup aligns with prompt scenario: balance $750, target Restaurant Tables ($1,200) -> needed $450
         const defaultData = {
             balance: 750,
             stars: 6,
@@ -175,6 +213,33 @@ class GameEconomyManager {
 
     getStars() {
         return this.data.stars;
+    }
+
+    // Returns current level (1..4) of an area independently
+    getAreaLevel(id) {
+        if (window.hotel3D && window.hotel3D.getAreaLevel) {
+            return window.hotel3D.getAreaLevel(id);
+        }
+        return 1;
+    }
+
+    // Returns exact cost for the area's NEXT upgrade level (Level 1->2, 2->3, 3->4)
+    getNextUpgradeCost(id) {
+        const item = this.renovationCosts[id];
+        if (!item) return 1200;
+        const currentLvl = this.getAreaLevel(id);
+        const nextLvl = Math.min(4, currentLvl + 1);
+        if (item.levelCosts && item.levelCosts[nextLvl]) {
+            return item.levelCosts[nextLvl];
+        }
+        return item.cost;
+    }
+
+    getNextUpgradeStars(id) {
+        const item = this.renovationCosts[id];
+        if (!item) return 2;
+        const currentLvl = this.getAreaLevel(id);
+        return item.stars + Math.max(0, currentLvl - 1);
     }
 
     getTargetRenovation() {
@@ -249,7 +314,6 @@ class GameEconomyManager {
             return { success: false, reason: 'insufficient_funds' };
         }
 
-        // Exact deduction once
         this.data.balance -= costCash;
         this.data.stars -= costStars;
         this.data.totalRenovationSpent += costCash;
@@ -281,10 +345,10 @@ class GameEconomyManager {
     simulateGuestActivity() {
         const events = [
             { desc: 'Suit 101 konaklama ve oda servisi faturası ödendi', minAmt: 140, maxAmt: 260 },
-            { desc: 'Riviera Restoran gurme akşam yemeği & şampanya hesabı', minAmt: 85, maxAmt: 190 },
-            { desc: 'Aurelia Resepsiyon VIP misafir check-in ödemesi', minAmt: 110, maxAmt: 210 },
-            { desc: 'Sonsuzluk Havuzu kokteyl barı satışı', minAmt: 60, maxAmt: 130 },
-            { desc: 'Zen Spa & Termal Jakuzi masaj seansı paketi', minAmt: 95, maxAmt: 180 }
+            { desc: 'Riviera Restoran gurme akşam yemeği & şampanya hesabı', minAmt: 95, maxAmt: 200 },
+            { desc: 'Aurelia Resepsiyon VIP misafir check-in ödemesi', minAmt: 120, maxAmt: 220 },
+            { desc: 'Sonsuzluk Havuzu & Bahçe Terası kokteyl satışı', minAmt: 75, maxAmt: 150 },
+            { desc: 'Zen Spa & Termal Jakuzi masaj seansı paketi', minAmt: 105, maxAmt: 190 }
         ];
 
         const ev = events[Math.floor(Math.random() * events.length)];
@@ -298,15 +362,19 @@ class GameEconomyManager {
     checkAffordableThresholds() {
         Object.keys(this.renovationCosts).forEach(id => {
             const item = this.renovationCosts[id];
-            // Check if already renovated in hotel3D
-            const isInstalled = window.hotel3D && window.hotel3D.getInstalledOption && window.hotel3D.getInstalledOption(id);
-            if (isInstalled && !isInstalled.isPreview) return;
+            const currentLvl = this.getAreaLevel(id);
+            if (currentLvl >= 4) return; // Max level reached
 
-            if (this.canAfford(item.cost, item.stars)) {
-                if (!this.data.notifiedRenovations[id]) {
-                    this.data.notifiedRenovations[id] = true;
+            const nextLvl = currentLvl + 1;
+            const nextCost = this.getNextUpgradeCost(id);
+            const nextStars = this.getNextUpgradeStars(id);
+            const notifyKey = `${id}_lv${nextLvl}`;
+
+            if (this.canAfford(nextCost, nextStars)) {
+                if (!this.data.notifiedRenovations[notifyKey]) {
+                    this.data.notifiedRenovations[notifyKey] = true;
                     this.save();
-                    this.showCelebrationAlert(id, item);
+                    this.showCelebrationAlert(id, item, nextLvl, nextCost);
                 }
             }
         });
@@ -330,27 +398,26 @@ class GameEconomyManager {
         }, 4000);
     }
 
-    showCelebrationAlert(targetId, target) {
+    showCelebrationAlert(targetId, target, nextLvl = 2, nextCost = 1200) {
         const banner = document.getElementById('budgetAlertToast');
         if (!banner) return;
         banner.innerHTML = `
             <div class="alert-content">
-                <span class="alert-sparkle">🎉 BİRİKİM TAMAMLANDI!</span>
-                <p>Birikiminiz <b>${target.name}</b> ($${target.cost}) restorasyonu için yeterli! Şimdi favori tasarımınızı seçebilirsiniz.</p>
+                <span class="alert-sparkle">🎉 3 TASARIM KİLİDİ AÇILDI! (SEVİYE ${nextLvl})</span>
+                <p>Birikiminiz <b>${target.name}</b> (Seviye ${nextLvl} — $${nextCost}) için yeterli! 3 farklı lüks tasarımdan favorinizi seçin.</p>
             </div>
             <button class="alert-action-btn" onclick="hotel3D.goToAndOpenRenovation('${targetId}')">
-                Tasarımı Seç ➔
+                3 Tasarımı Gör ➔
             </button>
         `;
         banner.style.display = 'flex';
         clearTimeout(this.alertTimer);
         this.alertTimer = setTimeout(() => {
             banner.style.display = 'none';
-        }, 8000);
+        }, 8500);
     }
 
     updateGlobalHUD() {
-        // Top currency strip
         const coinsEl = document.getElementById('coins');
         const starsEl = document.getElementById('stars');
         const hudCoinsEl = document.getElementById('hudCoins');
@@ -361,20 +428,28 @@ class GameEconomyManager {
         if (hudCoinsEl) hudCoinsEl.innerText = `$${this.data.balance}`;
         if (hudStarsEl) hudStarsEl.innerText = this.data.stars;
 
-        // Target renovation widget if exists
+        // Target renovation widget
         const targetBadge = document.getElementById('hudTargetBadge');
         if (targetBadge && this.renovationCosts[this.data.targetRenovationId]) {
-            const t = this.renovationCosts[this.data.targetRenovationId];
-            const def = Math.max(0, t.cost - this.data.balance);
-            const pct = Math.min(100, Math.round((this.data.balance / t.cost) * 100));
+            const id = this.data.targetRenovationId;
+            const t = this.renovationCosts[id];
+            const curLvl = this.getAreaLevel(id);
+            const nextLvl = Math.min(4, curLvl + 1);
+            const cost = this.getNextUpgradeCost(id);
+            const def = Math.max(0, cost - this.data.balance);
+            const pct = curLvl >= 4 ? 100 : Math.min(100, Math.round((this.data.balance / cost) * 100));
             targetBadge.innerHTML = `
                 <div class="target-head">
-                    <span>🎯 Hedef: <b>${t.name}</b> ($${t.cost})</span>
+                    <span>🎯 Hedef: <b>${t.name}</b> (Lv.${curLvl}➔Lv.${nextLvl} · $${cost})</span>
                     <b>%${pct}</b>
                 </div>
                 <div class="target-track"><div class="target-bar" style="width: ${pct}%;"></div></div>
-                <small>${def > 0 ? `$${def} daha gerekli` : '🟢 BÜTÇE HAZIR! TASARLA'}</small>
+                <small>${curLvl >= 4 ? '👑 MAKSİMUM SEVİYE (Lv.4)' : (def > 0 ? `🔒 $${def} daha gerekli (3 Tasarım Kilitli)` : '🟢 BÜTÇE HAZIR! 3 TASARIM AÇIK')}</small>
             `;
+        }
+
+        if (window.hotel3D && window.hotel3D.renderHotelAreaCards) {
+            window.hotel3D.renderHotelAreaCards();
         }
     }
 
@@ -450,25 +525,26 @@ class GameEconomyManager {
                     </div>
                 </div>
 
-                <!-- DUAL INCOME RATIO STRIP -->
-                <div class="dual-income-ratio-box">
+                <!-- INCOME RATIO BAR -->
+                <div class="ledger-ratio-box">
                     <div class="ratio-labels">
-                        <span>🏨 Otel Operasyonları (%${hotelRatio})</span>
-                        <span>🛍️ Sipariş Teslimatları (%${orderRatio})</span>
+                        <span>🏨 Otel Gelir Payı (%${hotelRatio})</span>
+                        <span>🛍️ Sipariş Gelir Payı (%${orderRatio})</span>
                     </div>
-                    <div class="ratio-track">
-                        <div class="ratio-bar-hotel" style="width: ${hotelRatio}%;"></div>
-                        <div class="ratio-bar-order" style="width: ${orderRatio}%;"></div>
+                    <div class="ratio-bar-track">
+                        <div class="ratio-fill-hotel" style="width: ${hotelRatio}%;"></div>
+                        <div class="ratio-fill-order" style="width: ${orderRatio}%;"></div>
                     </div>
                 </div>
 
-                <!-- LIVE TRANSACTION HISTORY -->
-                <div class="ledger-history-head">
-                    <h4>Canlı Kasa Hareketleri (Son İşlemler)</h4>
-                    <span class="tx-count">${this.data.transactions.length} Kayıt</span>
+                <div class="ledger-tx-header">
+                    <h4>Son Finansal Hareketler (Canlı Kasa Kaydı)</h4>
+                    <button class="sim-guest-btn" onclick="window.GameEconomy.simulateGuestActivity(); window.GameEconomy.openLedgerModal();">
+                        🛎️ Misafir Ödemesi Tahsil Et
+                    </button>
                 </div>
 
-                <div class="tx-scroll-list">
+                <div class="ledger-tx-list">
                     ${txRows}
                 </div>
             </div>
@@ -477,5 +553,4 @@ class GameEconomyManager {
     }
 }
 
-// Instantiate global authoritative economy
 window.GameEconomy = new GameEconomyManager();
