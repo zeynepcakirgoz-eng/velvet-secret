@@ -35,7 +35,7 @@ class Hotel3DSimulator {
         this.dragStart = { x: 0, y: 0 };
 
         // Isabella's walkable position inside the current room (in percentage 0..100)
-        this.characterPos = { x: 48, y: 78, walking: false, speech: 'Otelimizin yenilenecek eşyalarına (🔨) dokunarak 3 lüks tasarımı canlı dene!' };
+        this.characterPos = { x: 24, y: 78, walking: false, speech: 'Otelimizin yenilenecek eşyalarına (🔨) dokunarak alt çubuktaki 3 lüks tasarımı canlı dene!' };
 
         this.setupRenovationDefinitions();
         this.setupRoomDefinitions();
@@ -43,6 +43,7 @@ class Hotel3DSimulator {
         this.initAudio();
         this.initStageInteractions();
         this.renderStage();
+        this.openBottomDesignDock(this.selectedAreaId, false);
         this.updateHUD();
         this.updateProximityPanel();
         this.renderHotelAreaCards();
@@ -53,6 +54,7 @@ class Hotel3DSimulator {
                 this.state.stars = window.GameEconomy.getStars();
                 this.updateHUD();
                 this.checkAffordableNotifications();
+                this.renderBottomDesignDock();
                 this.updateProximityPanel();
                 this.renderStage();
                 this.renderHotelAreaCards();
@@ -778,7 +780,9 @@ class Hotel3DSimulator {
             if (window.GameEconomy) {
                 this.state.coins = window.GameEconomy.getBalance();
                 this.state.stars = window.GameEconomy.getStars();
-                this.state.renovations = window.GameEconomy.state.renovations || {};
+                if (window.GameEconomy.data && window.GameEconomy.data.renovations) {
+                    this.state.renovations = { ...window.GameEconomy.data.renovations };
+                }
             }
             const raw = localStorage.getItem('velvetSecrets3DHotelV2');
             if (raw) {
@@ -787,7 +791,8 @@ class Hotel3DSimulator {
                 if (window.GameEconomy) {
                     this.state.coins = window.GameEconomy.getBalance();
                     this.state.stars = window.GameEconomy.getStars();
-                    this.state.renovations = { ...this.state.renovations, ...(window.GameEconomy.state.renovations || {}) };
+                    const econRenos = (window.GameEconomy.data && window.GameEconomy.data.renovations) || {};
+                    this.state.renovations = { ...this.state.renovations, ...econRenos };
                 }
             }
             this.recalcHotelStats();
@@ -797,8 +802,8 @@ class Hotel3DSimulator {
     saveState() {
         try {
             localStorage.setItem('velvetSecrets3DHotelV2', JSON.stringify(this.state));
-            if (window.GameEconomy) {
-                window.GameEconomy.state.renovations = { ...this.state.renovations };
+            if (window.GameEconomy && window.GameEconomy.data) {
+                window.GameEconomy.data.renovations = { ...this.state.renovations };
                 window.GameEconomy.save();
             }
         } catch (e) {}
@@ -936,11 +941,11 @@ class Hotel3DSimulator {
         this.isMapMode = false;
         this.currentRoom = def.room || 'lobby';
         this.selectedAreaId = id;
-        this.walkCharacterTo(def.pinX, Math.min(84, def.pinY + 14), `${def.name} için 3 lüks tasarımı alt çubuktan seçebilirsin!`);
+        this.walkCharacterTo(Math.max(18, Math.min(82, def.pinX - 18)), Math.min(84, def.pinY + 14), `${def.name} için 3 lüks tasarımı alt çubuktan seçebilirsin!`);
         this.focusCameraOnPin(def.pinX, def.pinY);
-        this.renderStage();
-        this.openBottomDesignDock(id);
+        this.openBottomDesignDock(id, true);
         this.updateProximityPanel();
+        this.renderStage();
     }
 
     // ----------------------------------------------------
@@ -1267,9 +1272,14 @@ class Hotel3DSimulator {
             const displayLvl = isPreviewingThis ? nextLvl : curLvl;
 
             let visualThumbUrl = def.sceneImg;
-            if (activeOptId && window.LuxuryArt && window.LuxuryArt.getDesignPreview) {
-                visualThumbUrl = window.LuxuryArt.getDesignPreview(areaId, activeOptId, displayLvl);
-            }
+            try {
+                if (activeOptId && window.LuxuryArt && window.LuxuryArt.getDesignPreview) {
+                    visualThumbUrl = window.LuxuryArt.getDesignPreview(areaId, activeOptId, displayLvl) || def.sceneImg;
+                }
+            } catch (e) {}
+            const patchFilterStyle = (activeOptId && window.LuxuryArt && window.LuxuryArt.getDesignCssFilter)
+                ? `filter: ${window.LuxuryArt.getDesignCssFilter(activeOptId)};`
+                : '';
 
             const activeOptObj = activeOptId ? (def.options.find(o => o.id === activeOptId) || def.options[0]) : null;
             const styleBadgeText = isPreviewingThis
@@ -1294,7 +1304,7 @@ class Hotel3DSimulator {
                     </div>
 
                     <!-- Furniture Visual Showcase Patch on the Room Stage -->
-                    <div class="gh-furniture-visual-patch" style="background-image: url('${visualThumbUrl}');">
+                    <div class="gh-furniture-visual-patch" style="background-image: url('${visualThumbUrl}'); ${patchFilterStyle}">
                         <div class="gh-patch-top-row">
                             <span class="gh-patch-lv">Lv.${displayLvl}/4</span>
                             ${curLvl > 1 || isPreviewingThis ? '<span class="gh-patch-sparkle">✦</span>' : '<span class="gh-patch-cobweb">🕸️</span>'}
@@ -1386,14 +1396,14 @@ class Hotel3DSimulator {
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
 
         const speech = curLvl >= 4
-            ? `${def.name} maksimum seviyede (Lv.4)! İstediğin zaman 3 tasarım arasında geçiş yapabilirsin.`
+            ? `${def.name} maksimum seviyede (Lv.4)! Alt çubuktan 3 tasarım arasında geçiş yapabilirsin.`
             : (balance >= cost
                 ? `Harika! $${balance} bakiyemiz var. ${def.name} için alt çubuktan 3 tasarımdan birini seçip onaylayalım!`
-                : `${def.name} Seviye ${nextLvl} için $${cost} gerekiyor. Tasarımları şimdiden sahnede deneyebilirsin!`);
+                : `${def.name} Seviye ${nextLvl} için $${cost} gerekiyor. Aşağıdaki 3 tasarımı şimdiden canlı deneyebilirsin!`);
 
-        this.walkCharacterTo(def.pinX, Math.min(84, def.pinY + 15), speech);
+        this.walkCharacterTo(Math.max(18, Math.min(82, def.pinX - 18)), Math.min(84, def.pinY + 14), speech);
         this.focusCameraOnPin(def.pinX, def.pinY);
-        this.openBottomDesignDock(areaId);
+        this.openBottomDesignDock(areaId, true);
         this.updateProximityPanel();
         this.renderStage();
     }
@@ -1401,36 +1411,53 @@ class Hotel3DSimulator {
     // ----------------------------------------------------
     // GOSSIP HARBOR SIGNATURE BOTTOM 3-OPTION DESIGN DOCK
     // ----------------------------------------------------
-    openBottomDesignDock(areaId) {
+    openBottomDesignDock(areaId, scrollAndPulse = false) {
         const dock = document.getElementById('ghBottomDesignDock');
         if (!dock) return;
-        const def = this.renovationDefs[areaId];
+        const targetId = areaId || this.selectedAreaId || 'reception_desk';
+        const def = this.renovationDefs[targetId];
         if (!def) return;
 
-        this.selectedAreaId = areaId;
-        const installed = this.getInstalledOption(areaId);
-        if (installed && !this.previewingRenovation) {
+        this.selectedAreaId = targetId;
+        const installed = this.getInstalledOption(targetId);
+        if (installed && (!this.previewingRenovation || this.previewingRenovation.id !== targetId)) {
             const idx = def.options.findIndex(o => o.id === installed.optionId);
             this.selectedOptionIndex = idx >= 0 ? idx : 0;
-        } else if (!this.previewingRenovation || this.previewingRenovation.id !== areaId) {
+        } else if (!this.previewingRenovation || this.previewingRenovation.id !== targetId) {
             this.selectedOptionIndex = 0;
         }
 
         const chosenOpt = def.options[this.selectedOptionIndex] || def.options[0];
-        this.previewingRenovation = { id: areaId, optionId: chosenOpt.id };
+        this.previewingRenovation = { id: targetId, optionId: chosenOpt.id };
 
-        this.renderBottomDesignDock();
         dock.style.display = 'block';
+        this.renderBottomDesignDock();
+        this.updateProximityPanel();
         this.renderStage();
+
+        if (scrollAndPulse) {
+            dock.classList.remove('dock-pulse-highlight');
+            void dock.offsetWidth;
+            dock.classList.add('dock-pulse-highlight');
+            clearTimeout(this.dockPulseTimer);
+            this.dockPulseTimer = setTimeout(() => {
+                dock.classList.remove('dock-pulse-highlight');
+            }, 2200);
+
+            setTimeout(() => {
+                if (dock.scrollIntoView) {
+                    dock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 60);
+        }
     }
 
     closeBottomDesignDock() {
         this.previewingRenovation = null;
-        const dock = document.getElementById('ghBottomDesignDock');
-        if (dock) dock.style.display = 'none';
         this.zoom = 1.0;
         this.panX = 0;
         this.panY = 0;
+        this.renderBottomDesignDock();
         this.renderStage();
     }
 
@@ -1443,15 +1470,19 @@ class Hotel3DSimulator {
         this.previewingRenovation = { id: areaId, optionId: opt.id };
         this.playSound('chime');
         this.renderBottomDesignDock();
+        this.updateProximityPanel();
         this.renderStage();
+        this.showBanner(`👁️ Seçenek ${idx + 1}: "${opt.name}" oda sahnesinde canlı önizleniyor!`);
     }
 
     renderBottomDesignDock() {
         const dock = document.getElementById('ghBottomDesignDock');
-        if (!dock || !this.selectedAreaId) return;
-        const def = this.renovationDefs[this.selectedAreaId];
+        if (!dock) return;
+        const activeId = this.selectedAreaId || 'reception_desk';
+        const def = this.renovationDefs[activeId];
         if (!def) return;
 
+        dock.style.display = 'block';
         const id = def.id;
         const curLvl = this.getAreaLevel(id);
         const isMax = (curLvl >= 4);
@@ -1468,16 +1499,22 @@ class Hotel3DSimulator {
 
         def.options.forEach((opt, idx) => {
             const isSelected = (idx === this.selectedOptionIndex);
-            const thumbSrc = (window.LuxuryArt && window.LuxuryArt.getDesignPreview)
-                ? window.LuxuryArt.getDesignPreview(id, opt.id, nextLvl)
-                : def.sceneImg;
+            let thumbSrc = def.sceneImg || 'assets/scene_lobby_reception.jpg';
+            try {
+                if (window.LuxuryArt && window.LuxuryArt.getDesignPreview) {
+                    thumbSrc = window.LuxuryArt.getDesignPreview(id, opt.id, nextLvl) || thumbSrc;
+                }
+            } catch (e) {}
+            const cssFilter = (window.LuxuryArt && window.LuxuryArt.getDesignCssFilter)
+                ? window.LuxuryArt.getDesignCssFilter(opt.id)
+                : '';
 
             cardsHtml += `
                 <div class="gh-dock-option-card ${isSelected ? 'active' : ''}"
                      onclick="hotel3D.selectBottomDockOption('${id}', ${idx})">
-                    <div class="gh-dock-thumb" style="background-image: url('${thumbSrc}');">
+                    <div class="gh-dock-thumb" style="background-image: url('${thumbSrc}'); filter: ${cssFilter};">
                         <span class="gh-dock-opt-num">${styleNames[idx]}</span>
-                        ${!canAfford && !isMax ? '<span class="gh-dock-lock-tag">🔒 Önizleme</span>' : '<span class="gh-dock-check-tag">✓</span>'}
+                        ${isSelected ? '<span class="gh-dock-check-tag">✓ SEÇİLİ</span>' : (!canAfford && !isMax ? '<span class="gh-dock-lock-tag">👁️ Dene</span>' : '<span class="gh-dock-check-tag">Seç</span>')}
                     </div>
                     <div class="gh-dock-opt-meta">
                         <strong>${opt.icon} ${opt.name}</strong>
@@ -1492,12 +1529,11 @@ class Hotel3DSimulator {
         dock.innerHTML = `
             <div class="gh-dock-header">
                 <div class="gh-dock-title-wrap">
-                    <span class="gh-dock-lvl-badge">Seviye ${curLvl} ➔ Seviye ${nextLvl}</span>
-                    <h4>${def.name} — 3 Lüks Tasarım Seçeneği</h4>
+                    <span class="gh-dock-lvl-badge">🔨 ${def.area} · Seviye ${curLvl} ➔ Seviye ${nextLvl}</span>
+                    <h4>${def.name} — 3 Lüks Tasarım Seçeneğinden Birini Seçin:</h4>
                 </div>
                 <div class="gh-dock-header-right">
-                    <button class="gh-dock-detail-btn" onclick="hotel3D.openRenovationModal('${id}')">📋 Detay</button>
-                    <button class="gh-dock-close-btn" onclick="hotel3D.closeBottomDesignDock()">&times;</button>
+                    <button class="gh-dock-detail-btn" onclick="hotel3D.openRenovationModal('${id}')">📋 Tam Ekran İncele</button>
                 </div>
             </div>
 
@@ -1545,7 +1581,7 @@ class Hotel3DSimulator {
         if (installed) {
             const idx = def.options.findIndex(o => o.id === installed.optionId);
             this.selectedOptionIndex = idx >= 0 ? idx : 0;
-        } else {
+        } else if (typeof this.selectedOptionIndex !== 'number') {
             this.selectedOptionIndex = 0;
         }
 
@@ -1559,7 +1595,14 @@ class Hotel3DSimulator {
     selectDesignTab(idx) {
         this.selectedOptionIndex = idx;
         if (this.activeModalPoint) {
+            const def = this.renovationDefs[this.activeModalPoint];
+            if (def && def.options[idx]) {
+                this.previewingRenovation = { id: this.activeModalPoint, optionId: def.options[idx].id };
+            }
             this.renderModalContent(this.activeModalPoint);
+            this.renderBottomDesignDock();
+            this.updateProximityPanel();
+            this.renderStage();
         }
     }
 
@@ -1574,7 +1617,7 @@ class Hotel3DSimulator {
         this.playSound('chime');
         const modal = document.getElementById('renoModal');
         if (modal) modal.style.display = 'none';
-        this.openBottomDesignDock(this.activeModalPoint);
+        this.openBottomDesignDock(this.activeModalPoint, true);
         this.showBanner('👁️ Tasarım oda sahnesinde canlı önizleniyor! Alt çubuktan onaylayabilirsiniz.');
     }
 
@@ -1593,7 +1636,7 @@ class Hotel3DSimulator {
         const isMaxLevel = (curLvl >= 4);
         const nextLvl = Math.min(4, curLvl + 1);
         const installed = this.getInstalledOption(id);
-        const opt = def.options[this.selectedOptionIndex];
+        const opt = def.options[this.selectedOptionIndex] || def.options[0];
         const isPreviewing = this.previewingRenovation && this.previewingRenovation.optionId === opt.id;
 
         const balance = window.GameEconomy ? window.GameEconomy.getBalance() : this.state.coins;
@@ -1617,80 +1660,6 @@ class Hotel3DSimulator {
             levelStepsHtml += `<div class="reno-lv-step ${stepState}"><span>${stepTitle}</span></div>`;
         }
 
-        if (!canAfford && !isMaxLevel) {
-            let lockedCardsHtml = '';
-            def.options.forEach((o, idx) => {
-                const lvlMultiplier = 1 + (nextLvl - 2) * 0.55;
-                lockedCardsHtml += `
-                    <div class="locked-design-option-card">
-                        <div class="locked-design-icon">🔒</div>
-                        <div class="locked-design-info">
-                            <b>${optionStyleLabels[idx]}</b>
-                            <span>${o.name}</span>
-                            <small>Seviye ${nextLvl} Geliri: +$${Math.round(o.incomeBoost * lvlMultiplier)}/dk · +${Math.round(o.repBoost * lvlMultiplier)} Prestij</small>
-                        </div>
-                        <span class="locked-pill">KİLİTLİ</span>
-                    </div>
-                `;
-            });
-
-            modalContent.innerHTML = `
-                <div class="reno-card-header">
-                    <div class="header-left">
-                        <span class="reno-badge">${def.area} · Seviye ${curLvl} ➔ Seviye ${nextLvl}</span>
-                        <h3 class="reno-title">${def.name}</h3>
-                    </div>
-                    <button class="reno-close-btn" onclick="hotel3D.cancelPreviewAndClose()">&times;</button>
-                </div>
-
-                <div class="reno-lv-stepper">${levelStepsHtml}</div>
-
-                <div class="area-visual-banner" style="background-image: url('${def.sceneImg || 'assets/scene_lobby_reception.jpg'}')">
-                    <div class="area-visual-overlay">
-                        <span class="area-cond-tag">Mevcut Durum (Seviye ${curLvl}/4)</span>
-                        <b>${installed ? `Kurulu: ${def.options.find(x => x.id === installed.optionId)?.name || def.name}` : def.defaultDesc}</b>
-                    </div>
-                </div>
-
-                <div class="budget-breakdown-card">
-                    <div class="budget-row">
-                        <span>Seviye ${nextLvl} Yenileme Maliyeti:</span>
-                        <b class="text-gold">💰 $${cost} &nbsp;|&nbsp; ⭐ ${starsNeeded} Yıldız</b>
-                    </div>
-                    <div class="budget-row">
-                        <span>Mevcut Kasanız:</span>
-                        <b>💰 $${balance} &nbsp;|&nbsp; ⭐ ${stars} Yıldız</b>
-                    </div>
-                    <div class="budget-deficit-box">
-                        <span class="deficit-title">🔒 DURUM: BİRİKTİRİLİYOR</span>
-                        <div class="deficit-pills">
-                            ${deficitCoins > 0 ? `<span class="def-tag coin">$${deficitCoins} daha gerekli</span>` : ''}
-                            ${deficitStars > 0 ? `<span class="def-tag star">${deficitStars} ⭐ daha gerekli</span>` : ''}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="locked-designs-box">
-                    <div class="locked-box-title">
-                        <span>🎨 3 TASARIM SEÇENEĞİ ($${cost} Biriktiğinde Kilidi Açılır)</span>
-                    </div>
-                    <div class="locked-designs-list">
-                        ${lockedCardsHtml}
-                    </div>
-                </div>
-
-                <div class="reno-actions-footer">
-                    <button class="preview-3d-btn" onclick="hotel3D.previewDesignInWorld('${opt.id}')">
-                        👁️ Sahnede Canlı Önizle
-                    </button>
-                    <button class="purchase-confirm-btn btn-disabled" disabled>
-                        🔒 Yetersiz Bakiye ($${deficitCoins} Eksik)
-                    </button>
-                </div>
-            `;
-            return;
-        }
-
         let optionsTabsHtml = '';
         def.options.forEach((o, idx) => {
             const isSelected = (idx === this.selectedOptionIndex);
@@ -1708,9 +1677,15 @@ class Hotel3DSimulator {
             `;
         });
 
-        const previewImgSrc = (window.LuxuryArt && window.LuxuryArt.getDesignPreview)
-            ? window.LuxuryArt.getDesignPreview(id, opt.id, nextLvl)
-            : (def.sceneImg || 'assets/scene_lobby_reception.jpg');
+        let previewImgSrc = def.sceneImg || 'assets/scene_lobby_reception.jpg';
+        try {
+            if (window.LuxuryArt && window.LuxuryArt.getDesignPreview) {
+                previewImgSrc = window.LuxuryArt.getDesignPreview(id, opt.id, nextLvl) || previewImgSrc;
+            }
+        } catch (e) {}
+        const cssFilter = (window.LuxuryArt && window.LuxuryArt.getDesignCssFilter)
+            ? window.LuxuryArt.getDesignCssFilter(opt.id)
+            : '';
 
         const lvlMultiplier = 1 + (nextLvl - 2) * 0.55;
         const boostedIncome = Math.round(opt.incomeBoost * lvlMultiplier);
@@ -1733,8 +1708,8 @@ class Hotel3DSimulator {
 
             <div class="design-detail-card">
                 <div class="design-visual-preview-wrap">
-                    <img src="${previewImgSrc}" alt="${opt.name}" class="design-visual-preview-img" />
-                    <span class="design-preview-badge">🔓 ${optionStyleLabels[this.selectedOptionIndex]}</span>
+                    <img src="${previewImgSrc}" alt="${opt.name}" class="design-visual-preview-img" style="filter: ${cssFilter};" />
+                    <span class="design-preview-badge">${canAfford ? '🔓' : '👁️'} ${optionStyleLabels[this.selectedOptionIndex]}</span>
                 </div>
 
                 <div class="design-head-row">
@@ -1763,12 +1738,26 @@ class Hotel3DSimulator {
 
                 <div class="budget-breakdown-card">
                     <div class="budget-row">
+                        <span>Seviye ${nextLvl} Yenileme Maliyeti:</span>
+                        <b class="text-gold">💰 $${cost} &nbsp;|&nbsp; ⭐ ${starsNeeded} Yıldız</b>
+                    </div>
+                    <div class="budget-row">
                         <span>Mevcut Kasanız:</span>
                         <b>💰 $${balance} &nbsp;|&nbsp; ⭐ ${stars} Yıldız</b>
                     </div>
-                    <div class="budget-sufficient-box">
-                        <span>✅ ${isMaxLevel ? 'Maksimum Seviye (Lv.4) tamamlandı! Tasarımlar arasında ücretsiz geçiş yapabilirsiniz.' : `Bütçeniz Seviye ${nextLvl} yükseltmesi için yeterli! İşlem sonrası kalan: +$${balance - cost}`}</span>
-                    </div>
+                    ${canAfford ? `
+                        <div class="budget-sufficient-box">
+                            <span>✅ ${isMaxLevel ? 'Maksimum Seviye (Lv.4) tamamlandı! Tasarımlar arasında ücretsiz geçiş yapabilirsiniz.' : `Bütçeniz Seviye ${nextLvl} yükseltmesi için yeterli! İşlem sonrası kalan: +$${balance - cost}`}</span>
+                        </div>
+                    ` : `
+                        <div class="budget-deficit-box">
+                            <span class="deficit-title">⏳ DURUM: BİRİKTİRİLİYOR (3 Tasarımı Yukarıdan Önizleyebilirsiniz)</span>
+                            <div class="deficit-pills">
+                                ${deficitCoins > 0 ? `<span class="def-tag coin">$${deficitCoins} daha gerekli</span>` : ''}
+                                ${deficitStars > 0 ? `<span class="def-tag star">${deficitStars} ⭐ daha gerekli</span>` : ''}
+                            </div>
+                        </div>
+                    `}
                 </div>
             </div>
 
@@ -1778,12 +1767,18 @@ class Hotel3DSimulator {
                     👁️ Oda Sahnesinde Canlı Gör
                 </button>
 
-                <button class="purchase-confirm-btn btn-ready"
-                    onclick="hotel3D.executePurchase('${id}', '${opt.id}')">
-                    ${isMaxLevel
-                        ? `🎨 Bu Tasarımı Uygula (Ücretsiz)`
-                        : `🛠️ Seviye ${nextLvl}'e Yükselt & Uygula ($${cost})`}
-                </button>
+                ${canAfford ? `
+                    <button class="purchase-confirm-btn btn-ready"
+                        onclick="hotel3D.executePurchase('${id}', '${opt.id}')">
+                        ${isMaxLevel
+                            ? `🎨 Bu Tasarımı Uygula (Ücretsiz)`
+                            : `🛠️ Seviye ${nextLvl}'e Yükselt & Uygula ($${cost})`}
+                    </button>
+                ` : `
+                    <button class="purchase-confirm-btn btn-disabled" onclick="hotel3D.cancelPreviewAndClose(); window.switchMainPage && window.switchMainPage('pageBoard');">
+                        🧩 Masada Sipariş Tamamla ($${deficitCoins} Eksik)
+                    </button>
+                `}
             </div>
         `;
     }
@@ -1945,15 +1940,11 @@ class Hotel3DSimulator {
         this.currentRoom = def.room || 'lobby';
         this.selectedAreaId = id;
         this.playSound('door');
-        this.walkCharacterTo(def.pinX, Math.min(84, def.pinY + 14), `${def.name} (${def.area}) yanındayız. 3 lüks tasarımı aşağıdan deneyebilirsin!`);
+        this.walkCharacterTo(Math.max(18, Math.min(82, def.pinX - 18)), Math.min(84, def.pinY + 14), `${def.name} (${def.area}) yanındayız. 3 lüks tasarımı alt çubuktan seçebilirsin!`);
         this.focusCameraOnPin(def.pinX, def.pinY);
-        this.openBottomDesignDock(id);
+        this.openBottomDesignDock(id, true);
         this.updateProximityPanel();
         this.showBanner(`📍 ${def.name} (${def.area}) sahnesine geçildi.`);
-        const container = document.getElementById('hotel3DContainer');
-        if (container && container.scrollIntoView) {
-            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
     }
 
     // ----------------------------------------------------
@@ -2183,6 +2174,36 @@ class Hotel3DSimulator {
 
         const stillNeeded = Math.max(0, cost - balance);
         const remainingAfter = Math.max(0, balance - cost);
+        const chosenOpt = def.options[this.selectedOptionIndex] || def.options[0];
+        const styleNames = ['1. Modern Zarafet', '2. Kraliyet Kadife', '3. Akdeniz Riviera'];
+
+        let inlineOptionsHtml = '';
+        def.options.forEach((opt, idx) => {
+            const isSelected = (idx === this.selectedOptionIndex);
+            let thumbSrc = def.sceneImg || 'assets/scene_lobby_reception.jpg';
+            try {
+                if (window.LuxuryArt && window.LuxuryArt.getDesignPreview) {
+                    thumbSrc = window.LuxuryArt.getDesignPreview(id, opt.id, nextLvl) || thumbSrc;
+                }
+            } catch (e) {}
+            const cssFilter = (window.LuxuryArt && window.LuxuryArt.getDesignCssFilter)
+                ? window.LuxuryArt.getDesignCssFilter(opt.id)
+                : '';
+
+            inlineOptionsHtml += `
+                <div class="gh-dock-option-card ${isSelected ? 'active' : ''}"
+                     onclick="hotel3D.selectBottomDockOption('${id}', ${idx})">
+                    <div class="gh-dock-thumb" style="background-image: url('${thumbSrc}'); filter: ${cssFilter};">
+                        <span class="gh-dock-opt-num">${styleNames[idx]}</span>
+                        ${isSelected ? '<span class="gh-dock-check-tag">✓ SEÇİLİ</span>' : '<span class="gh-dock-lock-tag">👁️ Dene</span>'}
+                    </div>
+                    <div class="gh-dock-opt-meta">
+                        <strong>${opt.icon} ${opt.name}</strong>
+                        <small>+$${opt.incomeBoost}/dk · +${opt.repBoost} Prestij</small>
+                    </div>
+                </div>
+            `;
+        });
 
         proxPanel.innerHTML = `
             <div class="prox-card-inner">
@@ -2210,19 +2231,20 @@ class Hotel3DSimulator {
                         <b class="${canAfford ? 'text-green' : 'text-warn'}">${canAfford ? '+$' + remainingAfter : '-$' + stillNeeded}</b>
                     </div>
                 </div>
+
+                <!-- 3 Tasarım Seçeneği Doğrudan Burada da Görünür ve Tıklanabilir -->
+                <div class="gh-dock-options-grid" style="margin: 10px 0;">
+                    ${inlineOptionsHtml}
+                </div>
                 
                 <div class="prox-actions-row">
-                    ${isMax ? `
-                        <button class="prox-btn-view-designs" onclick="hotel3D.openBottomDesignDock('${def.id}')">
-                            🎨 Sahne Üzerinde 3 Tasarımı Değiştir
-                        </button>
-                    ` : canAfford ? `
-                        <button class="prox-btn-view-designs pulse" onclick="hotel3D.openBottomDesignDock('${def.id}')">
-                            🔓 3 Tasarımı Sahnede Dene &amp; Seviye ${nextLvl}'e Yükselt
+                    ${canAfford ? `
+                        <button class="prox-btn-view-designs pulse" onclick="hotel3D.executePurchase('${def.id}', '${chosenOpt.id}')">
+                            ✓ ${isMax ? 'Seçili Tasarımı Uygula (Ücretsiz)' : `Seçili Tasarımı Onayla & Seviye ${nextLvl}'e Yükselt ($${cost})`}
                         </button>
                     ` : `
-                        <button class="prox-btn-locked" onclick="hotel3D.openBottomDesignDock('${def.id}')">
-                            👁️ 3 Tasarımı Sahnede Önizle ($${stillNeeded} eksik · Maliyet: $${cost})
+                        <button class="prox-btn-locked" onclick="hotel3D.openRenovationModal('${def.id}')">
+                            📋 Detaylı İncele ($${stillNeeded} eksik · Maliyet: $${cost})
                         </button>
                     `}
                     <button class="prox-btn-set-target" onclick="hotel3D.setTargetRenovation('${def.id}')">
@@ -2270,17 +2292,17 @@ class Hotel3DSimulator {
 
         this.playSound('door');
         this.characterPos = {
-            x: 48,
+            x: 24,
             y: 78,
             walking: false,
-            speech: `${rm.name} odasındayız! Yenilenecek eşyalara (🔨) dokunarak tasarımları deneyebilirsin.`
+            speech: `${rm.name} odasındayız! Alt çubuktan 3 lüks tasarımı canlı deneyebilirsin.`
         };
 
         document.querySelectorAll('.room-jump-btn').forEach(b => b.classList.remove('active'));
         const btn = document.querySelector(`.room-jump-btn[onclick*="${roomKey}"]`);
         if (btn) btn.classList.add('active');
 
-        this.closeBottomDesignDock();
+        this.openBottomDesignDock(this.selectedAreaId, false);
         this.renderStage();
         this.updateProximityPanel();
         this.showBanner(`📍 ${rm.name} sahnesine geçildi.`);
@@ -2288,6 +2310,7 @@ class Hotel3DSimulator {
 
     onResize() {
         this.renderStage();
+        this.renderBottomDesignDock();
     }
 }
 
@@ -2302,6 +2325,8 @@ window.initHotel3D = function() {
         window.hotel3D = new Hotel3DSimulator('hotel3DContainer');
     } else if (window.hotel3D) {
         window.hotel3D.renderStage();
+        window.hotel3D.renderBottomDesignDock();
+        window.hotel3D.updateProximityPanel();
         window.hotel3D.renderHotelAreaCards();
     }
 };

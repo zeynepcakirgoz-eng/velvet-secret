@@ -791,135 +791,132 @@ class LuxuryArtEngine {
     // - opt_b: Option 2 — Velvet Luxury
     // - opt_c: Option 3 — Mediterranean Suite
     // --------------------------------------------------------
+    getDesignCssFilter(optionId) {
+        if (optionId === 'opt_a') return 'brightness(1.08) contrast(1.06) saturate(1.02)';
+        if (optionId === 'opt_b') return 'contrast(1.15) saturate(1.25) brightness(0.98)';
+        return 'sepia(0.14) saturate(1.26) contrast(1.08) brightness(1.04)';
+    }
+
     getDesignPreview(areaId, optionId, targetLevel = 2) {
         const sceneUrl = this.getAreaScene(areaId);
         const photo = this.loadedPhotos[sceneUrl];
         const key = `${areaId}_${optionId}_lv${targetLevel}_${photo ? 'hd' : 'init'}`;
         if (this.designPreviewCache[key]) return this.designPreviewCache[key];
 
-        const canvas = document.createElement('canvas');
-        canvas.width = 640;
-        canvas.height = 320;
-        const ctx = canvas.getContext('2d');
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 640;
+            canvas.height = 320;
+            const ctx = canvas.getContext('2d');
 
-        if (photo) {
-            ctx.save();
-            // Apply distinct crop/zoom and photorealistic color grading per design option
-            if (optionId === 'opt_a') {
-                ctx.filter = 'brightness(1.08) contrast(1.06) saturate(0.95)';
-                ctx.drawImage(photo, 0, 0, photo.width, photo.height, 0, 0, 640, 320);
-                // Warm Scandinavian daylight architectural sheen
-                const sheen = ctx.createLinearGradient(0, 0, 640, 320);
-                sheen.addColorStop(0, 'rgba(255, 248, 231, 0.22)');
-                sheen.addColorStop(0.5, 'rgba(216, 185, 139, 0.08)');
-                sheen.addColorStop(1, 'rgba(18, 22, 32, 0.55)');
-                ctx.fillStyle = sheen;
-                ctx.fillRect(0, 0, 640, 320);
-            } else if (optionId === 'opt_b') {
-                ctx.filter = 'contrast(1.16) saturate(1.25) brightness(0.98)';
-                ctx.drawImage(photo, photo.width * 0.04, photo.height * 0.04, photo.width * 0.92, photo.height * 0.92, 0, 0, 640, 320);
-                // Royal Monaco Gold & Crimson Velvet vignette
-                const royalGlow = ctx.createRadialGradient(320, 120, 30, 320, 160, 360);
-                royalGlow.addColorStop(0, 'rgba(255, 215, 0, 0.22)');
-                royalGlow.addColorStop(0.65, 'rgba(128, 15, 47, 0.16)');
-                royalGlow.addColorStop(1, 'rgba(10, 12, 20, 0.68)');
-                ctx.fillStyle = royalGlow;
-                ctx.fillRect(0, 0, 640, 320);
+            if (photo) {
+                ctx.save();
+                if (optionId === 'opt_a') {
+                    ctx.filter = 'brightness(1.08) contrast(1.06) saturate(0.95)';
+                    ctx.drawImage(photo, 0, 0, photo.width, photo.height, 0, 0, 640, 320);
+                    const sheen = ctx.createLinearGradient(0, 0, 640, 320);
+                    sheen.addColorStop(0, 'rgba(255, 248, 231, 0.22)');
+                    sheen.addColorStop(0.5, 'rgba(216, 185, 139, 0.08)');
+                    sheen.addColorStop(1, 'rgba(18, 22, 32, 0.55)');
+                    ctx.fillStyle = sheen;
+                    ctx.fillRect(0, 0, 640, 320);
+                } else if (optionId === 'opt_b') {
+                    ctx.filter = 'contrast(1.16) saturate(1.25) brightness(0.98)';
+                    ctx.drawImage(photo, photo.width * 0.04, photo.height * 0.04, photo.width * 0.92, photo.height * 0.92, 0, 0, 640, 320);
+                    const royalGlow = ctx.createRadialGradient(320, 120, 30, 320, 160, 360);
+                    royalGlow.addColorStop(0, 'rgba(255, 215, 0, 0.22)');
+                    royalGlow.addColorStop(0.65, 'rgba(128, 15, 47, 0.16)');
+                    royalGlow.addColorStop(1, 'rgba(10, 12, 20, 0.68)');
+                    ctx.fillStyle = royalGlow;
+                    ctx.fillRect(0, 0, 640, 320);
+                } else {
+                    ctx.filter = 'sepia(0.16) saturate(1.28) contrast(1.08) brightness(1.03)';
+                    ctx.drawImage(photo, photo.width * 0.06, 0, photo.width * 0.94, photo.height * 0.94, 0, 0, 640, 320);
+                    const rivieraGrad = ctx.createLinearGradient(0, 0, 0, 320);
+                    rivieraGrad.addColorStop(0, 'rgba(244, 162, 97, 0.20)');
+                    rivieraGrad.addColorStop(0.6, 'rgba(233, 196, 106, 0.08)');
+                    rivieraGrad.addColorStop(1, 'rgba(20, 16, 14, 0.62)');
+                    ctx.fillStyle = rivieraGrad;
+                    ctx.fillRect(0, 0, 640, 320);
+                }
+                ctx.restore();
             } else {
-                ctx.filter = 'sepia(0.16) saturate(1.28) contrast(1.08) brightness(1.03)';
-                ctx.drawImage(photo, photo.width * 0.06, 0, photo.width * 0.94, photo.height * 0.94, 0, 0, 640, 320);
-                // Warm Riviera sunset golden hour rays
-                const rivieraGrad = ctx.createLinearGradient(0, 0, 0, 320);
-                rivieraGrad.addColorStop(0, 'rgba(244, 162, 97, 0.20)');
-                rivieraGrad.addColorStop(0.6, 'rgba(233, 196, 106, 0.08)');
-                rivieraGrad.addColorStop(1, 'rgba(20, 16, 14, 0.62)');
-                ctx.fillStyle = rivieraGrad;
-                ctx.fillRect(0, 0, 640, 320);
+                return sceneUrl;
             }
-            ctx.restore();
-        } else {
-            // Fallback luxury gradient while image preloads
-            const bg = ctx.createLinearGradient(0, 0, 640, 320);
-            bg.addColorStop(0, optionId === 'opt_a' ? '#3a352f' : (optionId === 'opt_b' ? '#241422' : '#4a2c20'));
-            bg.addColorStop(1, '#0e111a');
-            ctx.fillStyle = bg;
-            ctx.fillRect(0, 0, 640, 320);
-        }
 
-        // Architectural level lighting sparkles for Lv.3 & Lv.4
-        if (targetLevel >= 3) {
-            this.drawSparkle(ctx, 120, 58, 16, '#fff6d6');
-            this.drawSparkle(ctx, 510, 64, 18, '#ffd700');
-            if (targetLevel >= 4) {
-                this.drawSparkle(ctx, 320, 44, 22, '#ffd700');
-                this.drawSparkle(ctx, 210, 82, 14, '#ffffff');
-                this.drawSparkle(ctx, 430, 82, 14, '#ffffff');
+            if (targetLevel >= 3) {
+                this.drawSparkle(ctx, 120, 58, 16, '#fff6d6');
+                this.drawSparkle(ctx, 510, 64, 18, '#ffd700');
+                if (targetLevel >= 4) {
+                    this.drawSparkle(ctx, 320, 44, 22, '#ffd700');
+                    this.drawSparkle(ctx, 210, 82, 14, '#ffffff');
+                    this.drawSparkle(ctx, 430, 82, 14, '#ffffff');
+                }
             }
-        }
 
-        // Bottom architectural material palette bar
-        const matBarGrad = ctx.createLinearGradient(0, 236, 0, 320);
-        matBarGrad.addColorStop(0, 'rgba(10, 12, 20, 0)');
-        matBarGrad.addColorStop(0.35, 'rgba(10, 12, 20, 0.86)');
-        matBarGrad.addColorStop(1, 'rgba(10, 12, 20, 0.96)');
-        ctx.fillStyle = matBarGrad;
-        ctx.fillRect(0, 236, 640, 84);
+            const matBarGrad = ctx.createLinearGradient(0, 236, 0, 320);
+            matBarGrad.addColorStop(0, 'rgba(10, 12, 20, 0)');
+            matBarGrad.addColorStop(0.35, 'rgba(10, 12, 20, 0.86)');
+            matBarGrad.addColorStop(1, 'rgba(10, 12, 20, 0.96)');
+            ctx.fillStyle = matBarGrad;
+            ctx.fillRect(0, 236, 640, 84);
 
-        const swatches = optionId === 'opt_a'
-            ? [
-                { color: '#d8b98b', ring: '#fff3d1', label: 'İskandinav Meşe' },
-                { color: '#e2e8f0', ring: '#94a3b8', label: 'Kristal Cam' },
-                { color: '#fef3c7', ring: '#f59e0b', label: 'Halo LED' }
-            ]
-            : (optionId === 'opt_b'
+            const swatches = optionId === 'opt_a'
                 ? [
-                    { color: '#14161f', ring: '#ffd700', label: 'Nero Mermer' },
-                    { color: '#7a0c1a', ring: '#ffd700', label: 'Kraliyet Kadife' },
-                    { color: '#d4af37', ring: '#fff3b0', label: '24K Altın Varak' }
+                    { color: '#d8b98b', ring: '#fff3d1', label: 'İskandinav Meşe' },
+                    { color: '#e2e8f0', ring: '#94a3b8', label: 'Kristal Cam' },
+                    { color: '#fef3c7', ring: '#f59e0b', label: 'Halo LED' }
                 ]
-                : [
-                    { color: '#f4f1ea', ring: '#d4af37', label: 'Carrara Mermer' },
-                    { color: '#5c3317', ring: '#d97706', label: 'Oyma Maun' },
-                    { color: '#0f5132', ring: '#ffd700', label: 'Riviera Dokuma' }
-                ]);
+                : (optionId === 'opt_b'
+                    ? [
+                        { color: '#14161f', ring: '#ffd700', label: 'Nero Mermer' },
+                        { color: '#7a0c1a', ring: '#ffd700', label: 'Kraliyet Kadife' },
+                        { color: '#d4af37', ring: '#fff3b0', label: '24K Altın Varak' }
+                    ]
+                    : [
+                        { color: '#f4f1ea', ring: '#d4af37', label: 'Carrara Mermer' },
+                        { color: '#5c3317', ring: '#d97706', label: 'Oyma Maun' },
+                        { color: '#0f5132', ring: '#ffd700', label: 'Riviera Dokuma' }
+                    ]);
 
-        swatches.forEach((sw, i) => {
-            const sx = 24 + i * 148;
-            const sy = 288;
-            ctx.fillStyle = sw.color;
-            ctx.beginPath();
-            ctx.arc(sx, sy, 13, 0, Math.PI * 2);
+            swatches.forEach((sw, i) => {
+                const sx = 24 + i * 148;
+                const sy = 288;
+                ctx.fillStyle = sw.color;
+                ctx.beginPath();
+                ctx.arc(sx, sy, 13, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = sw.ring;
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                ctx.fillStyle = '#f8f1e5';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(sw.label, sx + 20, sy + 4);
+            });
+
+            ctx.fillStyle = 'rgba(20, 24, 38, 0.92)';
+            this.roundRect(ctx, 468, 268, 154, 36, 10);
             ctx.fill();
-            ctx.strokeStyle = sw.ring;
-            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = 2;
             ctx.stroke();
+            ctx.fillStyle = '#ffd700';
+            ctx.font = 'bold 13px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`★ SEVİYE ${targetLevel} MİMARİ`, 545, 291);
 
-            ctx.fillStyle = '#f8f1e5';
-            ctx.font = 'bold 12px sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(sw.label, sx + 20, sy + 4);
-        });
+            ctx.strokeStyle = 'rgba(223, 191, 131, 0.55)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(1.5, 1.5, 637, 317);
 
-        // Level upgrade badge in bottom-right
-        ctx.fillStyle = 'rgba(20, 24, 38, 0.92)';
-        this.roundRect(ctx, 468, 268, 154, 36, 10);
-        ctx.fill();
-        ctx.strokeStyle = '#ffd700';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 13px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(`★ SEVİYE ${targetLevel} MİMARİ`, 545, 291);
-
-        // Gold outer frame
-        ctx.strokeStyle = 'rgba(223, 191, 131, 0.55)';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(1.5, 1.5, 637, 317);
-
-        const url = canvas.toDataURL('image/jpeg', 0.92);
-        this.designPreviewCache[key] = url;
-        return url;
+            const url = canvas.toDataURL('image/jpeg', 0.92);
+            this.designPreviewCache[key] = url;
+            return url;
+        } catch (err) {
+            return sceneUrl;
+        }
     }
 }
 

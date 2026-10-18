@@ -4,6 +4,17 @@ Bu dosya, **Velvet Secrets (Aurelia Palace Hotel)** Android oyununun tüm versiy
 
 ---
 
+## 🛠️ Sürüm `v2.5.1` (18 Ekim 2026) — *Alt 3-Tasarım Seçici Çubuğu (`#ghBottomDesignDock`) Görünürlük, Android WebView Canvas ve Mobil Etkileşim Düzeltmesi*
+- **Android WebView `SecurityError` (Tainted Canvas) Çökmesi Giderildi (`luxury_art.js`):**
+  - Android `file://` protokolünde yerel görseller `<canvas>` üzerine çizilip `toDataURL()` çağrıldığında oluşan güvenlik hatası (`SecurityError`), alt 3-tasarım seçici çubuğunun (`#ghBottomDesignDock`) HTML içeriği oluşturulmadan hemen önce kodun durmasına yol açıyordu. `getDesignPreview()` fonksiyonu güvenli `try/catch` yapısına alındı ve her 3 tasarım için özel foto-gerçekçi CSS filtre ve ışıklandırma (`getDesignCssFilter`) eklendi.
+- **Her Zaman Görünür & Sabitlenmiş Alt 3-Tasarım Seçici Çubuğu (`#ghBottomDesignDock`):**
+  - Alt tasarım seçici çubuk artık sahnenin altında gizli kalmıyor veya sahnenin `overflow: hidden` sınırları tarafından kesilmiyor; direkt olarak 2.5D Otel Sahnesinin hemen altında sabit, parlak altın çerçeveli bir dock olarak **her zaman açık** duruyor.
+  - Herhangi bir yenileme butonuna (`🔨 YENİLE!`, `🎨 3 Tasarımdan Seç & Kur` veya `GİT / YENİLE`) basıldığında ekran otomatik olarak alt tasarım çubuğuna kayıyor (`scrollIntoView`), altın vurgu animasyonu (`dock-pulse-highlight`) yapıyor ve **1. Modern Zarafet**, **2. Kraliyet Kadife**, **3. Akdeniz Riviera** seçeneklerini canlı önizlemeli olarak sunuyor.
+- **3 Noktadan Anında Tasarım Seçimi:**
+  - 3 tasarım seçeneği hem **2.5D Sahnenin Altındaki Seçici Çubukta (`#ghBottomDesignDock`)**, hem **Seçili Eşya Yakınlık Panelinde (`#renovationProximityPanel`)**, hem de **Detaylı Yenileme Penceresinde (`#renoModal`)** doğrudan tıklanabilir ve canlı önizlenebilir hale getirildi.
+
+---
+
 ## 🌟 Sürüm `v2.5.0` (18 Ekim 2026) — *Gossip Harbor Tarzı 2.5D Foto-Gerçekçi & İzometrik Otel Restorasyon Sahnesi ve Alt 3-Tasarım Seçici Dock*
 - **Gossip Harbor Tarzı 2.5D Foto-Gerçekçi & İzometrik Otel Sahnesi (`#ghSceneStage`):**
   - Eski birinci şahıs (FPS) kutu/silindir WebGL koridor yapısı tamamen kaldırıldı; yerine tıpkı *Gossip Harbor*’daki gibi **tam ekran foto-gerçekçi oda sahneleri üzerinde parmakla kaydırarak gezinme (Pan & Zoom)** ve **🗺️ İzometrik Otel Haritası** görünümü eklendi.
