@@ -3,18 +3,18 @@ name: Build Velvet Secrets APK
 on:
   workflow_dispatch:
   push:
-    paths:
-      - "Velvet_Secrets_Android_Source.zip"
-      - ".github/workflows/android-apk.yml"
+    branches:
+      - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-apk:
-    name: Build debug APK
+    name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,38 +29,51 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: ""
-
-      - name: Check source archive exists
-        run: test -f Velvet_Secrets_Android_Source.zip
-
-      - name: Extract project source
-        run: |
-          mkdir -p appsrc
-          unzip -q Velvet_Secrets_Android_Source.zip -d appsrc
-          test -f appsrc/package.json
-          test -f appsrc/www/index.html
 
       - name: Install JavaScript dependencies
-        working-directory: appsrc
         run: npm install
 
       - name: Add Android platform
-        working-directory: appsrc
         run: npx cap add android
 
       - name: Sync Capacitor
-        working-directory: appsrc
         run: npx cap sync android
 
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
       - name: Build debug APK
-        working-directory: appsrc/android
+        working-directory: android
         run: ./gradlew --no-daemon assembleDebug
 
-      - name: Upload APK
+      - name: Rename APK for easy download
+        run: |
+          mkdir -p build-output
+          cp android/app/build/outputs/apk/debug/app-debug.apk build-output/VelvetSecrets-debug.apk
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: velvet-secrets-debug-apk
-          path: appsrc/android/app/build/outputs/apk/debug/app-debug.apk
+          name: VelvetSecrets-APK
+          path: build-output/VelvetSecrets-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Create GitHub Release with APK
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+        with:
+          tag_name: v1.0.0-demo
+          name: "Velvet Secrets v1.0.0 Demo APK"
+          body: |
+            ## 📱 Velvet Secrets — Android Prototip APK
+            Oyununuz başarıyla derlendi!
+            
+            ### Kurulum Talimatları:
+            1. Aşağıdaki **VelvetSecrets-debug.apk** dosyasını Android telefonunuza indirin.
+            2. İndirilen dosyaya dokunun ve "Yükle" seçeneğini seçin.
+            3. Bilinmeyen kaynaklardan yükleme uyarısı çıkarsa izin verin.
+            4. Oyunun tadını çıkarın! ✨
+          files: build-output/VelvetSecrets-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
