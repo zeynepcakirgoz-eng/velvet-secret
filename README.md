@@ -4,11 +4,30 @@
 
 ---
 
-## 📦 Son Sürüm: `v2.4.0` — Foto-Gerçekçi Görevler, 3D Kazanım Vitrini & Tam 3D Mimari Güncellemesi
+## 📲 Doğrudan Android APK İndirme (`v3.0.0` — `81.66 MB`)
+- **Doğrudan APK İndir (GitHub Repo):** [`VelvetSecrets-debug.apk`](https://github.com/zeynepcakirgoz-eng/velvet-secret/raw/main/VelvetSecrets-debug.apk)
+- **GitHub Releases APK İndir:** [`VelvetSecrets-debug.apk (v3.0.0 Release)`](https://github.com/zeynepcakirgoz-eng/velvet-secret/releases/download/v1.0.0-demo/VelvetSecrets-debug.apk)
+
+---
+
+## 📦 Son Sürüm: `v3.0.0` — El Çizimi Lüks Eşya Seti, Önce Boş/Kirli Başlayan 85+ Eşyalı 3D Lobi Tadilatı, 5 Müşteri Siparişi, Obje Evrim Ağacı & 3D Hazine Sandığı
 
 ### 🌟 Sürüm Geçmişi ve Versiyon Açıklamaları (Türkçe)
 
-#### 🔹 Versiyon `v2.4.0` (Güncel Sürüm) — *Görsel Bütünlük, Foto-Gerçekçi Görevler, 3D Kazanımlar & Mobil/Tablet Uyumluluğu*
+#### 🔹 Versiyon `v3.0.0` (Güncel Sürüm) — *El Çizimi Lüks Eşya Seti, 85+ 3D Eşyalı Lobi Restorasyonu, Canlı Etkinlikler & 3D Sandık*
+- **El Çizimi Yarı-Gerçekçi Lüks Eşya Seti (`www/assets/props/` & `www/assets/items/`):**
+  - **Gül (Rose)**, **Altın İşlemeli Kadeh (Chalice)**, **Kraliyet Tacı (Crown/Tiara)**, **Püsküllü 'M' Otel Odası Anahtarı (Hotel Room Key)** ve **Kristal/Kadife Mücevher Kutusu (Luxury Box)** referans görselleriyle hazırlanan 4 ana evrim zinciri (Seviye 1 ➔ Seviye 5 MAKS) ve 1 dinamik etkinlik zinciri.
+  - Maksimum Seviye (`Lv.5 🔒 MAKS`) birleşme kilidi ve aktif müşteri siparişlerinde talep edilen objeler için tahta üzerinde yeşil `✓ SİPARİŞ` ışıması.
+  - **Obje Evrim Bilgi Paneli (Merge Tree / Recipe Tooltip):** Herhangi bir objeye dokunulduğunda Seviye 1'den Seviye 5'e kadar görsel üretim ağacını adım adım gösteren bilgi kartı.
+- **Önce Boş ve Kirli Başlayan ➔ Tadilat Yaptıkça Lüksleşen 85+ Eşyalı 3D Büyük Lobi (`www/js/hotel3d.js`):**
+  - Tadilat öncesi tozlu/lekeli çatlak beton zemin, boya kovaları, merdiven ve karton kutular; 6 aşamalı tadilat ilerledikçe cilalı damarlı mermer zemin, sıcak gizli LED tavan havuzu, 4 kademeli ışıklı halka avize, sol cephe mermer-ceviz resepsiyon bankosu (3 iMac, 2 masa lambası, ışıklı 'M' logosu, 16+ objeli raflar), sağ panoramik cam önünde iki ayrı lüks lounge oturma grubu, tropikal Areca palmiyeleri ve arkada 14 basamaklı yüzer merdiven + 2. kat cam korkuluklu asma kat (mezzanine).
+  - **UI ve 3D Sahne 1:1 Senkronizasyonu:** Alt tasarım seçicideki önizleme kartları (`getExact3DOptionThumbnail`) doğrudan Three.js 3D modelinden render edilir ve 3 seçenek (`opt_a`, `opt_b`, `opt_c`) birbirinden tamamen farklı geometrilere sahiptir.
+- **5 Aktif Müşteri Siparişi, Obje Mağazası, Elmas Zaman Atlama & 3D Sandık Açılış Animasyonu:**
+  - Aynı anda 5 VIP müşteri siparişi, 5/5 set tamamlandığında Nadir Obje + Three.js 3D Hazine Sandığı açılış animasyonu, Obje Mağazası (`🛍️ Mağaza`), 24 saatlik Şans Çarkı sayacı ve Merkezi Canlı Etkinlik / Tema Yöneticisi (`🎭 Etkinlik` — Cadılar Bayramı, Sevgililer Günü, Kış Galası).
+
+---
+
+#### 🔹 Versiyon `v2.4.0` — *Görsel Bütünlük, Foto-Gerçekçi Görevler, 3D Kazanımlar & Mobil/Tablet Uyumluluğu*
 - **Konuyla Birebir Uyumlu Foto-Gerçekçi Görev Kartları (`#tasks`):**
   - Görevlerdeki tekrarlayan veya konuyla ilgisiz arka planlar tamamen kaldırıldı.
   - Her göreve kendi konusuyla örtüşen, yazı/buton içermeyen 16:9 HD foto-gerçekçi arka plan sahnesi ve özel konu ikonu eklendi:

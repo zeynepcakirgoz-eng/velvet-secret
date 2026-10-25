@@ -63,7 +63,7 @@ if (-not $CommitMessage) {
     $CommitMessage = $pkgJson.description
 }
 
-& $gitExe add README.md README_TR.md SURUM_NOTLARI.md package.json .github/workflows/android-apk.yml git_sync.ps1 www/index.html www/style.css www/game.js www/assets/ www/js/
+& $gitExe add .gitignore VelvetSecrets-debug.apk README.md README_TR.md SURUM_NOTLARI.md package.json .github/workflows/android-apk.yml git_sync.ps1 www/index.html www/style.css www/game.js www/assets/ www/js/
 $status = & $gitExe status --porcelain
 if ($status) {
     Write-Host "Committing changes with Turkish version description..."
@@ -75,8 +75,9 @@ if ($status) {
     Write-Host "No unstaged changes to commit."
 }
 
+& $gitExe config http.postBuffer 524288000
 $remoteUrl = "https://x-access-token:$token@github.com/zeynepcakirgoz-eng/velvet-secret.git"
-Write-Host "Pushing to GitHub..."
+Write-Host "Pushing to GitHub (including VelvetSecrets-debug.apk)..."
 & $gitExe push $remoteUrl main:main
 
 $headers = @{
@@ -105,10 +106,25 @@ try {
             body = $notesText
         } | ConvertTo-Json -Compress
         Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/$($release.id)" -Headers $headers -Method Patch -Body ([System.Text.Encoding]::UTF8.GetBytes($relUpdate)) -ContentType "application/json; charset=utf-8" | Out-Null
-        Write-Host "Updated GitHub Release (v2.4.0) notes in Turkish!"
+        Write-Host "Updated GitHub Release (v3.0.0) notes in Turkish!"
+
+        # Also upload VelvetSecrets-debug.apk directly to the GitHub Release assets
+        $apkPath = "C:\gamechanger\VelvetSecrets-debug.apk"
+        if (Test-Path $apkPath) {
+            foreach ($asset in $release.assets) {
+                if ($asset.name -eq "VelvetSecrets-debug.apk") {
+                    Write-Host "Removing old release APK asset ($($asset.id))..."
+                    Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/assets/$($asset.id)" -Headers $headers -Method Delete | Out-Null
+                }
+            }
+            Write-Host "Uploading VelvetSecrets-debug.apk directly to GitHub Release..."
+            $uploadUrl = "https://uploads.github.com/repos/$repo/releases/$($release.id)/assets?name=VelvetSecrets-debug.apk"
+            Invoke-RestMethod -Uri $uploadUrl -Headers $headers -Method Post -InFile $apkPath -ContentType "application/vnd.android.package-archive" | Out-Null
+            Write-Host "Successfully uploaded VelvetSecrets-debug.apk to GitHub Release!"
+        }
     }
 } catch {
-    Write-Warning "Could not update release notes via API: $_"
+    Write-Warning "Could not update release notes/assets via API: $_"
 }
 
 Write-Host "Git push and Turkish version notes sync completed!"

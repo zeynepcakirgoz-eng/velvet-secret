@@ -2,6 +2,24 @@
 
 Bu dosya, **Velvet Secrets (Aurelia Palace Hotel)** Android oyununun tüm versiyon güncellemelerini ve eklenen özellikleri Türkçe olarak detaylandırır.
 
+## 🌟 Sürüm `v3.0.0` (25 Ekim 2026) — *El Çizimi Lüks Eşya Seti (Gül, Kadeh, Taç, 'M' Otel Anahtarı, Kristal Mücevher Kutusu), Önce Boş/Kirli Başlayan 85+ Eşyalı 3D Lobi Tadilatı, 5 Müşteri Siparişi, Evrim Ağacı ve 3D Hazine Sandığı*
+
+### 📲 Doğrudan APK İndirme Bağlantıları (`81.66 MB`)
+- **GitHub Repo Üzerinden İndir:** [`VelvetSecrets-debug.apk`](https://github.com/zeynepcakirgoz-eng/velvet-secret/raw/main/VelvetSecrets-debug.apk)
+- **GitHub Release Üzerinden İndir:** [`VelvetSecrets-debug.apk (Release)`](https://github.com/zeynepcakirgoz-eng/velvet-secret/releases/download/v1.0.0-demo/VelvetSecrets-debug.apk)
+
+### 1. 🎨 El Çizimi Yarı-Gerçekçi Lüks Eşya Seti & Evrim Ağacı
+- Referans görseldeki **Gül (Rose)**, **Altın İşlemeli Kadeh (Chalice)**, **Kraliyet Tacı (Crown/Tiara)**, **Püsküllü 'M' Otel Odası Anahtarı (Hotel Room Key)** ve **Kristal/Kadife Mücevher Kutusu (Luxury Box)** kullanılarak 4 ana birleştirme zinciri (`Lv.1 ➔ Lv.5 MAKS`) oluşturuldu.
+- Aktif müşteri siparişlerinde talep edilen objeler tahtada yeşil `✓ SİPARİŞ` rozeti ve altın ışıma ile vurgulanır.
+- Herhangi bir objenin `ℹ️` butonuna veya sipariş kartındaki görseline dokunulduğunda **Obje Evrim ve Üretim Ağacı (Merge Tree)** açılır.
+
+### 2. 🏛️ Önce Boş & Kirli Başlayan ➔ Tadilat Yaptıkça Güzelleşen 3D Otel Lobisi (85+ 3D Eşya)
+- Otel lobisi tadilat öncesinde tozlu/lekeli ham beton zemin, boya kovaları, ahşap merdiven ve karton kutularla başlar.
+- 6 aşamalı tadilat (`lobby_floor_walls`, `reception_desk`, `lobby_chandelier`, `lobby_carpet`, `lobby_columns`, `lobby_back_vista`) tamamlandıkça zemin cilalı damarlı mermere dönüşür; sol cephede mermer-ceviz resepsiyon bankosu (3 iMac, 2 masa lambası, ışıklı 'M' logosu, 16+ objeli raflar), tavanda 4 kademeli halka LED avize + 16 ray spot, sağ panoramik cam önünde 2 ayrı lüks lounge oturma grubu + tropikal Areca palmiyeleri ve arkada 14 basamaklı yüzer merdiven + 2. kat cam korkuluklu asma kat (mezzanine) kurulur.
+- Sağ üstteki **`✨ Tam Lüks Halini Gör`** butonu ile %0 Boş/Kirli hal ve %100 Tam Tadilatlı Lüks hal tek tıkla karşılaştırılabilir.
+
+---
+
 ## 🌟 Sürüm `v2.8.0` (18 Ekim 2026) — *Piksel Hassasiyetinde Mekan İçi Mobilya Konumlandırması, Çözünürlük ve Bozulma Düzeltmesi, 23 Bağımsız Görevde Bütüncül Tasarım Katmanları ve Akıcı UI*
 
 Kullanıcının ayrıntılı geri bildirimi doğrultusunda mekan içi restorasyon motoru, mobilya koordinasyon sistemi ve sahne ölçeklemesi baştan sona optimize edildi:
