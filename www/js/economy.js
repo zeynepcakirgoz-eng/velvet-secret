@@ -89,56 +89,82 @@ class GameEconomyManager {
                 description: 'Kraliyet karşılamasının ve otel ihtişamının kalbi.',
                 tasks: [
                     {
-                        id: 'reception_desk',
+                        id: 'lobby_floor_walls',
                         order: 1,
-                        name: 'Mermer Resepsiyon Bankosu',
-                        shortDesc: 'Yıpranmış eski ahşap bankoyu İtalyan mermeriyle yenileyin.',
-                        cost: 1500,
+                        name: 'Lobi Zemin Temizliği, Cilalı Mermer & Panoramik Tül Perdeler',
+                        shortDesc: 'Tozlu/lekeli beton zemini temizleyip ayna parlaklığında mermer döşeyin.',
+                        cost: 900,
                         stars: 1,
                         incomeBoost: 30,
-                        repBoost: 45,
-                        hotspot: { x: 50, y: 56 },
-                        stageBox: [0.33, 0.49, 0.33, 0.27],
-                        defaultDesc: 'Eski, yıpranmış ahşap resepsiyon bankosu'
+                        repBoost: 50,
+                        hotspot: { x: 50, y: 70 },
+                        stageBox: [0.10, 0.50, 0.80, 0.45],
+                        defaultDesc: 'Kirli, tozlu beton zemin, boya kovaları ve çıplak pencereler'
+                    },
+                    {
+                        id: 'reception_desk',
+                        order: 2,
+                        name: 'Sol Cephe Mermer Resepsiyon Bankosu, 3 iMac, Lambalar & Raflar',
+                        shortDesc: 'Sol duvara damarlı mermer-ceviz banko, 3 iMac, masa lambaları ve ışıklı raflar kurun.',
+                        cost: 1500,
+                        stars: 1,
+                        incomeBoost: 35,
+                        repBoost: 55,
+                        hotspot: { x: 22, y: 56 },
+                        stageBox: [0.05, 0.35, 0.38, 0.45],
+                        defaultDesc: 'Boş, tozlu sol duvar, karton kutular ve moloz yığını'
                     },
                     {
                         id: 'lobby_chandelier',
-                        order: 2,
-                        name: 'Büyük Lobi Kristal Avizesi',
-                        shortDesc: 'Lobi tavanına görkemli elmas kesim Bohemya avizesi asın.',
+                        order: 3,
+                        name: '4 Kademeli Halka LED Avizeler & Ray Spot Aydınlatma',
+                        shortDesc: 'Tavan havuzuna 4 kademeli ışıklı halka avize ve 16 ray spot yerleştirin.',
                         cost: 2200,
                         stars: 2,
                         incomeBoost: 45,
                         repBoost: 70,
                         hotspot: { x: 50, y: 22 },
-                        stageBox: [0.37, 0.00, 0.26, 0.41],
-                        defaultDesc: 'Sönük eski demir tavan lambası'
+                        stageBox: [0.30, 0.00, 0.40, 0.38],
+                        defaultDesc: 'Tavandan sarkan çıplak kablolar ve sönük şantiye duyu'
                     },
                     {
                         id: 'lobby_carpet',
-                        order: 3,
-                        name: 'Lobi Kraliyet Halısı & Koltukları',
-                        shortDesc: 'Misafir karşılama alanına lüks ipek halı ve kadife koltuklar döşeyin.',
+                        order: 4,
+                        name: 'Ön Sağ Lobi Lounge Grubu, Halı, Sehpa Seti & Palmiyeler',
+                        shortDesc: 'Ön sağ cam kenarına dalgalı halı, yastıklı kanepe, 2 berjer, mermer sehpa ve palmiyeler kurun.',
                         cost: 1200,
                         stars: 1,
                         incomeBoost: 35,
                         repBoost: 55,
-                        hotspot: { x: 50, y: 78 },
-                        stageBox: [0.22, 0.62, 0.56, 0.36],
-                        defaultDesc: 'Soluk koridor halısı ve eski koltuklar'
+                        hotspot: { x: 72, y: 74 },
+                        stageBox: [0.45, 0.52, 0.50, 0.42],
+                        defaultDesc: 'Boş ve kirli sağ ön zemin, tahta kalaslar ve boya kovası'
                     },
                     {
                         id: 'lobby_columns',
-                        order: 4,
-                        name: 'Saray Karşılama Sütunları & Giriş Kemeri',
-                        shortDesc: 'Girişi altın varaklı neoklasik sütunlarla taçlandırın.',
+                        order: 5,
+                        name: 'Orta Sağ 2. Lounge Oturma Grubu, Mermer Sütunlar & Palmiyeler',
+                        shortDesc: 'Orta sağ bölüme ikinci lüks oturma grubunu, sehpayı ve palmiyeleri yerleştirin.',
                         cost: 1700,
                         stars: 1,
                         incomeBoost: 40,
                         repBoost: 65,
-                        hotspot: { x: 82, y: 50 },
-                        stageBox: [0.72, 0.25, 0.24, 0.55],
-                        defaultDesc: 'Sade sıvalı giriş kapısı'
+                        hotspot: { x: 75, y: 50 },
+                        stageBox: [0.50, 0.35, 0.45, 0.38],
+                        defaultDesc: 'Boş ve tozlu orta koridor alanı, inşaat malzemeleri'
+                    },
+                    {
+                        id: 'lobby_back_vista',
+                        order: 6,
+                        name: 'Arka Galeri: Yüzer Merdiven, Asma Kat, Dresuar & Tablolar',
+                        shortDesc: 'Arka bölüme yüzer merdiven, cam korkuluklu asma kat, lambalı dresuar ve tablolar kurun.',
+                        cost: 1900,
+                        stars: 2,
+                        incomeBoost: 55,
+                        repBoost: 85,
+                        hotspot: { x: 55, y: 42 },
+                        stageBox: [0.25, 0.25, 0.55, 0.35],
+                        defaultDesc: 'Karanlık, boş ve kirli arka hol ile tamamlanmamış merdiven'
                     }
                 ]
             },
@@ -413,7 +439,6 @@ class GameEconomyManager {
 
         this.load();
         this.initHotelOperationsLoop();
-    }
     }
 
     load() {

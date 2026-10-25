@@ -1,8 +1,8 @@
 {
   "name": "velvet-secrets",
-  "version": "2.8.0",
+  "version": "3.0.0",
   "private": true,
-  "description": "Velvet Secrets (v2.8.0) - Piksel Hassasiyetinde Mekan Ici Mobilya Konumlandirmasi, Cozunurluk ve Bozulma Duzeltmesi, 23 Bagimsiz Gorevde Butuncul Tasarim Katmanlari ve Akici UI",
+  "description": "Velvet Secrets (v3.0.0) - El Cizimi Luks Esya Seti (Gul, Kadeh, Tac, M Otel Anahtari, Kristal Mujevher Kutusu), Once Bos/Kirli Baslayan 85+ Esyali 3D Lobi Tadilati, 5 Musteri Siparisi, Evrim Agaci ve 3D Hazine Sandigi",
   "scripts": {
     "sync:android": "npx cap sync android",
     "open:android": "npx cap open android"

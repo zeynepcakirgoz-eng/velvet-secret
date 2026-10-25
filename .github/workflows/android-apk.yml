@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-apk:
-    name: Android APK Derle (v2.4.0)
+    name: Android APK Derle (v3.0.0)
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -35,6 +35,53 @@ jobs:
 
       - name: Capacitor Android Platformunu Ekle
         run: npx cap add android
+
+      - name: Tam Portre (Portrait Only) ve Tam Ekran (Immersive Mode) Yapılandırması
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          if [ -f "$MANIFEST" ]; then
+            sed -i 's/<activity/<activity android:screenOrientation="portrait"/' "$MANIFEST"
+          fi
+          MAIN_ACT=$(find android/app/src/main/java -name "MainActivity.java" | head -n 1)
+          if [ -n "$MAIN_ACT" ]; then
+            cat << 'EOF' > "$MAIN_ACT"
+          package com.velvetsecrets.game;
+
+          import android.os.Bundle;
+          import android.view.View;
+          import android.view.WindowManager;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                  hideSystemNavigationUI();
+              }
+
+              @Override
+              public void onWindowFocusChanged(boolean hasFocus) {
+                  super.onWindowFocusChanged(hasFocus);
+                  if (hasFocus) {
+                      hideSystemNavigationUI();
+                  }
+              }
+
+              private void hideSystemNavigationUI() {
+                  View decorView = getWindow().getDecorView();
+                  decorView.setSystemUiVisibility(
+                      View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                      | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                      | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                      | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                      | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                      | View.SYSTEM_UI_FLAG_FULLSCREEN
+                  );
+              }
+          }
+          EOF
+          fi
 
       - name: Capacitor Dosyalarını Eşitle (npx cap sync)
         run: npx cap sync android
@@ -64,30 +111,29 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
         with:
           tag_name: v1.0.0-demo
-          name: "Velvet Secrets v2.4.0 — Foto-Gerçekçi Görevler, 3D Kazanımlar & 3D Otel Simülatörü APK"
+          name: "Velvet Secrets v3.0.0 — Tematik Birleştirme, 5 Müşteri Siparişi, 3D Serbest Dolaşımlı Otel, Mağaza & 3D Sandık APK"
           body: |
-            ## 🏨 Velvet Secrets — Güncel Android APK (`v2.4.0`)
+            ## 🏨 Velvet Secrets — Güncel Android APK (`v3.0.0`)
 
-            ### 🌟 Sürüm `v2.4.0` Yenilikleri (Son Güncelleme)
-            - **Konuyla Birebir Uyumlu Foto-Gerçekçi Görevler (`#tasks`):** Görevlerdeki tekrarlayan/bozuk arka planlar kaldırıldı; her göreve konusuyla birebir örtüşen, temiz 16:9 HD foto-gerçekçi sahne (`scene_garden_terrace.jpg`, `scene_restaurant_bar.jpg`, `scene_lobby_reception.jpg`, `scene_penthouse_piano.jpg`, `scene_spa_wellness.jpg`) ve aşamalı ilerleme (`Aşama 1 ➔ Aşama 2 ➔ Aşama 3`) eklendi.
-            - **3D Boyamalı Lüks Kazanım İkonları (`Kazanımlar`) & Büyük Kraliyet Sandığı:** Tüm görev, sipariş, hikâye ve çark ödüllerine yüksek çözünürlüklü 3D boyamalı ikonlar (`Enerji`, `Prestij $`, `Elmas`, `Yıldız`, `VIP Kraliyet Sandığı`) ve her 3 görevde bir açılan **Büyük Kraliyet Hazine Sandığı Vitrini** eklendi.
-            - **Tamamlanmış 3D Otel Mimarisi (`hotel3d.js`):** 360° Akdeniz gün batımı gökyüzü kubbesi, parıldayan deniz, oda tavanları, altın kornişler, Zen Spa Mermer Pavyonu, Botanik Bahçe Avlusu ve **11 alanın tamamında Seviye 1–4 çok parçalı 3D mobilyalar** eklendi.
-            - **Android Telefon & Tablet Arayüz (UI/UX) Optimizasyonu:** 3D ekranı kapatmayan alt yakınlık konsolu (`#renovationProximityPanel`), tam ekran dokunmatik 360° kamera kontrolü ve tabletler için 2 sütunlu duyarlı galeri düzeni eklendi.
-
-            ---
-
-            ### 📜 Önceki Versiyon Açıklamaları
-            - **`v2.2.0` — 4 Seviyeli Bağımsız Restorasyon & 18 HD Obje İllüstrasyonu:** 11 otel alanında bağımsız `Seviye 1 ➔ Seviye 4` yükseltme sistemi ve 5x5 birleştirme masasında 18 benzersiz boyamalı lüks obje illüstrasyonu.
-            - **`v2.0.0` — Görünür Maliyetler, Çift Gelir Kasası & Kilitli Tasarımlar:** Başlangıçtan itibaren görünür restorasyon maliyet tablosu (`📋 Tüm Maliyetler`), sipariş + pasif otel gelirini birleştiren ortak kasa (`💼 Kasa Defteri`) ve bütçe dolduğunda kilidi açılan 3 tasarım seçeneği.
-            - **`v1.5.0` — 3D Gezilebilir Otel Simülatörü:** Three.js tabanlı birinci şahıs yürüyüş, mobil sanal joystick, çarpışma algılama, radar minimap ve 2. Kat Penthouse asansörü.
-            - **`v1.0.0` — İlk Prototip:** 5x5 birleştirme tahtası, VIP müşteri siparişleri, interaktif hikâye seçimleri ve Şans Çarkı.
-
-            ---
-
-            ### 📲 Kurulum Talimatları:
-            1. Aşağıdaki **VelvetSecrets-debug.apk** dosyasını Android telefonunuza veya tabletinize indirin.
-            2. İndirilen dosyaya dokunun ve **"Yükle"** seçeneğini seçin.
-            3. Bilinmeyen kaynaklardan yükleme uyarısı çıkarsa izin verin ve oyunun tadını çıkarın! ✨
+            ### 🌟 Sürüm `v3.0.0` Yenilikleri (Oyun Geliştirme ve Hata Düzeltme Paketi)
+            1. **Birleştirme (Merge) Mekaniği & Tematik Evrim Ağacı:**
+               - **Tematik Tutarlılık:** 4 ana tema zinciri (Kraliyet Gülleri, Kraliyet Mücevheratı, Fransız Pastanesi, Riviera Şampanya Mahzeni) kendi temasıyla %100 uyumlu 5 seviyeli evrim ağacına (`Lv.1 ➔ Lv.5`) kavuşturuldu.
+               - **Maksimum Seviye (Lv.5 MAKS) Kilidi & Bug Düzeltmesi:** Son seviyeye (`🔒 MAKS`) ulaşan iki obje üst üste sürüklendiğinde birbirini yutma/kaybolma hatası giderildi; objeler birleşmeyi reddedip kendi grid konumlarına geri döner.
+            2. **Sipariş (Order) ve Seviye İlerleme Sistemi:**
+               - **5 Aktif Müşteri Kapasitesi:** Sipariş panosunda aynı anda **5 farklı VIP müşterinin siparişi** yer alır.
+               - **5/5 Set Tamamlama Ödülü:** 5 müşterinin tüm siparişleri tamamlandığında özel **Nadir Obje (Lv.3/Lv.4)** ve **3D Hazine Sandığı** ödülü verilir.
+               - **Dinamik Zorluk:** Oyuncu seviye atladıkça (`playerLevel`) talep edilen siparişler kademeli olarak daha yüksek seviyeli objeler içerir.
+            3. **Otel Yenileme (Renovasyon) ve Tam 3D Gezinti:**
+               - **3D Mekan ve Serbest Dolaşım:** Three.js WebGL tabanlı tam 3 boyutlu otel; sanal joystick, 360° dokunmatik bakış ve lüks 3D mobilyalarla serbest dolaşım.
+               - **3 Seçenekli Özelleştirme:** Her yenileme adımında 3 farklı lüks tasarım seçeneği (`opt_a`, `opt_b`, `opt_c`) canlı 3D önizleme ile sunulur ve onaylandığında kalıcı olarak uygulanır.
+            4. **Oyun Ekonomisi, Obje Mağazası ve Şans Çarkı Sınırlaması:**
+               - **Obje Mağazası (`🛍️ Mağaza`):** Temel (`Lv.1-2`) ve ara seviye (`Lv.3-4`) objelerin doğrudan satın alınabildiği market arayüzü eklendi.
+               - **Elmas (`💎`) & Zaman Atlama:** Yüksek seviye birleştirmelerden ve sandıklardan elde edilen Elmas birimi ile mağaza alışverişi ve bekleme sürelerini hızlandırma (zaman atlama) entegre edildi.
+               - **Şans Çarkı 24 Saat Sınırlaması:** Sınırsız çevirme engellendi; 24 saatte 1 ücretsiz hak ve geri sayım sayacı eklendi.
+            5. **Tam Portre Modu (Portrait Only), Tam Ekran (Immersive Mode) ve Türkçe Font Düzeltmesi:**
+               - Oyun dikey (portrait) moda kilitlendi, Android alt navigasyon tuşları gizlendi (`IMMERSIVE_STICKY`) ve tüm Türkçe karakter/font hataları giderildi.
+            6. **3D Sandık ve Ödül Açılış Animasyonu:**
+               - Kapak açılma animasyonu, ışık patlaması, 3D yıldız/parçacık efektleri ve içinden 3 boyutlu olarak havaya yükselen ödüllerle **Three.js 3D Hazine Sandığı** eklendi.
           files: build-output/VelvetSecrets-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
